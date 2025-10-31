@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作业清单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+        }
+        
+        .main-content {
+            flex: 3;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .homework-content {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2575fc;
+            min-height: 400px;
+            line-height: 1.8;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2575fc;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .bullet-list {
+            margin: 10px 0 10px 20px;
+            list-style-type: none;
+        }
+        
+        .bullet-list li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .bullet-list li:before {
+            content: "·";
+            position: absolute;
+            left: 0;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        .bold-text {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .normal-text {
+            margin: 8px 0;
+        }
+        
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .download-section, .history-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 10px 5px;
+            background: #2575fc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: #1a5fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-download {
+            background: #4CAF50;
+        }
+        
+        .btn-download:hover {
+            background: #45a049;
+        }
+        
+        .btn-history {
+            background: #FF9800;
+        }
+        
+        .btn-history:hover {
+            background: #e68900;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .date-info {
+            margin-top: 15px;
+            font-style: italic;
+            color: #666;
+            text-align: right;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>作业清单</h1>
+        <div class="subtitle">最新作业内容展示</div>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <h2>最新作业内容</h2>
+            
+            <div class="homework-content" id="homework-content">
+                <!-- 格式化后的作业内容将在这里显示 -->
+            </div>
+            <div class="date-info" id="date-info">最后更新</div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="download-section">
+                <h3>下载作业</h3>
+                <a href="#" class="btn btn-download">下载PDF</a>
+                <a href="#" class="btn btn-download">下载图片</a>
+            </div>
+            
+            <div class="history-section">
+                <h3>查看历史作业</h3>
+                <a href="#" class="btn btn-history">查看作业历史</a>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>作业清单管理系统 &copy; 2025</p>
+    </footer>
+
+    <script>
+        // 作业内容数据
+        const homeworkData = `一、文化作业（假期认真完成作业，返校后上交）
+·语文
+1.周末作业四。
+2.预习《故乡》画思维导图。
+3.背诵《鱼我所欲也》原文+翻译。
+·数学
+重做数学试卷，自行打印答题卡。
+·英语
+1.完成周记。
+2.E听说。
+3.2篇阅读（积累好词好句）。
+4.M5U2导学案剩下的练习。
+5.更正听写，准备默写。
+·物理
+第九周午练卷。
+·化学
+课本P105-106、P115-116。
+·道法 
+周末作业试卷的选择题和材料题1-3小题。
+·历史 
+1.完成第3课学案。
+2.整理历史资料（知识清单、目录关键词、考前两张复习资料）如有缺，私聊历史老师电子版自行打印。
+
+
+二、备忘
+◆剪指甲，整头发！穿白鞋（洗干净），外套拉拉链，衣服不要破洞，注意个人卫生，做好规范仪容仪表。
+◆体育要求男生带7号篮球，女生带4号足球。
+◆禁止携带违禁物品到学校。`;
+
+        // 最后更新日期（在此处修改）
+        const lastUpdateDate = "每周五约22:00更新 | 此清单更新于2025年10月31日";
+
+        // 格式化函数
+        function formatHomework(text) {
+            let formattedHTML = '';
+            const lines = text.split('\n');
+            let currentSection = '';
+            let inList = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // 检测 "一、""二、"等标题
+                if (line.match(/^[一二三四五六七八九十]、/)) {
+                    if (inList) {
+                        formattedHTML += '</ul>';
+                        inList = false;
+                    }
+                    formattedHTML += `<div class="section-title">${line}</div>`;
+                    currentSection = line;
+                }
+                // 检测科目标题（包含"作业"）
+                else if (line.endsWith('作业')) {
+                    if (inList) {
+                        formattedHTML += '</ul>';
+                        inList = false;
+                    }
+                    formattedHTML += `<div class="section-title">${line}</div>`;
+                    currentSection = line;
+                }
+                // 检测 "◆" 开头的行 - 加上·
+                else if (line.startsWith('◆')) {
+                    const content = line.substring(1).trim();
+                    if (!inList) {
+                        formattedHTML += '<ul class="bullet-list">';
+                        inList = true;
+                    }
+                    formattedHTML += `<li>${content}</li>`;
+                }
+                // 检测 "·" 开头的行 - 加粗但不加·
+                else if (line.startsWith('·')) {
+                    const content = line.substring(1).trim();
+                    if (inList) {
+                        formattedHTML += '</ul>';
+                        inList = false;
+                    }
+                    formattedHTML += `<div class="normal-text"><span class="bold-text">${content}</span></div>`;
+                }
+                // 其他内容 - 普通文本，不加·
+                else {
+                    if (inList) {
+                        formattedHTML += '</ul>';
+                        inList = false;
+                    }
+                    formattedHTML += `<div class="normal-text">${line}</div>`;
+                }
+            }
+            
+            // 关闭最后一个列表
+            if (inList) {
+                formattedHTML += '</ul>';
+            }
+            
+            return formattedHTML;
+        }
+        
+        // 页面加载时显示格式化后的作业
+        document.addEventListener('DOMContentLoaded', function() {
+            const homeworkContent = document.getElementById('homework-content');
+            homeworkContent.innerHTML = formatHomework(homeworkData);
+            
+            // 设置最后更新日期
+            document.getElementById('date-info').textContent = `${lastUpdateDate}`;
+        });
+    </script>
+</body>
+</html>
