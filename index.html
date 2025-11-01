@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>作业清单</title>
+    <title>907作业清单</title>
     <style>
         * {
             margin: 0;
@@ -177,17 +177,72 @@
                 font-size: 2rem;
             }
         }
+		
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .main-content,
+        body.dark-mode .download-section,
+        body.dark-mode .history-section {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .homework-content {
+            background: #3a3a3a;
+            border-left-color: #4a90e2;
+        }
+        
+        body.dark-mode .section-title {
+            color: #4a90e2;
+            border-bottom-color: #555;
+        }
+        
+        body.dark-mode .bold-text {
+            color: #ffffff;
+        }
+        
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        body.dark-mode .dark-mode-toggle {
+            background: rgba(0, 0, 0, 0.2);
+            color: #ffa500;
+        }
+        
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
     <header>
-        <h1>作业清单</h1>
+        <h1>北滘华附907班作业清单</h1>
         <div class="subtitle">最新作业内容展示</div>
     </header>
     
     <div class="container">
         <div class="main-content">
-            <h2>最新作业内容</h2>
+            <h2>最新作业内容（每周五22:00左右更新）</h2>
             
             <div class="homework-content" id="homework-content">
                 <!-- 格式化后的作业内容将在这里显示 -->
@@ -198,13 +253,13 @@
         <div class="sidebar">
             <div class="download-section">
                 <h3>下载作业</h3>
-                <a href="#" class="btn btn-download">下载PDF</a>
-                <a href="#" class="btn btn-download">下载图片</a>
+                <a href="latest/homework.pdf" class="btn btn-download">下载PDF</a>
+                <a href="latest/homework.png" class="btn btn-download">下载图片</a>
             </div>
             
             <div class="history-section">
-                <h3>查看历史作业</h3>
-                <a href="#" class="btn btn-history">查看作业历史</a>
+                <h3>查看历史</h3>
+                <a href="history.html" class="btn btn-history" target="_blank">查看作业历史</a>
             </div>
         </div>
     </div>
@@ -213,113 +268,6 @@
         <p>作业清单管理系统 &copy; 2025</p>
     </footer>
 
-    <script>
-        // 作业内容数据
-        const homeworkData = `一、文化作业（假期认真完成作业，返校后上交）
-·语文
-1.周末作业四。
-2.预习《故乡》画思维导图。
-3.背诵《鱼我所欲也》原文+翻译。
-·数学
-重做数学试卷，自行打印答题卡。
-·英语
-1.完成周记。
-2.E听说。
-3.2篇阅读（积累好词好句）。
-4.M5U2导学案剩下的练习。
-5.更正听写，准备默写。
-·物理
-第九周午练卷。
-·化学
-课本P105-106、P115-116。
-·道法 
-周末作业试卷的选择题和材料题1-3小题。
-·历史 
-1.完成第3课学案。
-2.整理历史资料（知识清单、目录关键词、考前两张复习资料）如有缺，私聊历史老师电子版自行打印。
-
-
-二、备忘
-◆剪指甲，整头发！穿白鞋（洗干净），外套拉拉链，衣服不要破洞，注意个人卫生，做好规范仪容仪表。
-◆体育要求男生带7号篮球，女生带4号足球。
-◆禁止携带违禁物品到学校。`;
-
-        // 最后更新日期（在此处修改）
-        const lastUpdateDate = "每周五约22:00更新 | 此清单更新于2025年10月31日";
-
-        // 格式化函数
-        function formatHomework(text) {
-            let formattedHTML = '';
-            const lines = text.split('\n');
-            let currentSection = '';
-            let inList = false;
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                
-                // 检测 "一、""二、"等标题
-                if (line.match(/^[一二三四五六七八九十]、/)) {
-                    if (inList) {
-                        formattedHTML += '</ul>';
-                        inList = false;
-                    }
-                    formattedHTML += `<div class="section-title">${line}</div>`;
-                    currentSection = line;
-                }
-                // 检测科目标题（包含"作业"）
-                else if (line.endsWith('作业')) {
-                    if (inList) {
-                        formattedHTML += '</ul>';
-                        inList = false;
-                    }
-                    formattedHTML += `<div class="section-title">${line}</div>`;
-                    currentSection = line;
-                }
-                // 检测 "◆" 开头的行 - 加上·
-                else if (line.startsWith('◆')) {
-                    const content = line.substring(1).trim();
-                    if (!inList) {
-                        formattedHTML += '<ul class="bullet-list">';
-                        inList = true;
-                    }
-                    formattedHTML += `<li>${content}</li>`;
-                }
-                // 检测 "·" 开头的行 - 加粗但不加·
-                else if (line.startsWith('·')) {
-                    const content = line.substring(1).trim();
-                    if (inList) {
-                        formattedHTML += '</ul>';
-                        inList = false;
-                    }
-                    formattedHTML += `<div class="normal-text"><span class="bold-text">${content}</span></div>`;
-                }
-                // 其他内容 - 普通文本，不加·
-                else {
-                    if (inList) {
-                        formattedHTML += '</ul>';
-                        inList = false;
-                    }
-                    formattedHTML += `<div class="normal-text">${line}</div>`;
-                }
-            }
-            
-            // 关闭最后一个列表
-            if (inList) {
-                formattedHTML += '</ul>';
-            }
-            
-            return formattedHTML;
-        }
-        
-        // 页面加载时显示格式化后的作业
-        document.addEventListener('DOMContentLoaded', function() {
-            const homeworkContent = document.getElementById('homework-content');
-            homeworkContent.innerHTML = formatHomework(homeworkData);
-            
-            // 设置最后更新日期
-            document.getElementById('date-info').textContent = `${lastUpdateDate}`;
-        });
-    </script>
+    <script type="text/javascript" src="javascript/index.js"></script>
 </body>
 </html>
