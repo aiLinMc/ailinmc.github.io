@@ -161,6 +161,20 @@
             font-size: 0.9rem;
         }
         
+        .app-link {
+            margin-top: 10px;
+            display: block;
+            color: #2575fc;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        
+        .app-link:hover {
+            color: #1a5fd8;
+            text-decoration: underline;
+        }
+        
         .date-info {
             margin-top: 15px;
             font-style: italic;
@@ -202,6 +216,14 @@
         
         body.dark-mode .bold-text {
             color: #ffffff;
+        }
+        
+        body.dark-mode .app-link {
+            color: #4a90e2;
+        }
+        
+        body.dark-mode .app-link:hover {
+            color: #7bb4ff;
         }
         
         .dark-mode-toggle {
@@ -266,6 +288,7 @@
     
     <footer>
         <p>作业清单管理系统 &copy; 2025</p>
+        <a href="app.html" class="app-link">获取作业清单APP</a>
     </footer>
 
     <script type="text/javascript" src="javascript/index.js"></script>
