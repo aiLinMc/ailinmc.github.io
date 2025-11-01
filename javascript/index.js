@@ -1,4 +1,4 @@
-onst homeworkData = `
+const homeworkData = `
 
 一、文化作业（假期认真完成作业，返校后上交）
 ·语文
