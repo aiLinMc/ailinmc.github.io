@@ -170,6 +170,10 @@
             transition: color 0.3s ease;
         }
         
+        .app-link.hidden {
+            display: none;
+        }
+        
         .app-link:hover {
             color: #1a5fd8;
             text-decoration: underline;
@@ -288,9 +292,85 @@
     
     <footer>
         <p>作业清单管理系统 &copy; 2025</p>
-        <a href="app.html" class="app-link">获取作业清单APP</a>
+        <a href="app.html" class="app-link" id="app-link">获取作业清单APP</a>
     </footer>
 
     <script type="text/javascript" src="javascript/index.js"></script>
+    <script>
+        // 检测是否在APP内运行
+        function isInApp() {
+            // 方法1: 检查User-Agent中的关键词
+            const userAgent = navigator.userAgent.toLowerCase();
+            
+            // 常见APP和WebView标识
+            const appIndicators = [
+                'webview',
+                'wv',
+                'android',
+                'iphone',
+                'ipad',
+                'mobile',
+                '907作业清单', // 替换为您的APP名称
+                'homework907' // 替换为您的APP标识
+            ];
+            
+            for (let indicator of appIndicators) {
+                if (userAgent.includes(indicator)) {
+                    return true;
+                }
+            }
+            
+            // 方法2: 检查URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('app') === 'true' || urlParams.get('source') === 'app') {
+                return true;
+            }
+            
+            // 方法3: 检查是否在特定环境中运行（如Cordova、Capacitor等）
+            if (window.cordova || window.Capacitor || window.phonegap) {
+                return true;
+            }
+            
+            // 方法4: 检查窗口特性（移动APP通常没有地址栏等）
+            if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // 页面加载后检查并隐藏APP链接
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isInApp()) {
+                document.getElementById('app-link').classList.add('hidden');
+                console.log('检测到在APP内运行，已隐藏下载链接');
+            } else {
+                console.log('在浏览器中运行，显示下载链接');
+            }
+        });
+        
+        // 暗黑模式功能（从index.js复制过来，确保可用）
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateDarkModeButton();
+        }
+
+        function updateDarkModeButton() {
+            const button = document.querySelector('.dark-mode-toggle');
+            if (document.body.classList.contains('dark-mode')) {
+                button.textContent = '☀️';
+            } else {
+                button.textContent = '🌙';
+            }
+        }
+
+        // 检查本地存储的暗黑模式设置
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+        updateDarkModeButton();
+    </script>
 </body>
 </html>
