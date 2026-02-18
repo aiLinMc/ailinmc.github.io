@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>907作业清单</title>
+    <link rel="stylesheet" href="css/homework/index.css">
+</head>
+<body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+    <header>
+        <h1 onclick="goTo99Page()">907班作业清单</h1>
+        <div class="subtitle">最新作业内容展示</div>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <h2>最新作业内容（每周五23:30左右更新）</h2>
+            
+            <div class="homework-content" id="homework-content">
+                <!-- 格式化后的作业内容将在这里显示 -->
+            </div>
+            <div class="date-info" id="date-info">最后更新</div>
+        </div>
+        
+        <div class="sidebar">
+            <div class="download-section">
+                <h3>下载作业</h3>
+                <a href="latest/homework.pdf" class="btn btn-download download-pdf" data-filename="最新作业.pdf">下载PDF</a>
+                <a href="latest/homework.png" class="btn btn-download">查看图片</a>
+            </div>
+            
+            <div class="history-section">
+                <h3>查看历史</h3>
+                <a href="history.html" class="btn btn-history">查看作业历史</a>
+            </div>
+            
+            <div class="changes-section">
+                <h3>改动历史</h3>
+                <div class="changes-content" id="changes-content">
+                    <!-- 改动历史内容将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>作业清单管理系统 &copy; 2025</p>
+        <!--a href="feedback.html" class="feedback-link">反馈问题</a-->
+    </footer>
+
+    <script type="text/javascript" src="javascript/homework/index.js"></script>
+    <script type="text/javascript" src="javascript/homework/index_app.js"></script>
+	<script type="text/javascript" src="javascript/homework/index_pdf-download.js"></script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面未找到 - 907作业清单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            color: #2575fc;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+
+        .error-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #2575fc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #1a5fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-home {
+            background: #4CAF50;
+        }
+
+        .btn-home:hover {
+            background: #45a049;
+        }
+
+        .btn-history {
+            background: #FF9800;
+        }
+
+        .btn-history:hover {
+            background: #e68900;
+        }
+
+        .illustration {
+            margin: 30px 0;
+            font-size: 6rem;
+        }
+
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 30px;
+            display: flex;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px 0 0 5px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #2575fc;
+        }
+
+        .search-btn {
+            padding: 12px 20px;
+            background: #2575fc;
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #1a5fd8;
+        }
+
+        footer {
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* 暗黑模式样式 */
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .container {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .error-code {
+            color: #4a90e2;
+        }
+
+        body.dark-mode .error-title {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .error-message {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .search-input {
+            background: #3a3a3a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .search-input:focus {
+            border-color: #4a90e2;
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            background: rgba(0, 0, 0, 0.2);
+            color: #ffa500;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .error-code {
+                font-size: 6rem;
+            }
+            
+            .error-title {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+    
+    <div class="container">
+        <div class="error-code">404</div>
+        <div class="illustration">📚</div>
+        <h1 class="error-title">页面未找到</h1>
+        <p class="error-message">
+            抱歉，您要查找的页面不存在。<br>
+            可能已被移动、删除或您输入了错误的网址。
+        </p>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="搜索作业内容...（其实这个功能根本没做）">
+            <button class="search-btn">搜索</button>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="index.html" class="btn btn-home">返回首页</a>
+            <a href="history.html" class="btn btn-history">查看作业历史</a>
+        </div>
+        
+        <p class="error-message">
+            如果您认为这是一个错误，请联系网站管理员。
+        </p>
+    </div>
+    
+    <footer>
+        <p>作业清单管理系统 &copy; 2025</p>
+    </footer>
+
+    <script>
+        // 暗黑模式功能
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateDarkModeButton();
+        }
+
+        function updateDarkModeButton() {
+            const button = document.querySelector('.dark-mode-toggle');
+            if (document.body.classList.contains('dark-mode')) {
+                button.textContent = '☀️';
+            } else {
+                button.textContent = '🌙';
+            }
+        }
+
+        // 页面加载时检查暗黑模式设置
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+            updateDarkModeButton();
+            
+            // 搜索功能
+            const searchInput = document.querySelector('.search-input');
+            const searchBtn = document.querySelector('.search-btn');
+            
+            searchBtn.addEventListener('click', function() {
+                performSearch();
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            function performSearch() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // 在实际应用中，这里应该实现搜索功能
+                    // 暂时简单重定向到历史页面
+                    window.location.href = 'history.html';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

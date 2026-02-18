@@ -1,0 +1,191 @@
+/* thanks.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Microsoft YaHei', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.thank-you-content {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+.success-icon {
+    font-size: 4rem;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.thank-you-content h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.success-message {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    line-height: 1.8;
+}
+
+.response-time {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 30px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #2575fc;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1a5fd8;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #757575;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #616161;
+    transform: translateY(-2px);
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 15px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* 暗黑模式样式 */
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .thank-you-content {
+    background: #2d2d2d;
+    color: #e0e0e0;
+}
+
+body.dark-mode .response-time {
+    color: #aaa;
+}
+
+.dark-mode-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+body.dark-mode .dark-mode-toggle {
+    background: rgba(0, 0, 0, 0.2);
+    color: #ffa500;
+}
+
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .thank-you-content {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}

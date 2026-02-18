@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<title>幸运抽奖</title>
+	<link href="css/spring-lottery/lottery.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="lottery-container">
+		<div class="lottery-header">
+			<h1 class="lottery-title">幸运抽奖</h1>
+		</div>
+
+		<div class="lottery-content">
+			<div class="prize-display" id="prizeDisplay">
+				<img src="assets/images/spring-lottery/fzfo.png" alt="抽奖" class="prize-image" id="prizeImage">
+				<div class="prize-text" id="prizeText" style="display: none;">准备抽奖</div>
+			</div>
+
+			<button class="lottery-btn" id="lotteryBtn" onclick="startLottery()">开始抽奖</button>
+
+			<div class="share-text" id="shareText" style="display: none;">
+				🎉 快截图发到群里吧！ 🎉
+			</div>
+		</div>
+
+		<a href="spring.html" class="back-btn">返回首页</a>
+	</div>
+
+	<script src="javascript/spring-lottery/lottery.js"></script>
+</body>
+</html>
