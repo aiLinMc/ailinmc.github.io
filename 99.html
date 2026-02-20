@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XXXX99</title>
+    <link rel="stylesheet" href="css/special99/99.css">
+</head>
+<body>
+    <div class="main-text" id="mainText">99</div>
+    
+    <div class="stars" id="stars"></div>
+    
+    <div class="danmaku-container" id="danmakuContainer"></div>
+    
+    <div class="action-buttons">
+        <button class="action-btn" id="musicPlayerBtn">
+            <span id="musicText">播放音乐</span>
+        </button>
+        <button class="action-btn" id="danmakuBtn">
+            <span id="danmakuText">弹幕</span>
+        </button>
+    </div>
+    
+    <div class="danmaku-panel" id="danmakuPanel" style="display: none;">
+        <div class="danmaku-header">
+            <h3>弹幕管理</h3>
+            <button class="close-btn" id="closeDanmakuPanel">✕</button>
+        </div>
+        <div class="danmaku-input-area">
+            <input type="text" id="danmakuInput" placeholder="请输入文本..." maxlength="50">
+            <button class="send-btn" id="sendDanmaku">发送</button>
+        </div>
+        <div class="danmaku-list" id="danmakuList"></div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <audio id="backgroundMusic" loop>
+        <source src="assets/music/special99/background.mp3" type="audio/mpeg">
+        您的浏览器不支持音频元素。
+    </audio>
+    
+    <script src="javascript/special99/99.js"></script>
+</body>
+</html>
