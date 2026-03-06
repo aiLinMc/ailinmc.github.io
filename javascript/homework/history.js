@@ -29,7 +29,7 @@ function updateDarkModeButton() {
     }
 }
 
-// 默认展开第一个学期（九年级上学期）
+// 默认展开第一个学期（九年级下学期）
 document.addEventListener('DOMContentLoaded', function() {
     // 检查本地存储的暗黑模式设置
     if (localStorage.getItem('darkMode') === 'true') {

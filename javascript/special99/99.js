@@ -81,6 +81,14 @@ function updateMainText() {
     }
 }
 
+function updatePageTitle() {
+    const cp = getUrlParameter('cp');
+    
+    if (cp) {
+        document.title = cp + '99';
+    }
+}
+
 function createFloatingText(text, isDanmaku = false) {
     const element = document.createElement('div');
     element.className = 'danmaku-item';
@@ -259,6 +267,7 @@ window.deleteDanmaku = deleteDanmaku;
 
 document.addEventListener('DOMContentLoaded', () => {
     updateMainText();
+    updatePageTitle();
     createStars();
     startFloatingTexts();
     renderDanmakuList();
