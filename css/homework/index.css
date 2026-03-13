@@ -26,6 +26,59 @@ header {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* 中考倒计时样式 */
+.exam-countdown {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.exam-countdown:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.countdown-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.countdown-time {
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.countdown-hint {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-top: 8px;
+    font-style: italic;
+}
+
+/* 暗黑模式下的倒计时样式 */
+body.dark-mode .exam-countdown {
+    background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .countdown-time {
+        font-size: 1.2rem;
+    }
+    
+    .countdown-title {
+        font-size: 1rem;
+    }
+}
+
 h1 {
     font-size: 2.5rem;
     margin-bottom: 10px;

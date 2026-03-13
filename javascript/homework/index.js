@@ -235,6 +235,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUpdateDate();
     loadHomeworkData();
     loadChangeHistory();
+    
+    // 初始化中考倒计时
+    initExamCountdown();
 });
 
 // 99页面跳转功能 - 连续点击10次触发
@@ -257,5 +260,62 @@ function goTo99Page() {
         if (cp !== null && cp.trim() !== '') {
             window.location.href = `99.html?cp=${encodeURIComponent(cp.trim())}`;
         }
+    }
+}
+
+// 中考倒计时功能
+let countdownInterval = null;
+let showHoursMode = false; // false: 显示天时分秒, true: 显示总小时数（1位小数）
+
+function initExamCountdown() {
+    const countdownElement = document.getElementById('examCountdown');
+    const countdownTimeElement = document.getElementById('countdownTime');
+    
+    if (countdownElement && countdownTimeElement) {
+        // 点击切换显示模式
+        countdownElement.addEventListener('click', function() {
+            showHoursMode = !showHoursMode;
+            updateCountdown();
+        });
+        
+        // 启动倒计时
+        updateCountdown();
+        countdownInterval = setInterval(updateCountdown, 1000);
+    }
+}
+
+function updateCountdown() {
+    const countdownTimeElement = document.getElementById('countdownTime');
+    if (!countdownTimeElement) return;
+    
+    // 中考时间：6月30日 15:00:00
+    const examDate = new Date();
+    examDate.setMonth(5); // 6月（0-11）
+    examDate.setDate(30);
+    examDate.setHours(15, 0, 0, 0);
+    
+    const now = new Date();
+    const timeLeft = examDate - now;
+    
+    if (timeLeft <= 0) {
+        countdownTimeElement.textContent = '中考已开始！';
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+        return;
+    }
+    
+    if (showHoursMode) {
+        // 显示总小时数（1位小数）
+        const totalHours = (timeLeft / (1000 * 60 * 60)).toFixed(1);
+        countdownTimeElement.textContent = totalHours + '小时';
+    } else {
+        // 显示天时分秒
+        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        
+        countdownTimeElement.textContent = `${days}天${hours}时${minutes}分${seconds}秒`;
     }
 }
