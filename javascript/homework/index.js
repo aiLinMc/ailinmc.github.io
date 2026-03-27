@@ -62,7 +62,7 @@ async function loadHomeworkData() {
         const homeworkContent = document.getElementById('homework-content');
         const errorMsg = document.createElement('div');
         errorMsg.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px;';
-        errorMsg.textContent = '提示：使用默认作业数据，如需更新请检查 homework.txt 文件';
+        errorMsg.textContent = '提示：作业文件读取失败，请检查网络，若无网络问题请联系站长';
         homeworkContent.parentNode.insertBefore(errorMsg, homeworkContent);
     }
 }
