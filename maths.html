@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代数式化简器</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="css/maths.css">
+</head>
+<body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+
+    <div class="container">
+        <header>
+            <h1>牛逼的代数计算器</h1>
+            <p class="subtitle">输入代数表达式，查看计算结果</p>
+        </header>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="normal" onclick="setMode('normal')">化简模式</button>
+            <button class="mode-btn" data-mode="factor" onclick="setMode('factor')">因式分解</button>
+            <button class="mode-btn" data-mode="calculator" onclick="setMode('calculator')">计算模式</button>
+            <button class="mode-btn" data-mode="equation" onclick="setMode('equation')">方程模式</button>
+        </div>
+
+        <div class="mode-notice" id="modeNotice"></div>
+
+        <div class="equation-options" id="equationOptions" style="display:none;">
+            <label class="switch-container">
+                <input type="checkbox" id="imaginaryToggle" onchange="toggleImaginary()">
+                <span class="switch-slider"></span>
+                <span class="switch-label">允许虚数解</span>
+            </label>
+        </div>
+
+        <div class="expression-display" id="expressionDisplay">
+            <div class="expression-content" id="expressionContent"></div>
+            <div class="cursor" id="cursor"></div>
+        </div>
+
+        <div class="toolbar">
+            <button class="toolbar-btn" onclick="copyAsText()" title="复制为数学表达式">复制表达式</button>
+            <button class="toolbar-btn" onclick="copyAsLatex()" title="复制为LaTeX代码">复制LaTeX</button>
+            <button class="toolbar-btn" onclick="toggleHistory()" title="查看历史记录">历史</button>
+        </div>
+
+        <div class="history-panel" id="historyPanel" style="display:none;">
+            <div class="history-header">
+                <h3>历史记录</h3>
+                <button class="history-close" onclick="toggleHistory()">×</button>
+            </div>
+            <div class="history-list" id="historyList"></div>
+            <div class="history-footer">
+                <button class="toolbar-btn" onclick="clearHistory()">清空历史</button>
+            </div>
+        </div>
+
+        <div class="keyboard-container">
+            <div class="keyboard-tabs">
+                <button class="keyboard-tab active" data-page="1">数字与字母</button>
+                <button class="keyboard-tab" data-page="2">符号与函数</button>
+            </div>
+
+            <div class="keyboard-page active" data-page="1">
+                <div class="keyboard-region region-2">
+                    <div class="keyboard-row">
+                        <button class="key number" data-value="1">1</button>
+                        <button class="key number" data-value="2">2</button>
+                        <button class="key number" data-value="3">3</button>
+                        <button class="key number" data-value="4">4</button>
+                        <button class="key number" data-value="5">5</button>
+                        <button class="key number" data-value="6">6</button>
+                        <button class="key number" data-value="7">7</button>
+                        <button class="key number" data-value="8">8</button>
+                        <button class="key number" data-value="9">9</button>
+                        <button class="key number" data-value="0">0</button>
+                    </div>
+                    <div class="keyboard-row keyboard-letters">
+                        <button class="key letter" data-value="q">q</button>
+                        <button class="key letter" data-value="w">w</button>
+                        <button class="key letter" data-value="e">e</button>
+                        <button class="key letter" data-value="r">r</button>
+                        <button class="key letter" data-value="t">t</button>
+                        <button class="key letter" data-value="y">y</button>
+                        <button class="key letter" data-value="u">u</button>
+                        <button class="key letter" data-value="i">i</button>
+                        <button class="key letter" data-value="o">o</button>
+                        <button class="key letter" data-value="p">p</button>
+                    </div>
+                    <div class="keyboard-row keyboard-letters">
+                        <button class="key letter" data-value="a">a</button>
+                        <button class="key letter" data-value="s">s</button>
+                        <button class="key letter" data-value="d">d</button>
+                        <button class="key letter" data-value="f">f</button>
+                        <button class="key letter" data-value="g">g</button>
+                        <button class="key letter" data-value="h">h</button>
+                        <button class="key letter" data-value="j">j</button>
+                        <button class="key letter" data-value="k">k</button>
+                        <button class="key letter" data-value="l">l</button>
+                    </div>
+                    <div class="keyboard-row keyboard-letters">
+                        <button class="key letter" data-value="z">z</button>
+                        <button class="key letter" data-value="x">x</button>
+                        <button class="key letter" data-value="c">c</button>
+                        <button class="key letter" data-value="v">v</button>
+                        <button class="key letter" data-value="b">b</button>
+                        <button class="key letter" data-value="n">n</button>
+                        <button class="key letter" data-value="m">m</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key" data-value="+">+</button>
+                        <button class="key" data-value="-">−</button>
+                        <button class="key" data-value="*">×</button>
+                        <button class="key" data-value="/">÷</button>
+                        <button class="key" data-value=".">.</button>
+                        <button class="key" data-value="(">(</button>
+                        <button class="key" data-value=")">)</button>
+                        <button class="key" data-value="=">=</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key case-btn" data-action="toggleCase" id="caseBtn">abc</button>
+                        <button class="key greek-btn" data-action="toggleGreek" id="greekBtn"><span class="katex">\alpha\beta\gamma</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="keyboard-page" data-page="2">
+                <div class="keyboard-region region-1">
+                    <div class="keyboard-row">
+                        <button class="key" data-action="insertSuperscript"><span class="katex">x^{n}</span></button>
+                        <button class="key" data-action="insertSubscript"><span class="katex">x_{n}</span></button>
+                        <button class="key" data-value="√(" data-type="sqrt"><span class="katex">\sqrt{x}</span></button>
+                        <button class="key" data-value="∛(" data-type="cuberoot"><span class="katex">\sqrt[3]{x}</span></button>
+                        <button class="key" data-value="n√(" data-type="nthroot"><span class="katex">\sqrt[n]{x}</span></button>
+                        <button class="key" data-value="|" data-type="abs"><span class="katex">|x|</span></button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key" data-value="π"><span class="katex">\pi</span></button>
+                        <button class="key" data-value="e"><span class="katex">e</span></button>
+                        <button class="key" data-value="i"><span class="katex">i</span></button>
+                        <button class="key" data-value="∞"><span class="katex">\infty</span></button>
+                        <button class="key" data-value="%">%</button>
+                        <button class="key" data-value="‰">‰</button>
+                        <button class="key" data-value="°"><span class="katex">^\circ</span></button>
+                        <button class="key" data-value=",">,</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key" data-value="sin(">sin</button>
+                        <button class="key" data-value="cos(">cos</button>
+                        <button class="key" data-value="tan(">tan</button>
+                        <button class="key" data-value="log(">log</button>
+                        <button class="key" data-value="ln(">ln</button>
+                        <button class="key" data-value="arcsin(">arcsin</button>
+                        <button class="key" data-value="arccos(">arccos</button>
+                        <button class="key" data-value="arctan(">arctan</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key" data-value="<"><</button>
+                        <button class="key" data-value=">">></button>
+                        <button class="key" data-value="<=">≤</button>
+                        <button class="key" data-value=">=">≥</button>
+                        <button class="key" data-value="!=">≠</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="keyboard-region region-3">
+                <div class="keyboard-row keyboard-controls">
+                    <button class="key control1" data-action="delete">删除</button>
+                    <button class="key control1" data-action="clear">清空</button>
+                </div>
+                <div class="keyboard-row keyboard-controls">
+                    <button class="key control" data-action="moveLeft">← 光标左移</button>
+                    <button class="key control" data-action="moveRight">光标右移 →</button>
+                    <button class="key control" data-action="moveToStart">开头</button>
+                    <button class="key control" data-action="moveToEnd">末尾</button>
+                    <button class="key control" data-action="moveToTermStart">项开头</button>
+                    <button class="key control" data-action="moveToTermEnd">项末尾</button>
+                    <!-- <button class="key control" data-action="moveToPrevTermEnd">上一项末尾</button> -->
+                    <!-- <button class="key control" data-action="moveToNextTermStart">下一项开头</button> -->
+                </div>
+            </div>
+
+            <div class="nth-root-input" id="nthRootInput">
+                <span>请输入根指数：</span>
+                <input type="number" id="rootIndex" min="2" value="3">
+                <button class="key confirm" data-action="confirmRoot">确定</button>
+                <button class="key cancel" data-action="cancelRoot">取消</button>
+            </div>
+        </div>
+
+        <button class="key simplify-btn" data-action="simplify">点击计算</button>
+
+        <div class="result-section" id="resultSection">
+            <h3>计算结果</h3>
+            <div class="result-toolbar" id="resultToolbar" style="display:none;margin-bottom:10px;">
+                <button class="toolbar-btn small" onclick="copyResultAsText()">复制结果表达式</button>
+                <button class="toolbar-btn small" onclick="copyResultAsLatex()">复制结果LaTeX</button>
+                <div class="dropdown">
+                    <button class="toolbar-btn small" onclick="toggleShareMenu()">分享</button>
+                    <div class="dropdown-menu" id="shareMenu">
+                        <button onclick="copyShareLink()">复制分享链接</button>
+                        <button onclick="exportProcess()">导出为TXT</button>
+                        <button onclick="showImagePreview('export')">导出为图片</button>
+                        <button onclick="showForwardDialog()">转发给...</button>
+                    </div>
+                </div>
+            </div>
+            <div class="result-content katex-output" id="resultContent"></div>
+        </div>
+    </div>
+
+    <div id="forwardDialog" class="dialog-overlay" style="display:none;">
+        <div class="dialog-box">
+            <div class="dialog-header">转发方式</div>
+            <div class="dialog-content">
+                <button class="dialog-btn" onclick="forwardLink()">转发链接</button>
+                <button class="dialog-btn" onclick="forwardTxt()">转发TXT</button>
+                <button class="dialog-btn" onclick="showImagePreview('forward')">转发图片</button>
+            </div>
+            <button class="dialog-close" onclick="closeForwardDialog()">取消</button>
+        </div>
+    </div>
+
+    <div id="previewDialog" class="dialog-overlay" style="display:none;">
+        <div class="dialog-box preview-box">
+            <div class="dialog-header">图片预览</div>
+            <div class="dialog-content">
+                <img id="previewImage" src="" alt="预览" style="max-width:100%;max-height:60vh;border-radius:8px;">
+            </div>
+            <div class="dialog-actions">
+                <button class="dialog-btn" id="previewConfirmBtn">确认</button>
+                <button class="dialog-close" onclick="closePreviewDialog()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>牛逼的代数计算器 &copy; 2025-2026</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+    <script src="javascript/maths.js"></script>
+</body>
+</html>
