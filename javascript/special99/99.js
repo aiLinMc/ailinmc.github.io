@@ -26,7 +26,7 @@ const bannedWords = [
 ];
 // ###############################################
 
-const BANNED_MESSAGE = '不要做那些你不该做的事';
+const BANNED_MESSAGE = '何意味';
 
 function getUrlParameter(name) {
     const urlParams = new URLSearchParams(window.location.search);
