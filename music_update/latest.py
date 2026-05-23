@@ -28,6 +28,7 @@ import time
 from urllib.parse import quote
 from PIL import Image, ImageTk
 import io
+import base64
 
 
 # 禁用SSL警告
@@ -35,8 +36,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==================== 版本配置 ====================
-CURRENT_INTERNAL_VERSION = "4"  # 内部版本号（纯数字，用于比较）
-CURRENT_DISPLAY_VERSION = "v1.1.2"  # 显示版本号（展示给用户）
+CURRENT_INTERNAL_VERSION = "5"  # 内部版本号（纯数字，用于比较）
+CURRENT_DISPLAY_VERSION = "v1.2.0"  # 显示版本号（展示给用户）
 UPDATE_DOWNLOAD_URL = "https://yyxc.fun/music_update/"  # 更新下载地址
 VERSION_URL = UPDATE_DOWNLOAD_URL + "music_version.txt"  # 版本文件URL
 
@@ -882,26 +883,15 @@ class MusicDownloaderGUI:
         btn_frame = ttk.Frame(info_frame)
         btn_frame.pack(fill=tk.X, pady=(10, 0))
         
-        btn_row1 = ttk.Frame(btn_frame)
-        btn_row1.pack(fill=tk.X, pady=(0, 5))
-        
-        self.download_mp3_btn = ttk.Button(btn_row1, text="⬇️ 下载音频", command=self.download_audio, state=tk.DISABLED, width=12)
+        # 只保留两个按钮：直接下载 + 下载歌词
+        self.download_mp3_btn = ttk.Button(btn_frame, text="⬇️ 直接下载", command=self.download_audio, state=tk.DISABLED, width=12)
         self.download_mp3_btn.pack(side=tk.LEFT, padx=(0, 10))
         
-        self.download_lrc_btn = ttk.Button(btn_row1, text="📝 下载歌词", command=self.download_lrc, state=tk.DISABLED, width=12)
+        self.download_lrc_btn = ttk.Button(btn_frame, text="📝 下载歌词", command=self.download_lrc, state=tk.DISABLED, width=12)
         self.download_lrc_btn.pack(side=tk.LEFT, padx=(0, 10))
         
-        self.open_browser_btn = ttk.Button(btn_row1, text="🌐 浏览器打开", command=self.open_browser, width=12)
+        self.open_browser_btn = ttk.Button(btn_frame, text="🌐 浏览器打开", command=self.open_browser, width=12)
         self.open_browser_btn.pack(side=tk.LEFT)
-        
-        btn_row2 = ttk.Frame(btn_frame)
-        btn_row2.pack(fill=tk.X)
-        
-        self.convert_to_mp3_btn = ttk.Button(btn_row2, text="🔄 转换为MP3", command=self.convert_to_mp3, state=tk.DISABLED, width=12)
-        self.convert_to_mp3_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
-        self.format_warning_label = ttk.Label(btn_row2, text="", foreground="#856404", font=("微软雅黑", 8))
-        self.format_warning_label.pack(side=tk.LEFT)
     
     def create_lyrics_area(self, parent):
         lyrics_frame = ttk.LabelFrame(parent, text="歌词", padding="10")
@@ -1214,16 +1204,18 @@ class MusicDownloaderGUI:
             if match:
                 cover_url = match.group(1)
             
-            # 音频链接
+            # 音频链接（保留原有正则，新增Base64降级）
             audio_url = None
             audio_format = None
             
+            # 原有逻辑 1：匹配 <source> 标签
             pattern1 = r'<source\s+src="([^"]+\.(?:mp3|aac|m4a|flac))"'
             match = re.search(pattern1, html, re.IGNORECASE)
             if match:
                 audio_url = match.group(1)
                 audio_format = os.path.splitext(audio_url)[1].lower()
             
+            # 原有逻辑 2：直接匹配 .mp3 链接
             if not audio_url:
                 pattern2 = r'https?://[^\s"\']+\.mp3'
                 match = re.search(pattern2, html, re.IGNORECASE)
@@ -1231,6 +1223,7 @@ class MusicDownloaderGUI:
                     audio_url = match.group(0)
                     audio_format = ".mp3"
             
+            # 原有逻辑 3：匹配 kuwo.cn 的音频链接
             if not audio_url:
                 pattern3 = r'https?://[^\s"\']+kuwo\.cn[^\s"\']+\.(?:aac|mp3|m4a)'
                 match = re.search(pattern3, html, re.IGNORECASE)
@@ -1238,10 +1231,45 @@ class MusicDownloaderGUI:
                     audio_url = match.group(0)
                     audio_format = os.path.splitext(audio_url)[1].lower()
             
-            # 歌词
-            lyrics = []
-            for match in re.finditer(r'<div class="lyric-line"[^>]*>([^<]+)</div>', html):
-                lyrics.append(match.group(1).strip())
+            # 新增降级逻辑：从 base64 编码的 code 变量中解码
+            if not audio_url:
+                code_match = re.search(r'let\s+code\s*=\s*"([^"]+)"', html)
+                if code_match:
+                    encoded = code_match.group(1)
+                    try:
+                        real_url = base64.b64decode(encoded).decode('utf-8')
+                        if real_url.startswith('http'):
+                            audio_url = real_url
+                            if '.mp3' in real_url.lower():
+                                audio_format = '.mp3'
+                            elif '.aac' in real_url.lower():
+                                audio_format = '.aac'
+                            elif '.m4a' in real_url.lower():
+                                audio_format = '.m4a'
+                            elif '.flac' in real_url.lower():
+                                audio_format = '.flac'
+                            else:
+                                audio_format = '.mp3'
+                    except Exception as e:
+                        print(f"Base64解码失败: {e}")
+            
+            # 歌词提取：同时获取纯文本（用于显示）和带时间戳的LRC（用于下载）
+            lyrics_texts = []      # 纯文本行，用于界面显示
+            lrc_lyrics = []        # 带时间戳的列表，每个元素为 (秒数, 文本)
+            
+            # 优先匹配带 data-time 属性的歌词行
+            for match in re.finditer(r'<div class="lyric-line"\s*data-time="([^"]+)"[^>]*>([^<]+)</div>', html):
+                time_sec = float(match.group(1))
+                text = match.group(2).strip()
+                lyrics_texts.append(text)
+                lrc_lyrics.append((time_sec, text))
+            
+            # 如果没有 data-time 属性（旧页面），则降级为只提取文本
+            if not lrc_lyrics:
+                for match in re.finditer(r'<div class="lyric-line"[^>]*>([^<]+)</div>', html):
+                    text = match.group(1).strip()
+                    lyrics_texts.append(text)
+                # lrc_lyrics 保持为空列表
             
             if not audio_url:
                 return None, "未找到音频链接（可能歌曲已下架）"
@@ -1252,7 +1280,8 @@ class MusicDownloaderGUI:
                 'audio_url': audio_url,
                 'audio_format': audio_format,
                 'song_id': song_id,
-                'lyrics': lyrics or ["暂无歌词"],
+                'lyrics': lyrics_texts or ["暂无歌词"],   # 界面显示用
+                'lrc_lyrics': lrc_lyrics,               # 下载LRC用（可能为空）
                 'page_url': url,
                 'cover_url': cover_url
             }, None
@@ -1279,9 +1308,10 @@ class MusicDownloaderGUI:
         else:
             self.cover_label.config(text="暂无封面", image="")
         
+        # 格式化音频格式信息，若非MP3则添加转换提示
         format_info = f"【音频格式】{audio_format.upper()}"
         if not is_mp3:
-            format_info += "\nℹ️ 提示：此格式大多数音乐播放器（QQ音乐、网易云、VLC等）都支持，可直接播放。如需MP3格式，可点击转换按钮。"
+            format_info += "\nℹ️ 点击「直接下载」可选择转换为MP3或下载原始文件。"
         
         self._show_info_message(
             f"【歌曲名称】{info['title']}\n"
@@ -1297,15 +1327,9 @@ class MusicDownloaderGUI:
             self.lyrics_text.insert(tk.END, f"{line}\n")
         self.lyrics_text.config(state=tk.DISABLED)
         
+        # 启用下载按钮
         self.download_mp3_btn.config(state=tk.NORMAL)
         self.download_lrc_btn.config(state=tk.NORMAL)
-        
-        if is_mp3:
-            self.convert_to_mp3_btn.config(state=tk.DISABLED)
-            self.format_warning_label.config(text="✓ 已是MP3格式，无需转换")
-        else:
-            self.convert_to_mp3_btn.config(state=tk.NORMAL)
-            self.format_warning_label.config(text=f"⚠️ 当前为{audio_format.upper()}格式，可转换为MP3")
         
         self._set_buttons_state(True, include_extract=True)
         self._update_status(f"✓ {info['title']} - {info['artist']} ({audio_format.upper()})")
@@ -1335,6 +1359,33 @@ class MusicDownloaderGUI:
     # ==================== 下载功能 ====================
     
     def download_audio(self):
+        if not self.current_song_info:
+            return
+        
+        audio_format = self.current_song_info.get('audio_format', '.mp3')
+        is_mp3 = (audio_format == '.mp3')
+        
+        if is_mp3:
+            # 直接下载MP3
+            self._download_original()
+        else:
+            # 非MP3格式，弹出选项对话框
+            result = messagebox.askyesno(
+                "格式转换提示",
+                f"当前歌曲格式为 {audio_format.upper()}，不是标准MP3。\n\n"
+                "是否转换为MP3后再下载？\n\n"
+                "• 点击“是” → 下载后自动转换为MP3\n"
+                "• 点击“否” → 直接下载原始格式文件"
+            )
+            if result:
+                # 转换为MP3下载
+                self.download_and_convert()
+            else:
+                # 下载原始格式
+                self._download_original()
+                
+    def _download_original(self):
+        """直接下载原始格式音频（不转换）"""
         if not self.current_song_info:
             return
         
@@ -1423,6 +1474,7 @@ class MusicDownloaderGUI:
         if not self.current_song_info:
             return
         from tkinter import filedialog
+        
         filename = filedialog.asksaveasfilename(
             defaultextension=".lrc",
             filetypes=[("LRC歌词文件", "*.lrc")],
@@ -1430,14 +1482,31 @@ class MusicDownloaderGUI:
         )
         if not filename:
             return
+        
         try:
+            lrc_data = self.current_song_info.get('lrc_lyrics', [])
+            if lrc_data:
+                lines = []
+                #lines.append(f"[ti:{self.current_song_info['title']}]")
+                #lines.append(f"[ar:{self.current_song_info['artist']}]")
+                #lines.append(f"[by:907班音乐工具]")
+                #lines.append("")
+                
+                for time_sec, text in lrc_data:
+                    minutes = int(time_sec // 60)
+                    seconds = int(time_sec % 60)
+                    timestamp = f"[{minutes}:{seconds:02d}] "
+                    lines.append(f"{timestamp}{text}")
+                
+                content = "\n".join(lines)
+            else:
+                # 无时间戳时保存纯文本（与原行为一致）
+                content = "\n".join(self.current_song_info['lyrics'])
+            
             with open(filename, 'w', encoding='utf-8') as f:
-                f.write(f"[ti:{self.current_song_info['title']}]\n")
-                f.write(f"[ar:{self.current_song_info['artist']}]\n")
-                f.write(f"[by:907班音乐工具]\n\n")
-                for line in self.current_song_info['lyrics']:
-                    f.write(f"{line}\n")
-            self._update_status(f"✓ 歌词已保存")
+                f.write(content)
+            
+            self._update_status("✓ 歌词已保存")
             messagebox.showinfo("完成", f"歌词已保存到：\n{filename}")
         except Exception as e:
             self._update_status(f"保存失败：{e}")
@@ -1633,8 +1702,7 @@ class MusicDownloaderGUI:
         self.lyrics_text.config(state=tk.DISABLED)
         self.download_mp3_btn.config(state=tk.DISABLED)
         self.download_lrc_btn.config(state=tk.DISABLED)
-        self.convert_to_mp3_btn.config(state=tk.DISABLED)
-        self.format_warning_label.config(text="")
+        # 不再有 convert_to_mp3_btn 和 format_warning_label
         self.cover_label.config(text="暂无封面", image="")
         self.album_photo = None
     

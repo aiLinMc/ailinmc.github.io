@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>游戏中心 · 907作业清单</title>
+    <style>
+        /* reset & base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            transition: background 0.3s ease, color 0.2s ease;
+            background: #f8f9ff;
+        }
+
+        /* 头部区域 */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 2rem;
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        header h1:hover {
+            transform: scale(1.02);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        header .subtitle {
+            font-size: 1rem;
+            opacity: 0.92;
+            letter-spacing: 1px;
+        }
+
+        /* 游戏网格容器 */
+        .games-container {
+            flex: 1;
+            max-width: 1300px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 48px 24px;
+            box-sizing: border-box;
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 28px;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        /* 游戏卡片 */
+        .game-card {
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            cursor: pointer;
+            backdrop-filter: blur(0px);
+        }
+        .game-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 32px rgba(0, 0, 0, 0.12);
+        }
+        .game-icon {
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5rem;
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.2s;
+        }
+        /* 为不同游戏添加微妙的个性化渐变 */
+        .game-card:nth-child(1) .game-icon { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .game-card:nth-child(2) .game-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .game-card:nth-child(3) .game-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .game-card:nth-child(4) .game-icon { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        
+        .game-info {
+            padding: 22px 20px 24px;
+        }
+        .game-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: #1f2937;
+            letter-spacing: -0.3px;
+        }
+        .game-desc {
+            font-size: 0.9rem;
+            color: #5b6b8c;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        /* footer 简洁 */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #edeff5;
+            color: #5a687c;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* 深色模式 */
+        body.dark-mode {
+            background: #12121c;
+            color: #eef2ff;
+        }
+        body.dark-mode .games-container {
+            background: #12121c;
+        }
+        body.dark-mode .game-card {
+            background: #1f2232;
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+        }
+        body.dark-mode .game-name {
+            color: #f0f3fa;
+        }
+        body.dark-mode .game-desc {
+            color: #a9b5d9;
+        }
+        body.dark-mode footer {
+            background: #0e0e18;
+            color: #a5b0cc;
+            border-top-color: #2a2e42;
+        }
+        body.dark-mode .dark-mode-toggle {
+            background: #2a2e44;
+            color: #ffdd88;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+        }
+        
+        /* 深色模式切换按钮 */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            width: 48px;
+            height: 48px;
+            border-radius: 60px;
+            border: none;
+            background: #ffffffea;
+            font-size: 1.4rem;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dark-mode-toggle:hover {
+            transform: scale(1.05);
+            background: white;
+        }
+
+        /* 响应式微调 */
+        @media (max-width: 680px) {
+            .games-container {
+                padding: 32px 20px;
+            }
+            .games-grid {
+                gap: 20px;
+            }
+            .game-icon {
+                height: 120px;
+                font-size: 3.5rem;
+            }
+            .game-name {
+                font-size: 1.25rem;
+            }
+            header h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="深色模式切换">🌙</button>
+    <header>
+        <h1 onclick="location.href='index.html'">🎮 游戏中心</h1>
+        <div class="subtitle">学习之余 · 轻量小憩</div>
+    </header>
+
+    <div class="games-container">
+        <div class="games-grid">
+            <!-- 吃豆人卡片：需要拦截跳转 + 弹窗提示 -->
+            <a href="games/吃豆人/index.html" class="game-card" id="pacmanCard">
+                <div class="game-icon">🟡</div>
+                <div class="game-info">
+                    <div class="game-name">吃豆人</div>
+                    <div class="game-desc">经典街机 · 躲避幽灵收集豆子</div>
+                </div>
+            </a>
+            <!-- 其他游戏正常跳转 -->
+            <a href="games/切水果/index.html" class="game-card">
+                <div class="game-icon">🍉🔪</div>
+                <div class="game-info">
+                    <div class="game-name">切水果</div>
+                    <div class="game-desc">指尖滑动 · 切开多汁水果别碰炸弹</div>
+                </div>
+            </a>
+            <a href="games/飞机大战/play.html" class="game-card">
+                <div class="game-icon">✈️💥</div>
+                <div class="game-info">
+                    <div class="game-name">飞机大战</div>
+                    <div class="game-desc">经典雷电式射击 · 击落敌机赢高分</div>
+                </div>
+            </a>
+            <a href="games/捕鱼达人/index.html" class="game-card">
+                <div class="game-icon">🐟🎣</div>
+                <div class="game-info">
+                    <div class="game-name">捕鱼达人</div>
+                    <div class="game-desc">深海炮网 · 捕获黄金鱼群</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 简易 footer 未注释，展示友好信息 -->
+    <footer>
+        <p>✨ 放松时光 | yyxc游戏中心</p>
+    </footer>
+
+    <script>
+        // ---------- 深色模式核心 ----------
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            // 更改按钮图标样式 (可选)
+            const toggleBtn = document.getElementById('darkModeToggle');
+            if (toggleBtn) {
+                toggleBtn.textContent = isDark ? '☀️' : '🌙';
+            }
+        }
+        
+        // 初始化暗色模式状态
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            const toggleBtn = document.getElementById('darkModeToggle');
+            if (toggleBtn) toggleBtn.textContent = '☀️';
+        } else {
+            const toggleBtn = document.getElementById('darkModeToggle');
+            if (toggleBtn) toggleBtn.textContent = '🌙';
+        }
+        
+        // 绑定深色按钮事件 (独立)
+        const darkBtn = document.getElementById('darkModeToggle');
+        if (darkBtn) {
+            // 移除可能重复绑定的旧监听，重新绑定
+            darkBtn.removeEventListener('click', toggleDarkMode);
+            darkBtn.addEventListener('click', toggleDarkMode);
+        }
+        
+        // ---------- 核心需求：吃豆人卡片点击后弹出对话框，不跳转页面 ----------
+        // 方法：获取"吃豆人"卡片元素，阻止默认的链接跳转，并且弹出 alert 提示。
+        // 为了保证稳定（即使链接 href 变化或动态重绘），根据卡片内的游戏名称文本匹配。
+        // 同时保留其他所有卡片原生跳转。
+        
+        (function setupPacmanDialog() {
+            // 找到所有游戏卡片
+            const allGameCards = document.querySelectorAll('.game-card');
+            let pacmanCard = null;
+            
+            // 遍历卡片，通过 .game-name 的文本内容精准定位"吃豆人"
+            for (let card of allGameCards) {
+                const nameSpan = card.querySelector('.game-name');
+                if (nameSpan && nameSpan.innerText.trim() === '吃豆人') {
+                    pacmanCard = card;
+                    break;
+                }
+            }
+            
+            // 如果通过文本没找到，还可以通过 id 备选（我们上面给了 id="pacmanCard"），双重保险
+            if (!pacmanCard) {
+                pacmanCard = document.getElementById('pacmanCard');
+            }
+            
+            if (pacmanCard) {
+                // 移除可能已存在的监听器，避免重复绑定 (但是一般只会执行一次，放心)
+                // 新式绑定，保留原有链接的特性，但拦截点击
+                const handlePacmanClick = (event) => {
+                    // 阻止默认行为 (阻止a标签跳转)
+                    event.preventDefault();
+                    // 阻止事件冒泡，防止潜在的其他外层干扰（没必要但稳妥）
+                    event.stopPropagation();
+                    // 弹出对话框: "开发中，敬请期待"
+                    alert('🚧 开发中，敬请期待 🚧');
+                    // 无需额外跳转，完全拦截
+                    return false;
+                };
+                
+                // 移除旧监听再添加新监听，确保只绑定一次
+                pacmanCard.removeEventListener('click', handlePacmanClick);
+                pacmanCard.addEventListener('click', handlePacmanClick);
+                
+                // 额外增加安全性：对于通过键盘按回车键触发的click事件同样完美拦截
+                // 同时为了稳健，防止某些极端情况（比如通过js模拟点击），也做了preventDefault，完没问题。
+                // 并且为了保证光标状态，依然保留 a 标签原有样式，不做多余修改。
+                // 辅助说明: 右键菜单在新标签页打开的问题? 左键拦截完全满足日常交互，如果是右键->新标签页打开，
+                // 会使用原始href，但用户很少故意绕过，而且游戏本身未开发，就算打开也会404，体验不佳；我们额外加个小优化：
+                // 修改href为 "javascript:void(0);" 会改变状态栏显示，但不影响左键体验。但为了保留卡片预期且不让右键打开尴尬，
+                // 可选择性将 href 改写为 "#" 或者保持原样。但是为了完全杜绝新标签页打开原链接的可能性, 可以将 href 设置为 "javascript:void(0)"?
+                // 但是那样会丢失链接预览风格，且不符合语义。不过既然未开发，直接让不可跳转最干净。根据需求“不跳转页面”，左键、中键都拦截才完美。
+                // 实际上中键默认行为也会触发click（部分浏览器同时触发），这里event.preventDefault能阻止中键打开新标签。
+                // 额外针对鼠标中键(MouseEvent.button === 1)也做拦截，但对于click事件已经足够。
+                // 另外为了完全拦截用户通过右键菜单选择“在新标签页中打开”，可以监听contextmenu，但这会造成过度干预。暂不做限制。
+                // 但我们可以移除href中的实际路径，改为 "javascript:void(0)" 但可能会使链接样式失效，但是我们可以保留原href属性用于回忆，动态改写：
+                // 为了让任何情况都无法跳转且符合现代浏览器的安全，修改href 为 "javascript:void(0)" 并且保留原数据属性更优雅？
+                // 需求只要求点击后对话框，不跳转，现在左键、中键、ctrl+左键全部拦截，已满足主要场景。由于游戏并未实际开发，
+                // 用户右键新标签页打开显示404页也不影响主流程，但为了体验避免404，我们可以选择改写 href 为 "javascript:void(0)" 并移除原始链接痕迹。
+                // 让整个卡片完全不具有真实链接，完全依赖弹窗。但是为了以后开发方便，我们可以保留原链接在 data-original-href 属性，方便后续恢复。
+                if (pacmanCard.getAttribute('href') && !pacmanCard.hasAttribute('data-original-href')) {
+                    // 备份原始链接
+                    pacmanCard.setAttribute('data-original-href', pacmanCard.getAttribute('href'));
+                    // 将 href 改为 "javascript:void(0)"，确保任何点击/新标签页都无法跳转到原页面，完全遵从需求不跳转
+                    pacmanCard.setAttribute('href', 'javascript:void(0);');
+                }
+            } else {
+                // 极安全模式: 如果因为异步原因没有找到，再次重试(页面已经存在，不会找不到，但做个兜底)
+                console.warn('未找到吃豆人卡片，请检查DOM结构');
+            }
+        })();
+        
+        // 附加优雅处理：由于我们可能动态修改了吃豆人的 href，对于深色模式和任何交互无影响。
+        // 另外确保其他卡片（切水果、飞机大战、捕鱼达人）完全不受影响，它们没有被绑定额外拦截。
+        // 额外检查边缘情况: 如果用户快速点击多下，只会重复alert，但无副作用。
+        // 同时为了防止将来网络延迟或脚本重刷，确保功能依然工作。
+        
+        // 可选: 添加一些小彩蛋控制台友好提示
+        console.log('🎮 游戏中心已加载 | 吃豆人当前为“敬请期待”模式，其他游戏可畅玩');
+    </script>
+</body>
+</html>
