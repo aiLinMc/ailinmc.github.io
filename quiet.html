@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教室安静器 - 保持安静哦 🤫</title>
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --panel-bg: #ffffff;
+            --text: #2d3748;
+            --accent: #5a67d8;
+            --danger: #e53e3e;
+            --warning: #ed8936;
+            --border: #e2e8f0;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #e8edf5 0%, #f0f4f8 30%, #e2e8f0 70%, #edf2f7 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            padding: 20px;
+            transition: background 0.8s ease;
+        }
+        body.danger-bg {
+            background: linear-gradient(135deg, #fecaca 0%, #fca5a5 20%, #f87171 50%, #ef4444 80%, #dc2626 100%);
+            background-attachment: fixed;
+        }
+
+        .app-container {
+            position: relative;
+            width: 100%;
+            max-width: 960px;
+            background: var(--panel-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transition: all 0.5s ease;
+            border: 1px solid var(--border);
+        }
+        .app-container.shaking {
+            animation: screenShake 0.15s infinite;
+        }
+        .app-container.exploding {
+            animation: screenShakeHard 0.08s infinite;
+            border-color: #ef4444;
+            box-shadow: 0 0 80px rgba(255, 0, 0, 0.6), 0 0 160px rgba(255, 80, 0, 0.4);
+        }
+
+        @keyframes screenShake {
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+            25% {
+                transform: translate(-3px, 2px);
+            }
+            50% {
+                transform: translate(3px, -1px);
+            }
+            75% {
+                transform: translate(-2px, -2px);
+            }
+        }
+        @keyframes screenShakeHard {
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0);
+            }
+            20% {
+                transform: translate(-8px, 5px) rotate(-1.5deg);
+            }
+            40% {
+                transform: translate(7px, -4px) rotate(1.2deg);
+            }
+            60% {
+                transform: translate(-5px, -6px) rotate(-0.8deg);
+            }
+            80% {
+                transform: translate(6px, 3px) rotate(1deg);
+            }
+        }
+
+        .main-canvas-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 10/7;
+            background: #fafcfd;
+            cursor: default;
+            transition: background 0.6s ease;
+            overflow: hidden;
+        }
+        .main-canvas-wrapper.danger-flash {
+            background: #fff5f5;
+        }
+        .main-canvas-wrapper.danger-deep {
+            background: #fee2e2;
+        }
+
+        svg#mainSvg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            transition: filter 0.3s ease;
+        }
+        svg#mainSvg.glitched {
+            filter: url(#glitchFilter);
+        }
+
+        .danmaku-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+        .danmaku-item {
+            position: absolute;
+            white-space: nowrap;
+            font-weight: 900;
+            font-size: 22px;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(255, 50, 50, 0.9), 0 0 18px rgba(255, 80, 0, 0.7), 0 2px 4px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(255, 200, 0, 0.5);
+            letter-spacing: 2px;
+            animation: danmakuFly linear forwards;
+            pointer-events: none;
+            z-index: 11;
+        }
+        @keyframes danmakuFly {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-110vw);
+                opacity: 0;
+            }
+        }
+
+        .progress-bar-container {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            max-width: 500px;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 15;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+        .progress-bar-container.visible {
+            opacity: 1;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.15s linear, background 0.5s ease;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #ef4444);
+            width: 0%;
+        }
+        .progress-bar-fill.warning {
+            background: linear-gradient(90deg, #f87171, #ef4444, #dc2626);
+        }
+        .progress-bar-fill.danger {
+            background: linear-gradient(90deg, #ef4444, #b91c1c, #7f1d1d);
+            animation: pulseBar 0.4s infinite;
+        }
+        @keyframes pulseBar {
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.8);
+            }
+        }
+
+        .volume-indicator {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 15;
+            pointer-events: none;
+            opacity: 0.75;
+            transition: opacity 0.3s;
+        }
+        .volume-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e0;
+            transition: all 0.2s ease;
+        }
+        .volume-dot.active {
+            background: #48bb78;
+            box-shadow: 0 0 8px #48bb78;
+        }
+        .volume-dot.warn {
+            background: #f6ad55;
+            box-shadow: 0 0 8px #f6ad55;
+        }
+        .volume-dot.danger {
+            background: #fc8181;
+            box-shadow: 0 0 10px #fc8181;
+        }
+
+        .start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            border-radius: 24px;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .start-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .start-btn {
+            padding: 16px 44px;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background: #fff;
+            color: #2d3748;
+            letter-spacing: 2px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+            background: #fffbeb;
+        }
+        .start-btn:active {
+            transform: scale(0.95);
+            transition: transform 0.1s;
+        }
+        .start-btn .mic-icon {
+            font-size: 28px;
+        }
+
+        .settings-toggle {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            z-index: 16;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid #e2e8f0;
+            background: #fff;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            color: #4a5568;
+        }
+        .settings-toggle:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+            transform: rotate(30deg);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+        .settings-toggle:active {
+            transform: rotate(60deg) scale(0.9);
+            transition: transform 0.1s;
+        }
+
+        .settings-panel {
+            position: absolute;
+            top: 60px;
+            left: 16px;
+            z-index: 18;
+            background: #fff;
+            border-radius: 18px;
+            padding: 22px 20px 16px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+            width: 280px;
+            border: 1px solid #e8ecf1;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top left;
+            opacity: 0;
+            transform: scale(0.85);
+            pointer-events: none;
+        }
+        .settings-panel.open {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        .settings-panel h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #4a5568;
+            gap: 10px;
+        }
+        .setting-row label {
+            flex-shrink: 0;
+            font-weight: 500;
+            min-width: 60px;
+        }
+        .setting-row input[type="range"] {
+            flex: 1;
+            accent-color: #5a67d8;
+            height: 6px;
+            cursor: pointer;
+        }
+        .setting-row .range-val {
+            min-width: 32px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 12px;
+            color: #718096;
+        }
+        /* 修复开关滑块位置：增大滑块宽度并调整移动距离 */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #cbd5e0;
+            border-radius: 28px;
+            transition: all 0.3s ease;
+        }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+        .toggle-switch input:checked+.toggle-slider {
+            background: #5a67d8;
+        }
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(32px);
+        }
+
+        .close-settings {
+            display: block;
+            margin: 10px auto 0;
+            padding: 6px 20px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            background: #f7fafc;
+            cursor: pointer;
+            font-size: 12px;
+            color: #4a5568;
+            transition: all 0.2s;
+            letter-spacing: 1px;
+        }
+        .close-settings:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .mic-error-msg {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            z-index: 21;
+            background: #fff5f5;
+            color: #c53030;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s;
+            border: 1px solid #feb2b2;
+            max-width: 85%;
+        }
+        .mic-error-msg.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 640px) {
+            .app-container {
+                border-radius: 16px;
+            }
+            .settings-panel {
+                width: 240px;
+                left: 8px;
+                top: 50px;
+                padding: 16px 14px;
+                border-radius: 14px;
+            }
+            .settings-panel h3 {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            .setting-row {
+                font-size: 11px;
+                margin-bottom: 8px;
+                gap: 6px;
+            }
+            .setting-row label {
+                min-width: 48px;
+                font-size: 10px;
+            }
+            .danmaku-item {
+                font-size: 16px;
+            }
+            .start-btn {
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+            .settings-toggle {
+                width: 34px;
+                height: 34px;
+                font-size: 16px;
+                top: 10px;
+                left: 10px;
+            }
+            .volume-indicator {
+                top: 10px;
+                right: 10px;
+                gap: 3px;
+            }
+            .volume-dot {
+                width: 6px;
+                height: 6px;
+            }
+            .toggle-switch {
+                width: 44px;
+                height: 24px;
+            }
+            .toggle-slider::before {
+                height: 18px;
+                width: 18px;
+                left: 3px;
+                bottom: 3px;
+            }
+            .toggle-switch input:checked+.toggle-slider::before {
+                transform: translateX(20px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="appContainer">
+        <!-- 画布区域 -->
+        <div class="main-canvas-wrapper" id="canvasWrapper">
+            <svg id="mainSvg" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="glitchFilter">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" seed="5" result="noise" />
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R"
+                        yChannelSelector="G" result="displaced" />
+                        <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" />
+                    </filter>
+                    <radialGradient id="redGlow" cx="50%" cy="50%" r="60%">
+                        <stop offset="0%" stop-color="#ff4444" stop-opacity="0" />
+                        <stop offset="100%" stop-color="#ff0000" stop-opacity="0" />
+                    </radialGradient>
+                </defs>
+                <!-- 背景 -->
+                <rect id="bgRect" x="0" y="0" width="1000" height="700" fill="#fafcfd" rx="0" />
+                <!-- 红色叠加层 -->
+                <rect id="redOverlay" x="0" y="0" width="1000" height="700" fill="#e53e3e" opacity="0"
+                pointer-events="none" />
+                <!-- 红色光晕 -->
+                <rect id="redGlowOverlay" x="0" y="0" width="1000" height="700" fill="url(#redGlow)" opacity="0"
+                pointer-events="none" />
+                <!-- emoji组 -->
+                <g id="emojiGroup"></g>
+                <!-- 进度条（SVG内） -->
+                <rect id="svgProgressBg" x="150" y="665" width="700" height="8" rx="4" fill="rgba(0,0,0,0.06)"
+                pointer-events="none" opacity="0" />
+                <rect id="svgProgressFill" x="150" y="665" width="0" height="8" rx="4" fill="#f59e0b"
+                pointer-events="none" opacity="0" />
+            </svg>
+
+            <!-- 弹幕层 -->
+            <div class="danmaku-layer" id="danmakuLayer"></div>
+
+            <!-- 音量指示器 -->
+            <div class="volume-indicator" id="volumeIndicator">
+                <span class="volume-dot" id="vDot1"></span>
+                <span class="volume-dot" id="vDot2"></span>
+                <span class="volume-dot" id="vDot3"></span>
+                <span class="volume-dot" id="vDot4"></span>
+                <span class="volume-dot" id="vDot5"></span>
+            </div>
+
+            <!-- 进度条（HTML层） -->
+            <div class="progress-bar-container" id="progressBarContainer">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+
+            <!-- 设置按钮 -->
+            <button class="settings-toggle" id="settingsToggle" title="设置">⚙️</button>
+
+            <!-- 设置面板 -->
+            <div class="settings-panel" id="settingsPanel">
+                <h3>🔧 设置面板</h3>
+                <div class="setting-row">
+                    <label>🔊 警报音</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleAlarm" checked />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <label>💥 爆炸效果</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleExplosion" checked />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <label>💬 文字弹幕</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleDanmaku" checked />
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <label>😀 表情数量</label>
+                    <input type="range" id="rangeEmojiCount" min="10" max="60" value="28" step="2" />
+                    <span class="range-val" id="valEmojiCount">28</span>
+                </div>
+                <div class="setting-row">
+                    <label>🎯 敏感度</label>
+                    <input type="range" id="rangeSensitivity" min="10" max="100" value="50" step="5" />
+                    <span class="range-val" id="valSensitivity">50</span>
+                </div>
+                <button class="close-settings" id="closeSettings">关闭 ✕</button>
+            </div>
+
+            <!-- 启动覆盖层 -->
+            <div class="start-overlay" id="startOverlay">
+                <button class="start-btn" id="startBtn">
+                    <span class="mic-icon">🎤</span> 点击启动麦克风
+                </button>
+            </div>
+            <div class="mic-error-msg" id="micErrorMsg">⚠️ 无法访问麦克风，请检查权限或使用HTTPS</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ============ DOM元素 ============
+            const appContainer = document.getElementById('appContainer');
+            const canvasWrapper = document.getElementById('canvasWrapper');
+            const mainSvg = document.getElementById('mainSvg');
+            const emojiGroup = document.getElementById('emojiGroup');
+            const redOverlay = document.getElementById('redOverlay');
+            const redGlowOverlay = document.getElementById('redGlowOverlay');
+            const svgProgressBg = document.getElementById('svgProgressBg');
+            const svgProgressFill = document.getElementById('svgProgressFill');
+            const danmakuLayer = document.getElementById('danmakuLayer');
+            const progressBarContainer = document.getElementById('progressBarContainer');
+            const progressBarFill = document.getElementById('progressBarFill');
+            const volumeIndicator = document.getElementById('volumeIndicator');
+            const vDots = [document.getElementById('vDot1'), document.getElementById('vDot2'), document.getElementById(
+                'vDot3'), document.getElementById('vDot4'), document.getElementById('vDot5')];
+            const startOverlay = document.getElementById('startOverlay');
+            const startBtn = document.getElementById('startBtn');
+            const micErrorMsg = document.getElementById('micErrorMsg');
+            const settingsToggle = document.getElementById('settingsToggle');
+            const settingsPanel = document.getElementById('settingsPanel');
+            const closeSettingsBtn = document.getElementById('closeSettings');
+            const toggleAlarm = document.getElementById('toggleAlarm');
+            const toggleExplosion = document.getElementById('toggleExplosion');
+            const toggleDanmaku = document.getElementById('toggleDanmaku');
+            const rangeEmojiCount = document.getElementById('rangeEmojiCount');
+            const valEmojiCount = document.getElementById('valEmojiCount');
+            const rangeSensitivity = document.getElementById('rangeSensitivity');
+            const valSensitivity = document.getElementById('valSensitivity');
+
+            // ============ 设置 ============
+            let settings = {
+                alarmEnabled: true,
+                explosionEnabled: true,
+                danmakuEnabled: true,
+                emojiCount: 28,
+                sensitivity: 50, // 10-100
+            };
+
+            // 从localStorage加载设置
+            try {
+                const saved = JSON.parse(localStorage.getItem('classroomQuietizerSettings'));
+                if (saved && typeof saved === 'object') {
+                    settings = { ...settings, ...saved };
+                }
+            } catch (e) { /* ignore */ }
+
+            function saveSettings() {
+                try {
+                    localStorage.setItem('classroomQuietizerSettings', JSON.stringify(settings));
+                } catch (e) { /* ignore */ }
+            }
+
+            function applySettingsToUI() {
+                toggleAlarm.checked = settings.alarmEnabled;
+                toggleExplosion.checked = settings.explosionEnabled;
+                toggleDanmaku.checked = settings.danmakuEnabled;
+                rangeEmojiCount.value = settings.emojiCount;
+                valEmojiCount.textContent = settings.emojiCount;
+                rangeSensitivity.value = settings.sensitivity;
+                valSensitivity.textContent = settings.sensitivity;
+            }
+
+            // 【修复1】扩大敏感度范围，使最高敏感度更容易触发
+            function getThreshold() {
+                // 敏感度10 → 阈值0.50（不敏感）
+                // 敏感度100 → 阈值0.03（极其敏感，轻微声音即可触发）
+                return 0.50 - (settings.sensitivity / 100) * 0.47;
+            }
+
+            function getDeltaThreshold() {
+                // 敏感度10 → 突变阈值0.22
+                // 敏感度100 → 突变阈值0.02（微小波动即可触发弹幕）
+                return 0.22 - (settings.sensitivity / 100) * 0.20;
+            }
+
+            // ============ 音频相关 ============
+            let audioContext = null;
+            let analyser = null;
+            let microphone = null;
+            let audioInitialized = false;
+            let currentVolume = 0; // 0-1 平滑音量
+            let rawVolume = 0;
+            let volumeHistory = []; // 存储最近2秒的音量
+            const VOLUME_HISTORY_MAX = 120; // ~2秒（60fps）
+            let lastDanmakuTime = 0;
+            const DANMAKU_COOLDOWN = 1.5; // 弹幕冷却时间（秒），高敏感时缩短
+
+            // 吵闹计时
+            let loudAccumulator = 0; // 累计吵闹秒数
+            const EXPLOSION_THRESHOLD = 15; // 15秒触发爆炸
+            let hasExploded = false;
+            let isExploding = false;
+            let explosionStartTime = 0;
+            const EXPLOSION_DURATION = 1.8;
+            const RECOVERY_DURATION = 2.5;
+            let recoveryStartTime = 0;
+            let isRecovering = false;
+
+            async function initAudio() {
+                try {
+                    audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: false,
+                            noiseSuppression: false,
+                            autoGainControl: false,
+                        }
+                    });
+                    microphone = audioContext.createMediaStreamSource(stream);
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 2048;
+                    analyser.smoothingTimeConstant = 0.2; // 更低平滑使响应更快
+                    microphone.connect(analyser);
+                    audioInitialized = true;
+                    micErrorMsg.classList.remove('show');
+                    startOverlay.classList.add('hidden');
+                    if (audioContext.state === 'suspended') {
+                        await audioContext.resume();
+                    }
+                    console.log('✅ 麦克风已就绪 | 敏感度范围: 阈值' + getThreshold().toFixed(3) + ' ~ ' + (0.5).toFixed(
+                        2));
+                } catch (err) {
+                    console.error('麦克风初始化失败:', err);
+                    micErrorMsg.classList.add('show');
+                    setTimeout(() => micErrorMsg.classList.remove('show'), 4000);
+                    startOverlay.classList.remove('hidden');
+                    audioInitialized = false;
+                }
+            }
+
+            function getVolume() {
+                if (!analyser) return 0;
+                const dataArray = new Float32Array(analyser.fftSize);
+                analyser.getFloatTimeDomainData(dataArray);
+                let sumSquares = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    sumSquares += dataArray[i] * dataArray[i];
+                }
+                const rms = Math.sqrt(sumSquares / dataArray.length);
+                // 【修复1】增大放大系数，让微弱声音也能被检测到
+                return Math.min(1, rms * 5.5);
+            }
+
+            // ============ Emoji管理 ============
+            const EMOJI_POOL = [
+                '📚', '📖', '✏️', '📝', '📏', '📐', '🖊️', '📎', '📌', '🧮',
+                '🎓', '📒', '📕', '📗', '📘', '📙', '💡', '🎯', '🌟', '✨',
+                '🤓', '😊', '🙋', '🤔', '😴', '😲', '😮', '😵', '🤯', '😱',
+                '💥', '🔥', '🎉', '🎊', '🤪', '😜', '🤡', '👾', '🎪', '🎨',
+                '🌈', '💫', '⭐', '🦄', '🎭', '🧩', '🫧', '🌪️', '🎲', '🃏',
+                '📢', '🔔', '🚨', '⚠️', '⁉️', '❓', '❗', '💢', '🗯️', '💬',
+            ];
+
+            let emojiData = [];
+
+            function getRandomEmoji() {
+                return EMOJI_POOL[Math.floor(Math.random() * EMOJI_POOL.length)];
+            }
+
+            function calculateGridPositions(count) {
+                const viewW = 900;
+                const viewH = 600;
+                const startX = 50;
+                const startY = 50;
+                const aspect = viewW / viewH;
+                const cols = Math.max(3, Math.ceil(Math.sqrt(count * aspect)));
+                const rows = Math.max(3, Math.ceil(count / cols));
+                const spacingX = viewW / (cols + 1);
+                const spacingY = viewH / (rows + 1);
+                const positions = [];
+                let idx = 0;
+                for (let r = 0; r < rows && idx < count; r++) {
+                    for (let c = 0; c < cols && idx < count; c++) {
+                        const x = startX + spacingX * (c + 1);
+                        const y = startY + spacingY * (r + 1);
+                        positions.push({ x, y });
+                        idx++;
+                    }
+                }
+                return positions;
+            }
+
+            function createEmojiElements() {
+                while (emojiGroup.firstChild) {
+                    emojiGroup.removeChild(emojiGroup.firstChild);
+                }
+                emojiData = [];
+                const positions = calculateGridPositions(settings.emojiCount);
+                const usedEmojis = [];
+                for (let i = 0; i < settings.emojiCount; i++) {
+                    usedEmojis.push(getRandomEmoji());
+                }
+                positions.forEach((pos, i) => {
+                    const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    textEl.setAttribute('x', pos.x);
+                    textEl.setAttribute('y', pos.y);
+                    textEl.setAttribute('text-anchor', 'middle');
+                    textEl.setAttribute('dominant-baseline', 'central');
+                    textEl.setAttribute('font-size', '32');
+                    textEl.setAttribute('style', 'transition: none;');
+                    textEl.textContent = usedEmojis[i];
+                    emojiGroup.appendChild(textEl);
+                    emojiData.push({
+                        homeX: pos.x,
+                        homeY: pos.y,
+                        currentX: pos.x,
+                        currentY: pos.y,
+                        rotation: 0,
+                        scale: 1,
+                        vx: 0,
+                        vy: 0,
+                        emoji: usedEmojis[i],
+                        element: textEl,
+                        seedX: (Math.random() - 0.5) * 2,
+                        seedY: (Math.random() - 0.5) * 2,
+                    });
+                });
+            }
+
+            function updateEmojiElementsCount() {
+                const currentCount = emojiData.length;
+                if (currentCount === settings.emojiCount) return;
+                createEmojiElements();
+            }
+
+            // ============ 弹幕系统 ============
+            const DANMAKU_TEXTS = [
+                '同学们请安静！📢',
+                '请保持安静！🤫',
+                '嘘——安静！🙊',
+                '不要说话啦！😤',
+                '请安静下来！🧘',
+                '课堂需要安静！📚',
+                '安静！安静！⚠️',
+                '大家都在学习呢！📝',
+                '请尊重他人！🙏',
+                '声音小一点！🔇',
+                '现在是上课时间！⏰',
+                '请勿喧哗！🚫',
+                '保持课堂纪律！📏',
+                '嘘~听老师讲课！👨‍🏫',
+                '安——静——！💢',
+                '太吵啦！请安静！😫',
+                '安静是美德~ 🌸',
+                '好好学习天天向上！📖',
+            ];
+
+            function spawnDanmaku() {
+                if (!settings.danmakuEnabled) return;
+                const now = performance.now() / 1000;
+                const cooldown = Math.max(0.4, DANMAKU_COOLDOWN - (settings.sensitivity / 100) * 1.2);
+                if (now - lastDanmakuTime < cooldown) return;
+                lastDanmakuTime = now;
+                const count = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < count; i++) {
+                    setTimeout(() => {
+                        createSingleDanmaku();
+                    }, i * 200 + Math.random() * 150);
+                }
+            }
+
+            function createSingleDanmaku() {
+                const danmaku = document.createElement('div');
+                danmaku.className = 'danmaku-item';
+                danmaku.textContent = DANMAKU_TEXTS[Math.floor(Math.random() * DANMAKU_TEXTS.length)];
+                const wrapperHeight = canvasWrapper.clientHeight;
+                const topPos = 15 + Math.random() * (wrapperHeight - 60);
+                danmaku.style.top = topPos + 'px';
+                danmaku.style.right = '-20px';
+                danmaku.style.transform = 'translateX(0)';
+                const duration = 3.0 + Math.random() * 2.0;
+                danmaku.style.animationDuration = duration + 's';
+                danmakuLayer.appendChild(danmaku);
+                danmaku.addEventListener('animationend', () => {
+                    if (danmaku.parentNode) danmaku.parentNode.removeChild(danmaku);
+                });
+                setTimeout(() => {
+                    if (danmaku.parentNode) danmaku.parentNode.removeChild(danmaku);
+                }, (duration + 0.5) * 1000);
+            }
+
+            // ============ 警报音 ============
+            let alarmOscillators = [];
+            let alarmGain = null;
+
+            function playAlarmSound() {
+                if (!settings.alarmEnabled) return;
+                if (!audioContext) return;
+                try {
+                    if (audioContext.state === 'suspended') audioContext.resume();
+                    const gainNode = audioContext.createGain();
+                    gainNode.connect(audioContext.destination);
+                    gainNode.gain.setValueAtTime(0.06, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 2.2);
+                    alarmGain = gainNode;
+                    const osc1 = audioContext.createOscillator();
+                    const osc2 = audioContext.createOscillator();
+                    osc1.type = 'sawtooth';
+                    osc2.type = 'square';
+                    osc1.connect(gainNode);
+                    osc2.connect(gainNode);
+                    const now = audioContext.currentTime;
+                    const pattern = [
+                        { f1: 900, f2: 600, d: 0.25 }, { f1: 1100, f2: 750, d: 0.25 },
+                        { f1: 900, f2: 600, d: 0.25 }, { f1: 1100, f2: 750, d: 0.25 },
+                        { f1: 1300, f2: 900, d: 0.3 }, { f1: 800, f2: 500, d: 0.3 },
+                        { f1: 1200, f2: 800, d: 0.2 }, { f1: 1000, f2: 650, d: 0.2 },
+                    ];
+                    let t = now;
+                    for (const p of pattern) {
+                        osc1.frequency.setValueAtTime(p.f1, t);
+                        osc2.frequency.setValueAtTime(p.f2, t);
+                        t += p.d;
+                    }
+                    osc1.frequency.setValueAtTime(200, t);
+                    osc2.frequency.setValueAtTime(150, t);
+                    osc1.start(now);
+                    osc2.start(now);
+                    osc1.stop(now + 2.3);
+                    osc2.stop(now + 2.3);
+                    alarmOscillators.push(osc1, osc2);
+                    setTimeout(() => {
+                        alarmOscillators = alarmOscillators.filter(o => o !== osc1 && o !== osc2);
+                        if (alarmGain === gainNode) alarmGain = null;
+                    }, 2500);
+                } catch (e) {
+                    console.warn('警报音播放失败:', e);
+                }
+            }
+
+            // ============ 爆炸效果 ============
+            function triggerExplosion() {
+                if (!settings.explosionEnabled) {
+                    loudAccumulator = 0;
+                    updateProgressUI(0);
+                    return;
+                }
+                if (isExploding || isRecovering) return;
+                isExploding = true;
+                hasExploded = true;
+                explosionStartTime = performance.now() / 1000;
+                loudAccumulator = 0;
+                updateProgressUI(0);
+                playAlarmSound();
+                const cx = 500;
+                const cy = 350;
+                for (const ed of emojiData) {
+                    const dx = ed.currentX - cx;
+                    const dy = ed.currentY - cy;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const speed = 350 + Math.random() * 900;
+                    const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.2;
+                    ed.vx = Math.cos(angle) * speed;
+                    ed.vy = Math.sin(angle) * speed - Math.random() * 300;
+                    ed.rotation = (Math.random() - 0.5) * 20;
+                    ed.scale = 0.6 + Math.random() * 1.8;
+                }
+                appContainer.classList.add('exploding');
+                canvasWrapper.classList.add('danger-deep');
+                document.body.classList.add('danger-bg');
+                mainSvg.classList.add('glitched');
+                redOverlay.setAttribute('opacity', '0.7');
+                setTimeout(() => redOverlay.setAttribute('opacity', '0.35'), 300);
+                setTimeout(() => redOverlay.setAttribute('opacity', '0.15'), 600);
+            }
+
+            function updateExplosion(dt) {
+                const elapsed = (performance.now() / 1000) - explosionStartTime;
+                if (elapsed >= EXPLOSION_DURATION) {
+                    isExploding = false;
+                    isRecovering = true;
+                    recoveryStartTime = performance.now() / 1000;
+                    appContainer.classList.remove('exploding');
+                    mainSvg.classList.remove('glitched');
+                    document.body.classList.remove('danger-bg');
+                    canvasWrapper.classList.remove('danger-deep');
+                    redOverlay.setAttribute('opacity', '0');
+                    redGlowOverlay.setAttribute('opacity', '0');
+                    for (const ed of emojiData) { ed.vx = 0;
+                        ed.vy = 0; }
+                    return;
+                }
+                const gravity = 500;
+                for (const ed of emojiData) {
+                    ed.vx *= 0.985;
+                    ed.vy += gravity * dt;
+                    ed.vy *= 0.995;
+                    ed.currentX += ed.vx * dt;
+                    ed.currentY += ed.vy * dt;
+                    ed.rotation += ed.vx * 0.02 * dt;
+                    if (ed.currentX < -60) { ed.currentX = -60;
+                        ed.vx *= -0.5; }
+                    if (ed.currentX > 1060) { ed.currentX = 1060;
+                        ed.vx *= -0.5; }
+                    if (ed.currentY < -60) { ed.currentY = -60;
+                        ed.vy *= -0.5; }
+                    if (ed.currentY > 760) { ed.currentY = 760;
+                        ed.vy *= -0.5; }
+                }
+                const pulse = 0.5 + 0.5 * Math.sin(elapsed * 20);
+                redOverlay.setAttribute('opacity', (0.15 + pulse * 0.4).toString());
+                redGlowOverlay.setAttribute('opacity', (pulse * 0.6).toString());
+            }
+
+            function updateRecovery(dt) {
+                const elapsed = (performance.now() / 1000) - recoveryStartTime;
+                const totalRecovery = RECOVERY_DURATION;
+                if (elapsed >= totalRecovery) {
+                    isRecovering = false;
+                    hasExploded = false;
+                    for (const ed of emojiData) {
+                        ed.currentX = ed.homeX;
+                        ed.currentY = ed.homeY;
+                        ed.rotation = 0;
+                        ed.scale = 1;
+                        ed.vx = 0;
+                        ed.vy = 0;
+                    }
+                    redOverlay.setAttribute('opacity', '0');
+                    redGlowOverlay.setAttribute('opacity', '0');
+                    appContainer.classList.remove('shaking');
+                    canvasWrapper.classList.remove('danger-deep', 'danger-flash');
+                    document.body.classList.remove('danger-bg');
+                    updateAllEmojiTransforms();
+                    return;
+                }
+                const t = elapsed / totalRecovery;
+                const eased = easeOutBack(t);
+                for (const ed of emojiData) {
+                    ed.currentX = ed.currentX + (ed.homeX - ed.currentX) * eased * 3 * dt;
+                    ed.currentY = ed.currentY + (ed.homeY - ed.currentY) * eased * 3 * dt;
+                    ed.rotation = ed.rotation * (1 - 3 * dt);
+                    ed.scale = ed.scale + (1 - ed.scale) * 3 * dt;
+                    if (t > 0.85) {
+                        ed.currentX = ed.currentX + (ed.homeX - ed.currentX) * 0.3;
+                        ed.currentY = ed.currentY + (ed.homeY - ed.currentY) * 0.3;
+                        ed.rotation *= 0.7;
+                        ed.scale += (1 - ed.scale) * 0.3;
+                    }
+                }
+                redOverlay.setAttribute('opacity', Math.max(0, 0.3 * (1 - t)).toString());
+                redGlowOverlay.setAttribute('opacity', Math.max(0, 0.4 * (1 - t)).toString());
+            }
+
+            function easeOutBack(t) {
+                const c1 = 1.70158;
+                const c3 = c1 + 1;
+                return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+            }
+
+            // ============ UI更新 ============
+            function updateProgressUI(progress) {
+                const pct = Math.min(100, Math.round(progress * 100));
+                progressBarFill.style.width = pct + '%';
+                svgProgressFill.setAttribute('width', (700 * progress).toString());
+                if (progress > 0.01) {
+                    progressBarContainer.classList.add('visible');
+                    svgProgressBg.setAttribute('opacity', '1');
+                    svgProgressFill.setAttribute('opacity', '1');
+                } else {
+                    progressBarContainer.classList.remove('visible');
+                    svgProgressBg.setAttribute('opacity', '0');
+                    svgProgressFill.setAttribute('opacity', '0');
+                }
+                progressBarFill.classList.remove('warning', 'danger');
+                if (progress > 0.75) {
+                    progressBarFill.classList.add('danger');
+                    svgProgressFill.setAttribute('fill', '#dc2626');
+                } else if (progress > 0.4) {
+                    progressBarFill.classList.add('warning');
+                    svgProgressFill.setAttribute('fill', '#f59e0b');
+                } else {
+                    svgProgressFill.setAttribute('fill', '#fbbf24');
+                }
+            }
+
+            function updateVolumeIndicator(vol) {
+                const activeDots = Math.round(vol * 5);
+                for (let i = 0; i < 5; i++) {
+                    vDots[i].classList.remove('active', 'warn', 'danger');
+                    if (i < activeDots) {
+                        if (i >= 3) vDots[i].classList.add('danger');
+                        else if (i >= 2) vDots[i].classList.add('warn');
+                        else vDots[i].classList.add('active');
+                    }
+                }
+            }
+
+            function updateAllEmojiTransforms() {
+                for (const ed of emojiData) {
+                    const tx = ed.currentX;
+                    const ty = ed.currentY;
+                    const rot = ed.rotation;
+                    const sc = ed.scale;
+                    ed.element.setAttribute('x', ed.homeX);
+                    ed.element.setAttribute('y', ed.homeY);
+                    ed.element.setAttribute('transform',
+                        `translate(${tx - ed.homeX},${ty - ed.homeY}) rotate(${rot},${ed.homeX},${ed.homeY}) scale(${sc})`
+                        );
+                }
+            }
+
+            // ============ 主循环 ============
+            let lastTime = performance.now() / 1000;
+
+            function mainLoop(timestamp) {
+                const now = timestamp / 1000;
+                let dt = now - lastTime;
+                lastTime = now;
+                if (dt > 0.2) dt = 0.2;
+                if (dt <= 0) dt = 0.016;
+
+                if (audioInitialized && !isExploding && !isRecovering) {
+                    rawVolume = getVolume();
+                    // 【修复1】提高平滑响应速度
+                    const smoothing = 0.45;
+                    currentVolume = currentVolume + (rawVolume - currentVolume) * Math.min(1, smoothing * 60 * dt);
+                    volumeHistory.push(currentVolume);
+                    if (volumeHistory.length > VOLUME_HISTORY_MAX) volumeHistory.shift();
+
+                    const threshold = getThreshold();
+                    const isLoud = currentVolume > threshold;
+                    const deltaThreshold = getDeltaThreshold();
+
+                    // 检测突然吵闹
+                    if (volumeHistory.length > 30) {
+                        const recentAvg = volumeHistory.slice(-8).reduce((a, b) => a + b, 0) / 8;
+                        const olderAvg = volumeHistory.slice(-40, -10).reduce((a, b) => a + b, 0) / 30;
+                        if (recentAvg - olderAvg > deltaThreshold && recentAvg > threshold * 0.6) {
+                            spawnDanmaku();
+                        }
+                    }
+
+                    // 累计吵闹时间
+                    if (isLoud && currentVolume > threshold * 0.75) {
+                        loudAccumulator += dt;
+                    } else if (!isLoud && currentVolume < threshold * 0.35) {
+                        loudAccumulator -= dt * 1.8;
+                    }
+                    loudAccumulator = Math.max(0, Math.min(EXPLOSION_THRESHOLD + 1, loudAccumulator));
+
+                    if (loudAccumulator >= EXPLOSION_THRESHOLD && !hasExploded && !isExploding) {
+                        triggerExplosion();
+                    }
+
+                    const progress = loudAccumulator / EXPLOSION_THRESHOLD;
+                    updateProgressUI(progress);
+
+                    const redOpacity = progress * 0.55;
+                    redOverlay.setAttribute('opacity', redOpacity.toString());
+                    redGlowOverlay.setAttribute('opacity', (redOpacity * 0.7).toString());
+
+                    if (progress > 0.5) appContainer.classList.add('shaking');
+                    else if (progress < 0.2) appContainer.classList.remove('shaking');
+                    if (progress > 0.7) canvasWrapper.classList.add('danger-deep');
+                    else if (progress < 0.3) canvasWrapper.classList.remove('danger-deep');
+                    if (progress > 0.85) document.body.classList.add('danger-bg');
+                    else if (progress < 0.5) document.body.classList.remove('danger-bg');
+                    if (progress > 0.6) {
+                        mainSvg.classList.add('glitched');
+                        const scale = Math.floor(progress * 12);
+                        const filterEl = mainSvg.querySelector('#glitchFilter feDisplacementMap');
+                        if (filterEl) filterEl.setAttribute('scale', scale.toString());
+                    } else {
+                        mainSvg.classList.remove('glitched');
+                        const filterEl = mainSvg.querySelector('#glitchFilter feDisplacementMap');
+                        if (filterEl) filterEl.setAttribute('scale', '0');
+                    }
+                    updateEmojiChaos(currentVolume, progress, dt);
+                } else if (isExploding) {
+                    updateExplosion(dt);
+                } else if (isRecovering) {
+                    updateRecovery(dt);
+                }
+
+                updateVolumeIndicator(currentVolume);
+                updateAllEmojiTransforms();
+
+                const prog = loudAccumulator / EXPLOSION_THRESHOLD;
+                if (prog > 0.01 && !isExploding && !isRecovering) {
+                    svgProgressBg.setAttribute('opacity', '1');
+                    svgProgressFill.setAttribute('opacity', '1');
+                    svgProgressFill.setAttribute('width', (700 * Math.min(1, prog)).toString());
+                } else if (isExploding || isRecovering) {
+                    svgProgressBg.setAttribute('opacity', '0');
+                    svgProgressFill.setAttribute('opacity', '0');
+                }
+
+                requestAnimationFrame(mainLoop);
+            }
+
+            function updateEmojiChaos(volume, progress, dt) {
+                const chaosLevel = Math.min(1, volume * 1.15 + progress * 0.55);
+                for (const ed of emojiData) {
+                    if (chaosLevel < 0.015 && progress < 0.03) {
+                        ed.currentX += (ed.homeX - ed.currentX) * 5 * dt;
+                        ed.currentY += (ed.homeY - ed.currentY) * 5 * dt;
+                        ed.rotation += (0 - ed.rotation) * 5 * dt;
+                        ed.scale += (1 - ed.scale) * 5 * dt;
+                    } else {
+                        const maxOffset = chaosLevel * 130;
+                        const targetX = ed.homeX + ed.seedX * maxOffset * (0.6 + 0.4 * Math.sin(volume * 15 + ed.seedX * 7));
+                        const targetY = ed.homeY + ed.seedY * maxOffset * (0.6 + 0.4 * Math.cos(volume * 13 + ed.seedY * 8));
+                        const targetRot = chaosLevel * ed.seedX * 50;
+                        const targetScale = 1 + chaosLevel * ed.seedY * 0.55;
+                        const speed = 3.5 + chaosLevel * 9;
+                        ed.currentX += (targetX - ed.currentX) * speed * dt;
+                        ed.currentY += (targetY - ed.currentY) * speed * dt;
+                        ed.rotation += (targetRot - ed.rotation) * speed * dt;
+                        ed.scale += (targetScale - ed.scale) * speed * dt;
+                    }
+                }
+                if (chaosLevel > 0.35) {
+                    const shakeX = (Math.random() - 0.5) * chaosLevel * 14;
+                    const shakeY = (Math.random() - 0.5) * chaosLevel * 14;
+                    mainSvg.style.transform = `translate(${shakeX}px,${shakeY}px)`;
+                } else {
+                    mainSvg.style.transform = 'translate(0,0)';
+                }
+            }
+
+            // ============ 事件处理 ============
+            startBtn.addEventListener('click', () => initAudio());
+
+            setTimeout(() => {
+                if (!audioInitialized) {
+                    navigator.mediaDevices.enumerateDevices().then(devices => {
+                        const hasAudio = devices.some(d => d.kind === 'audioinput' && d.label);
+                        if (hasAudio) initAudio().catch(() => {});
+                    }).catch(() => {});
+                }
+            }, 800);
+
+            settingsToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                settingsPanel.classList.toggle('open');
+            });
+            closeSettingsBtn.addEventListener('click', () => settingsPanel.classList.remove('open'));
+            document.addEventListener('click', (e) => {
+                if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) {
+                    settingsPanel.classList.remove('open');
+                }
+            });
+            settingsPanel.addEventListener('click', (e) => e.stopPropagation());
+
+            toggleAlarm.addEventListener('change', () => {
+                settings.alarmEnabled = toggleAlarm.checked;
+                saveSettings();
+            });
+            toggleExplosion.addEventListener('change', () => {
+                settings.explosionEnabled = toggleExplosion.checked;
+                saveSettings();
+            });
+            toggleDanmaku.addEventListener('change', () => {
+                settings.danmakuEnabled = toggleDanmaku.checked;
+                saveSettings();
+            });
+            rangeEmojiCount.addEventListener('input', () => {
+                settings.emojiCount = parseInt(rangeEmojiCount.value);
+                valEmojiCount.textContent = settings.emojiCount;
+                saveSettings();
+                if (!isExploding && !isRecovering) updateEmojiElementsCount();
+            });
+            rangeEmojiCount.addEventListener('change', () => {
+                if (!isExploding && !isRecovering) updateEmojiElementsCount();
+            });
+            rangeSensitivity.addEventListener('input', () => {
+                settings.sensitivity = parseInt(rangeSensitivity.value);
+                valSensitivity.textContent = settings.sensitivity;
+                saveSettings();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') settingsPanel.classList.remove('open');
+                if (e.key === ' ' && e.ctrlKey && audioInitialized) {
+                    e.preventDefault();
+                    spawnDanmaku();
+                    loudAccumulator += 2;
+                    if (loudAccumulator >= EXPLOSION_THRESHOLD && !hasExploded && !isExploding) triggerExplosion();
+                }
+                if (e.key === 't' && e.ctrlKey && audioInitialized && !isExploding && !isRecovering) {
+                    e.preventDefault();
+                    loudAccumulator = EXPLOSION_THRESHOLD;
+                    triggerExplosion();
+                }
+            });
+
+            // ============ 初始化 ============
+            function init() {
+                applySettingsToUI();
+                createEmojiElements();
+                updateAllEmojiTransforms();
+                updateProgressUI(0);
+                redOverlay.setAttribute('opacity', '0');
+                redGlowOverlay.setAttribute('opacity', '0');
+                svgProgressBg.setAttribute('opacity', '0');
+                svgProgressFill.setAttribute('opacity', '0');
+                progressBarContainer.classList.remove('visible');
+                document.body.classList.remove('danger-bg');
+                appContainer.classList.remove('shaking', 'exploding');
+                canvasWrapper.classList.remove('danger-deep', 'danger-flash');
+                mainSvg.classList.remove('glitched');
+                mainSvg.style.transform = 'translate(0,0)';
+                const filterEl = mainSvg.querySelector('#glitchFilter feDisplacementMap');
+                if (filterEl) filterEl.setAttribute('scale', '0');
+                requestAnimationFrame(mainLoop);
+                console.log('🚀 教室安静器已就绪');
+                console.log('   💡 提示：Ctrl+空格 模拟吵闹 | Ctrl+T 测试爆炸');
+                console.log('   🎯 敏感度' + settings.sensitivity + ' → 吵闹阈值: ' + getThreshold().toFixed(3) +
+                    ' | 突变阈值: ' + getDeltaThreshold().toFixed(3));
+            }
+
+            init();
+
+            window.addEventListener('resize', () => {});
+            window.addEventListener('beforeunload', () => {
+                if (alarmGain && audioContext) { try { alarmGain.disconnect(); } catch (e) {} }
+                alarmOscillators.forEach(o => { try { o.stop(); } catch (e) {} });
+                if (audioContext && audioContext.state !== 'closed') { try { audioContext.close(); } catch (
+                e) {} }
+            });
+
+            console.log('📚 教室安静器加载完成！');
+        })();
+    </script>
+</body>
+</html>
