@@ -66,6 +66,23 @@
             border-color: #1a73e8;
         }
 
+        .captcha-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .captcha-group input {
+            flex: 1;
+        }
+
+        .captcha-img {
+            width: 120px;
+            height: 44px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+
         .btn-submit {
             width: 100%;
             padding: 14px;
@@ -92,19 +109,6 @@
             display: block;
         }
 
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #999;
-            font-size: 12px;
-            border-top: 1px solid #ddd;
-        }
-
-        .footer-warning {
-            color: #d93025;
-            font-weight: bold;
-        }
-
         @media (max-width: 600px) {
             header h1 {
                 font-size: 20px;
@@ -112,6 +116,11 @@
 
             .form-section {
                 padding: 20px;
+            }
+
+            .captcha-img {
+                width: 100px;
+                height: 40px;
             }
         }
     </style>
@@ -131,11 +140,16 @@
                 <label for="examNo">准考证号</label>
                 <input type="text" id="examNo" placeholder="请输入14位准考证号">
             </div>
+            <div class="form-group">
+                <label for="captcha">验证码</label>
+                <div class="captcha-group">
+                    <input type="text" id="captcha" placeholder="请输入验证码">
+                    <img id="captchaImg" class="captcha-img" src="" alt="验证码" onclick="refreshCaptcha()">
+                </div>
+            </div>
             <div class="error-message" id="errorMessage"></div>
             <button class="btn-submit" onclick="queryScore()">确定查询</button>
         </div>
-
-        
     </div>
 
     <script>
@@ -193,6 +207,41 @@
             { id: 51, name: "邹泺韵" }
         ];
 
+        let captchaId = '';
+
+        async function fetchCaptcha() {
+            try {
+                const response = await fetch('https://v2.xxapi.cn/api/captcha?type=digit&width=120&height=44');
+                const data = await response.json();
+                if (data.code === 200 && data.data) {
+                    captchaId = data.data.id;
+                    document.getElementById('captchaImg').src = data.data.url;
+                } else {
+                    refreshCaptcha();
+                }
+            } catch (error) {
+                console.error('获取验证码失败:', error);
+            }
+        }
+
+        function refreshCaptcha() {
+            fetchCaptcha();
+        }
+
+        async function verifyCaptcha(captcha) {
+            if (!captchaId || !captcha) {
+                return false;
+            }
+            try {
+                const response = await fetch(`https://v2.xxapi.cn/api/captcha?id=${captchaId}&key=${captcha}`);
+                const data = await response.json();
+                return data.code === 200;
+            } catch (error) {
+                console.error('验证验证码失败:', error);
+                return false;
+            }
+        }
+
         function validateInput(name, examNo) {
             if (!name || !examNo) {
                 return "请填写姓名和准考证号";
@@ -232,13 +281,15 @@
             return null;
         }
 
-        function queryScore() {
+        async function queryScore() {
             const nameInput = document.getElementById("name");
             const examNoInput = document.getElementById("examNo");
+            const captchaInput = document.getElementById("captcha");
             const errorMessage = document.getElementById("errorMessage");
 
             const name = nameInput.value.trim();
             const examNo = examNoInput.value.trim();
+            const captcha = captchaInput.value.trim();
 
             errorMessage.classList.remove("show");
 
@@ -249,10 +300,26 @@
                 return;
             }
 
+            if (!captcha) {
+                errorMessage.textContent = "请输入验证码";
+                errorMessage.classList.add("show");
+                return;
+            }
+
+            const isCaptchaValid = await verifyCaptcha(captcha);
+            if (!isCaptchaValid) {
+                errorMessage.textContent = "验证码错误";
+                errorMessage.classList.add("show");
+                refreshCaptcha();
+                return;
+            }
+
             window.location.href = `score_result.html?name=${encodeURIComponent(name)}&examNo=${encodeURIComponent(examNo)}`;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            fetchCaptcha();
+
             document.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     queryScore();
