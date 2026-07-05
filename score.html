@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年广东省初中学业水平考试查分系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "SimHei", sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #1a73e8;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .form-section {
+            background-color: #fff;
+            padding: 30px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: #1a73e8;
+            color: #fff;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background-color: #1557b0;
+        }
+
+        .error-message {
+            color: #d93025;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #ddd;
+        }
+
+        .footer-warning {
+            color: #d93025;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 20px;
+            }
+
+            .form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>2026年广东省初中学业水平考试查分系统</h1>
+        </header>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="name">姓名</label>
+                <input type="text" id="name" placeholder="请输入姓名">
+            </div>
+            <div class="form-group">
+                <label for="examNo">准考证号</label>
+                <input type="text" id="examNo" placeholder="请输入14位准考证号">
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+            <button class="btn-submit" onclick="queryScore()">确定查询</button>
+        </div>
+
+        
+    </div>
+
+    <script>
+        const students = [
+            { id: 1, name: "桂欣然" },
+            { id: 2, name: "何贝琦" },
+            { id: 3, name: "何政燊" },
+            { id: 4, name: "胡俊锋" },
+            { id: 5, name: "黄宝淇" },
+            { id: 6, name: "黄博文" },
+            { id: 7, name: "黄芸熙" },
+            { id: 8, name: "景恩熙" },
+            { id: 9, name: "蓝楚盈" },
+            { id: 10, name: "黎天乐" },
+            { id: 11, name: "李沛凌" },
+            { id: 12, name: "李桐" },
+            { id: 13, name: "李奕衡" },
+            { id: 14, name: "连可欣" },
+            { id: 15, name: "梁海恩" },
+            { id: 16, name: "梁君谦" },
+            { id: 17, name: "梁逸扬" },
+            { id: 18, name: "梁宇澄" },
+            { id: 19, name: "梁雨菲" },
+            { id: 20, name: "梁雨霏" },
+            { id: 21, name: "林勋贵" },
+            { id: 22, name: "林弈然" },
+            { id: 23, name: "林子淳" },
+            { id: 24, name: "刘浩天" },
+            { id: 25, name: "刘家乐" },
+            { id: 26, name: "刘嘉滢" },
+            { id: 27, name: "龙钰宁" },
+            { id: 28, name: "卢关键" },
+            { id: 29, name: "吕明轩" },
+            { id: 30, name: "潘高翔" },
+            { id: 31, name: "彭嘉意" },
+            { id: 32, name: "彭敬宇" },
+            { id: 33, name: "彭炜浚" },
+            { id: 34, name: "区皓燊" },
+            { id: 35, name: "尚熙哲" },
+            { id: 36, name: "沈佳雯" },
+            { id: 37, name: "舒乐" },
+            { id: 38, name: "孙思彤" },
+            { id: 39, name: "谈嘉琪" },
+            { id: 40, name: "谈乐瑶" },
+            { id: 41, name: "唐梓轩" },
+            { id: 42, name: "夏尧" },
+            { id: 43, name: "贤明理" },
+            { id: 44, name: "张浩文" },
+            { id: 45, name: "张琳欣" },
+            { id: 46, name: "张敏怡" },
+            { id: 47, name: "章晟超" },
+            { id: 48, name: "赵恩淇" },
+            { id: 49, name: "周沛衡" },
+            { id: 50, name: "周梓辉" },
+            { id: 51, name: "邹泺韵" }
+        ];
+
+        function validateInput(name, examNo) {
+            if (!name || !examNo) {
+                return "请填写姓名和准考证号";
+            }
+
+            if (!/^\d{14}$/.test(examNo)) {
+                return "准考证号格式错误";
+            }
+
+            if (!examNo.startsWith("26")) {
+                return "准考证号格式错误";
+            }
+
+            const prefix = "260606060607";
+            const startsWithPrefix = examNo.startsWith(prefix);
+            const studentId = startsWithPrefix ? parseInt(examNo.substring(prefix.length)) : null;
+            const student = startsWithPrefix ? students.find(s => s.id === studentId) : null;
+
+            const nameExists = students.some(s => s.name === name);
+
+            if (!startsWithPrefix && !nameExists) {
+                return null;
+            }
+
+            if (student && !nameExists) {
+                return "姓名与准考证号不匹配";
+            }
+
+            if (nameExists && !student) {
+                return "姓名与准考证号不匹配";
+            }
+
+            if (student && nameExists && name !== student.name) {
+                return "姓名与准考证号不匹配";
+            }
+
+            return null;
+        }
+
+        function queryScore() {
+            const nameInput = document.getElementById("name");
+            const examNoInput = document.getElementById("examNo");
+            const errorMessage = document.getElementById("errorMessage");
+
+            const name = nameInput.value.trim();
+            const examNo = examNoInput.value.trim();
+
+            errorMessage.classList.remove("show");
+
+            const validationError = validateInput(name, examNo);
+            if (validationError) {
+                errorMessage.textContent = validationError;
+                errorMessage.classList.add("show");
+                return;
+            }
+
+            window.location.href = `score_result.html?name=${encodeURIComponent(name)}&examNo=${encodeURIComponent(examNo)}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    queryScore();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

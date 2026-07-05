@@ -238,6 +238,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化中考倒计时
     initExamCountdown();
+    
+    // 显示毕业弹窗
+    setTimeout(showGraduationModal, 500);
 });
 
 // 99页面跳转功能 - 连续点击10次触发
@@ -263,7 +266,7 @@ function goTo99Page() {
     }
 }
 
-// 中考倒计时功能
+// 中考结束倒计时功能（显示已结束多久）
 let countdownInterval = null;
 let showHoursMode = false; // false: 显示天时分秒, true: 显示总小时数（1位小数）
 
@@ -288,34 +291,39 @@ function updateCountdown() {
     const countdownTimeElement = document.getElementById('countdownTime');
     if (!countdownTimeElement) return;
     
-    // 中考时间：6月30日 15:00:00
-    const examDate = new Date();
-    examDate.setMonth(5); // 6月（0-11）
-    examDate.setDate(30);
-    examDate.setHours(15, 0, 0, 0);
+    // 中考结束时间：7月2日 16:30:00
+    const examEndDate = new Date();
+    examEndDate.setMonth(6); // 7月（0-11）
+    examEndDate.setDate(2);
+    examEndDate.setHours(16, 30, 0, 0);
     
     const now = new Date();
-    const timeLeft = examDate - now;
-    
-    if (timeLeft <= 0) {
-        countdownTimeElement.textContent = '中考已开始！';
-        if (countdownInterval) {
-            clearInterval(countdownInterval);
-        }
-        return;
-    }
+    const timePassed = now - examEndDate;
     
     if (showHoursMode) {
-        // 显示总小时数（1位小数）
-        const totalHours = (timeLeft / (1000 * 60 * 60)).toFixed(1);
+        const totalHours = (timePassed / (1000 * 60 * 60)).toFixed(1);
         countdownTimeElement.textContent = totalHours + '小时';
     } else {
-        // 显示天时分秒
-        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        const days = Math.floor(timePassed / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timePassed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timePassed % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timePassed % (1000 * 60)) / 1000);
         
         countdownTimeElement.textContent = `${days}天${hours}时${minutes}分${seconds}秒`;
+    }
+}
+
+// 毕业弹窗功能
+function showGraduationModal() {
+    const modal = document.getElementById('graduationModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeGraduationModal() {
+    const modal = document.getElementById('graduationModal');
+    if (modal) {
+        modal.style.display = 'none';
     }
 }

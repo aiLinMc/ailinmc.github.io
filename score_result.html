@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年广东省初中学业水平考试查分系统 - 查询结果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "SimHei", sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #1a73e8;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .result-section {
+            background-color: #fff;
+            padding: 30px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .result-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .result-header h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .result-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .score-table th,
+        .score-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .score-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .score-table .total-row {
+            background-color: #e8f0fe;
+            font-weight: bold;
+        }
+
+        .score-table .total-row td {
+            border-top: 2px solid #1a73e8;
+        }
+
+        .btn-back {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .btn-back:hover {
+            background-color: #e0e0e0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #ddd;
+        }
+
+        .footer-warning {
+            color: #d93025;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 20px;
+            }
+
+            .result-section {
+                padding: 20px;
+            }
+
+            .score-table th,
+            .score-table td {
+                padding: 10px 8px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>2026年广东省初中学业水平考试查分系统</h1>
+        </header>
+
+        <div class="result-section" id="resultSection">
+            <div class="result-header">
+                <h2>成绩查询结果</h2>
+                <div class="result-info" id="resultInfo"></div>
+            </div>
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th>科目</th>
+                        <th>得分</th>
+                    </tr>
+                </thead>
+                <tbody id="scoreBody">
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <div class="footer-warning">⚠️ 仅供娱乐，纯随机生成，请勿当真 ⚠️</div>
+            <div style="margin-top: 10px;">祝各位同学金榜题名，前程似锦！</div>
+            <div>系统版本：2026.07</div>
+        </footer>
+    </div>
+
+    <script>
+        const allSubjects = [
+            "猎奇", "睡觉", "玩耍", "吃饭", "装嘉豪", 
+            "吃零食", "聊天", "伤感", "高冷", "聊八卦", 
+            "嗑cp", "摸鱼", "玩手机", "摆烂", "低调", 
+            "内卷", "走神", "养生", "发呆", "熬夜", 
+            "赖床", "努力", "刷视频", "跑操", "搞研究", 
+            "做梦", "幻想", "发癫", "何意味", "追剧", 
+            "看言情小说", "emo", "搞抽象", "如厕"
+        ];
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function generateScores() {
+            const shuffledSubjects = shuffleArray(allSubjects);
+            
+            const subjects120 = shuffledSubjects.slice(0, 3);
+            const subjects60 = shuffledSubjects.slice(3, 6);
+            const subjects100 = shuffledSubjects.slice(6, 8);
+
+            const allSelected = [
+                ...subjects120.map(s => ({ name: s, max: 120 })),
+                ...subjects60.map(s => ({ name: s, max: 60 })),
+                ...subjects100.map(s => ({ name: s, max: 100 }))
+            ];
+
+            const targetTotal = Math.floor(Math.random() * 31) + 700;
+
+            const scores = allSelected.map(subject => {
+                const minScore = Math.floor(subject.max * 0.6);
+                const maxScore = subject.max - 1;
+                return {
+                    name: subject.name,
+                    score: Math.floor(Math.random() * (maxScore - minScore + 1)) + minScore,
+                    max: subject.max
+                };
+            });
+
+            let currentTotal = scores.reduce((sum, s) => sum + s.score, 0);
+            let diff = targetTotal - currentTotal;
+
+            while (diff !== 0) {
+                const idx = Math.floor(Math.random() * scores.length);
+                const subject = scores[idx];
+                
+                if (diff > 0 && subject.score < subject.max - 1) {
+                    scores[idx].score++;
+                    diff--;
+                } else if (diff < 0 && subject.score > Math.floor(subject.max * 0.6)) {
+                    scores[idx].score--;
+                    diff++;
+                }
+            }
+
+            return scores;
+        }
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const name = getQueryParam('name') || '';
+            const examNo = getQueryParam('examNo') || '';
+
+            const resultInfo = document.getElementById('resultInfo');
+            const scoreBody = document.getElementById('scoreBody');
+
+            resultInfo.textContent = `姓名：${decodeURIComponent(name)}  准考证号：${decodeURIComponent(examNo)}`;
+
+            const scores = generateScores();
+            const totalScore = scores.reduce((sum, s) => sum + s.score, 0);
+
+            let html = '';
+            scores.forEach(subject => {
+                html += `
+                    <tr>
+                        <td>${subject.name}</td>
+                        <td>${subject.score}</td>
+                    </tr>
+                `;
+            });
+            html += `
+                <tr class="total-row">
+                    <td>总分</td>
+                    <td>${totalScore}</td>
+                </tr>
+            `;
+            scoreBody.innerHTML = html;
+        });
+    </script>
+</body>
+</html>
