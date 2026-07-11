@@ -39,12 +39,18 @@
         .subtitle {
             color: #7a8b9b;
             font-size: 14px;
-            margin-bottom: 25px;
+            margin-bottom: 8px;
             border-left: 4px solid #f6b83d;
             padding-left: 14px;
             background: #faf8f5;
             border-radius: 0 8px 8px 0;
             line-height: 1.6;
+        }
+        .save-hint {
+            color: #9aabb8;
+            font-size: 12px;
+            margin-bottom: 25px;
+            padding-left: 18px;
         }
 
         /* ===== 设置面板 ===== */
@@ -447,6 +453,13 @@
             min-width: 60px;
             text-align: right;
         }
+        .round-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2d3e50;
+            margin-left: 16px;
+            white-space: nowrap;
+        }
         .progress-icon {
             font-size: 18px;
         }
@@ -455,7 +468,7 @@
             text-align: center;
             font-size: 20px;
             font-weight: 600;
-            color: #2d3e50;
+            color: #394a5d;
             padding: 30px 0;
         }
         .game-actions {
@@ -579,6 +592,7 @@
 <div class="container" id="app">
     <h1>📖 七班校园故事</h1>
     <div class="subtitle">AI 驱动的文字冒险 · 你的选择决定剧情走向 -（目前仅有七上剧情，后续剧情敬请期待）</div>
+    <div class="save-hint">💾 具备存档功能，可随时退出，重新进入可继续游戏</div>
 
     <!-- ===== 设置面板 ===== -->
     <div id="setup-panel" class="setup-panel">
@@ -632,6 +646,7 @@
                 <div class="progress-bar-fill" id="progress-bar-fill"></div>
             </div>
             <span class="progress-label" id="progress-label">0.00%</span>
+            <span class="round-label" id="round-label">第 0 回合</span>
         </div>
 
         <div class="story-box" id="story-box">
@@ -674,18 +689,19 @@
 
 【故事背景】
  - 时间：2023.8.26下午，你（${playerName}，${gender}）到华附北滘学校中学部报到，升初一。班级707，年级12班×52人。
- - 宿舍${dorm}（8人间，3间卫浴一体。707的宿舍有（男）402,403,404和（女）538,539,540）。宿舍无书桌，学校禁带手机/MP3（因此剧情不允许出现“手机收到班主任发的消息”之类的情节）。男生校服蓝白，女生粉白；周三穿纯蓝文化服（非强制）。
- - 作息：6:30起床铃，6:40操场跑操；21:30晚修结束，22:00熄灯。
+ - 宿舍${dorm}（8人间（铁床），3间卫浴一体。707的宿舍有（男，四楼）402,403,404和（女，五楼）538,539,540）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现“手机收到班主任发的消息”之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
+ - 作息：6:30起床铃，6:40操场跑操；晚饭和洗澡是在下午五六点；21:30晚修结束，22:00熄灯。
  - 教室有“清大视讯”一体机（需刷卡启动），两侧黑板。无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝）。
  - “七上”=七年级上学期。
 
-【剧情走向（必须按顺序发生，但你可以自由填充细节和分支）】
+【剧情走向（必须按顺序发生！，但你可以自由填充细节和分支）】
 1. 开学报到：8月26日下午来到宿舍，铺床，与舍友首次见面；之后去到班级报到，每个人的位置已经被安排好（桌上有姓名牌），班上一体机正播放着校歌《从心出发》“诚意正心，格物致知，铭记华附精神，从心出发…”。
 2. 军训（8月27日-8月31日，共5天）：
    - 班级教官的外号是"笑脸哥"（这是第三天才起的外号，所以前几天不能出现），严而不厉，惩罚方式：让表现不好的学生去其他班张开双臂、迈一只腿喊"我骄傲、我自信、我能行"。
    - 总教官口头禅"晕蛋！"，军训第三天中午罚全年级在操场太阳下蹲了20分钟，腿都蹲麻了。
    - 第二天学唱《团结就是力量》。
    - 第四天军营参观（足球场设陆军/空军等展区），可体验无人机、穿越火线、水火箭、打靶等。
+   - 第五天结营仪式，全年级在操场上进行了队列展示。
 3. 七上开学：认识各科老师：
    - 语文：刘志荣（女，胖胖的，和蔼），她在我们班任教前我们班换过两次语文老师。讲课爱跑题废话多。
    - 数学：谭庆坤（男，严肃但挺好，七上后期妻子生娃，他发喜糖）。
@@ -695,11 +711,11 @@
    - 地理：谢春霞（女，温柔，国庆假期布置作业制作建议地球仪）。
    - 生物：吕绍钿（女，温柔，分享午睡时间不宜太长的常识，每节课前播放性教育小视频）。
    - 班主任：何铭仪（初期温柔，后期渐严，七上开学发纸写班干部意向）。
-4. 4人小组，上交10多份口号，投票选出“七班七班，逐梦云端，不惧困难，跨越山川！”，后改“逐”为“筑”。票数第二：“七班七班我最棒，七班七班我最强，七班七班，耶！”。
+4. 4人小组，上交10多份班级口号，投票选出“七班七班，逐梦云端，不惧困难，跨越山川！”，后改“逐”为“筑”。票数第二：“七班七班我最棒，七班七班我最强，七班七班，耶！”。
 5. 同学逐渐熟络。
-6. 第一次校运会：班级一分钟文艺表演《小城夏天》。
-7. 红歌比赛：表演《我和我的祖国》，4名同学先朗诵，后其余合唱+手势舞，1名同学指挥歌唱节奏。
-8. 篮球赛：男上半场20分钟→女投篮→男下半场→女投篮。周末线上与10班争执（怀疑裁判黑哨、怀疑对方翻比分牌），班主任调解和平解决。
+6. 10月篮球赛：男上半场20分钟→女投篮→男下半场→女投篮。周末线上与10班争执（怀疑裁判黑哨、怀疑对方翻比分牌），班主任调解和平解决。
+7. 11月第一次校运会：班级一分钟文艺表演《小城夏天》。
+8. 12月红歌比赛：表演《我和我的祖国》，4名同学先朗诵，后其余合唱+手势舞，1名同学指挥歌唱节奏。
 9. 第一次期末考试。
 10. 考后在教室看电影。
 11. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，寒假开始（七上结束）。
@@ -709,8 +725,8 @@
 - 描述要生动、细腻，包含环境、心理、对话等，长度控制在 200~400 字左右。
 - 选项要合理，且能推动剧情发展，符合当前时间线。
 - 生成格式：
-  第一行开始为故事描述（不使用Markdown格式；多行分段，尽量每段不多于180字，一句对话可以单独占一行）。描述结束后无需询问具体问题（比如“接下来要做什么？”）。
-  故事描述结束后先单独一行输出当前进度（格式见【进度跟踪】），然后单独一行写"【选项】"，接着每行一个选项，无需列出自定义选项了，如：
+  第一行开始为故事描述（不使用Markdown格式；多行分段，尽量每段（行）不多于140字，一句对话可以单独占一行）。描述结束后无需询问（比如“接下来要做什么？”）。
+  故事描述结束后先单独一行输出当前进度（见【进度跟踪】），然后单独一行写"【选项】"，接着每行一个选项，无需列出自定义选项了，如：
   ...（故事描述）
   【进度: 12.35%】
   【选项】
@@ -718,6 +734,7 @@
   2. 回宿舍休息
   3. 在操场散步
 - 如果故事已经结束（例如放寒假），则不再提供选项，只输出"故事结束"之类的文字。
+- ！某些场景下（如班干部意向、老师点名提问等），剧情需要玩家自己输入内容，此时故事描述部分的最后一行需提问，【选项】后不输出任何选项（直接以【选项】行结束）。
 - 每次只推进一小段剧情，不要一次性跨越多个关键事件。
 - 自定义选项由程序提供，你不需要在选项中包含"自定义"、"其他"、"自己决定"等类似选项。
 - 玩家消息中会包含本轮是否允许自定义选项的标记，请根据标记生成合适数量的选项。
@@ -725,19 +742,19 @@
 【进度跟踪】
 整个七上剧情按顺序共11个主要事件，你必须根据当前剧情所处的事件阶段，在每次输出的**故事描述末尾另起一行**输出当前进度，格式为：
 【进度: XX.XX%】
-各事件对应的大致进度范围如下（你只需合理评估当前位置即可）：
+各事件对应的大致进度范围如下（严格按照顺序！你只需合理评估当前位置即可，但还是尽量保持下方的进度范围）：
   - 事件1 开学报到（0% ~ 6%）
-  - 事件2 军训（6% ~ 24%）
-  - 事件3 七上开学/认识老师（24% ~ 31%）
-  - 事件4 小组口号投票（31% ~ 37%）
-  - 事件5 同学逐渐熟络（37% ~ 43%）
-  - 事件6 第一次校运会（43% ~ 55%）
-  - 事件7 红歌比赛（55% ~ 67%）
-  - 事件8 篮球赛（67% ~ 80%）
+  - 事件2 军训（6% ~ 28%）
+  - 事件3 七上开学/认识老师（28% ~ 35%）
+  - 事件4 班级口号投票（35% ~ 40%）
+  - 事件5 同学逐渐熟络（40% ~ 43%）
+  - 事件6 10月篮球赛（43% ~ 56%）
+  - 事件7 11月第一次校运会（56% ~ 68%）
+  - 事件8 12月红歌比赛（68% ~ 80%）
   - 事件9 第一次期末考试（80% ~ 87%）
   - 事件10 考后看电影（87% ~ 94%）
   - 事件11 放假/寒假开始（94% ~ 100%）
-进度应平滑递增。当故事结束时，进度为 100.00%。
+每轮进度应递增范围为0.2%至0.8%，两位小数。当故事结束时，进度为 100.00%。
 示例输出结尾：
   ...（故事描述）
   【进度: 12.35%】
@@ -826,6 +843,12 @@
     let selectedOption = null;  // 当前选中的选项文本
     let isCustomSelected = false;  // 是否选中了自定义选项
     let playerInfo = { name: '', gender: '', dorm: '' };  // 玩家信息
+    let currentRound = 0;  // 当前回合数
+
+    function updateRoundDisplay() {
+        const el = document.getElementById('round-label');
+        if (el) el.textContent = `第 ${currentRound} 回合`;
+    }
 
     // ================================================================
     //  存档功能
@@ -844,7 +867,8 @@
             playerInfo: playerInfo,
             savedAt: new Date().toISOString(),
             isComplete: isComplete,
-            currentProgress: currentProgress
+            currentProgress: currentProgress,
+            currentRound: currentRound
         };
         localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     }
@@ -969,6 +993,7 @@
         let options = [];
         let descriptionLines = [];
         let inOptions = false;
+        let foundOptionsMarker = false;
         let progress = null;
 
         // 先尝试提取进度标记
@@ -988,6 +1013,7 @@
 
             if (line.startsWith('【选项】')) {
                 inOptions = true;
+                foundOptionsMarker = true;
                 continue;
             }
             if (inOptions) {
@@ -1001,7 +1027,7 @@
             }
         }
 
-        if (options.length === 0) {
+        if (options.length === 0 && !foundOptionsMarker) {
             const allLines = text.split('\n').map(s => s.trim());
             const desc = [];
             for (let line of allLines) {
@@ -1018,7 +1044,8 @@
         return {
             description: descriptionLines.join('\n').trim(),
             options,
-            progress
+            progress,
+            noOptionsMode: foundOptionsMarker && options.length === 0
         };
     }
 
@@ -1037,7 +1064,7 @@
     // ================================================================
     //  显示剧情 (手动导航)
     // ================================================================
-    function displayStory(description, options, progress) {
+    function displayStory(description, options, progress, noOptionsMode) {
         return new Promise((resolve) => {
             optionsArea.innerHTML = '';
             storyBox.innerHTML = '';
@@ -1164,6 +1191,32 @@
                         if (prevBtn) {
                             prevBtn.disabled = false;
                         }
+                    } else if (noOptionsMode) {
+                        // AI明确输出无选项，强制开启自定义输入
+                        document.getElementById('next-btn')?.remove();
+                        
+                        selectedOption = null;
+                        isCustomSelected = true;
+
+                        const customInputArea = document.createElement('div');
+                        customInputArea.className = 'custom-input-area show';
+                        customInputArea.innerHTML = '<input type="text" id="custom-option-input" placeholder="输入你的想法..." autocomplete="off">';
+                        optionsArea.appendChild(customInputArea);
+
+                        const confirmBtn = document.createElement('button');
+                        confirmBtn.className = 'confirm-btn show';
+                        confirmBtn.id = 'confirm-btn';
+                        confirmBtn.textContent = '确定';
+                        confirmBtn.disabled = false;
+                        confirmBtn.addEventListener('click', handleConfirm);
+                        optionsArea.appendChild(confirmBtn);
+
+                        isWaitingForChoice = true;
+                        
+                        const prevBtn = document.getElementById('prev-btn');
+                        if (prevBtn) prevBtn.disabled = false;
+
+                        setTimeout(() => document.getElementById('custom-option-input')?.focus(), 100);
                     } else {
                         navButtonsContainer.remove();
                         navButtonsContainer = null;
@@ -1301,6 +1354,8 @@
         }
 
         messages.push({ role: 'user', content: userMessage });
+        currentRound++;
+        updateRoundDisplay();
         saveGame();
 
         loadingIndicator.style.display = 'block';
@@ -1328,8 +1383,8 @@
         selectedOption = null;
         isCustomSelected = false;
 
-        const { description, options, progress } = parseResponse(reply);
-        await displayStory(description, options, progress);
+        const { description, options, progress, noOptionsMode } = parseResponse(reply);
+        await displayStory(description, options, progress, noOptionsMode);
         saveGame();  // 保存更新后的进度
     }
 
@@ -1367,6 +1422,8 @@
         document.getElementById('end-screen').style.display = 'none';
         gameArea.style.display = 'block';
         isPlaying = true;
+        currentRound = 1;
+        updateRoundDisplay();
 
         storyBox.innerHTML = '⏳ 正在生成初始剧情……';
         optionsArea.innerHTML = '';
@@ -1409,9 +1466,9 @@
         messages.push({ role: 'assistant', content: reply });
         saveGame();
 
-        const { description, options, progress } = parseResponse(reply);
+        const { description, options, progress, noOptionsMode } = parseResponse(reply);
         // 初始剧情暂不加入历史，等待第一次选择
-        await displayStory(description, options, progress);
+        await displayStory(description, options, progress, noOptionsMode);
     }
 
     async function continueGame() {
@@ -1437,6 +1494,8 @@
         playerInfo = saveData.playerInfo || { name: '', gender: '', dorm: '' };
         currentProgress = saveData.currentProgress !== undefined ? saveData.currentProgress : 0;
         updateProgressBar(currentProgress);
+        currentRound = saveData.currentRound !== undefined ? saveData.currentRound : 0;
+        updateRoundDisplay();
 
         setupPanel.style.display = 'none';
         characterSetup.style.display = 'none';
@@ -1457,8 +1516,8 @@
             
             const lastMessage = messages[messages.length - 1];
             if (lastMessage && lastMessage.role === 'assistant') {
-                const { description, options, progress } = parseResponse(lastMessage.content);
-                await displayStory(description, options, progress);
+                const { description, options, progress, noOptionsMode } = parseResponse(lastMessage.content);
+                await displayStory(description, options, progress, noOptionsMode);
             } else {
                 storyBox.innerHTML = '❌ 存档数据异常，无法继续游戏。';
                 isPlaying = false;
@@ -1498,8 +1557,8 @@
                     messages.push({ role: 'assistant', content: reply });
                     saveGame();
 
-                    const { description, options, progress } = parseResponse(reply);
-                    await displayStory(description, options, progress);
+                    const { description, options, progress, noOptionsMode } = parseResponse(reply);
+                    await displayStory(description, options, progress, noOptionsMode);
                     return;
                 }
             }
@@ -1509,6 +1568,8 @@
             
             messages = [];
             currentStory = '';
+            currentRound = 0;
+            updateRoundDisplay();
             historyContent.innerHTML = '';
             renderHistory();
             
@@ -1546,8 +1607,8 @@
 
             messages.push({ role: 'assistant', content: reply });
             saveGame();
-            const { description, options, progress } = parseResponse(reply);
-            await displayStory(description, options, progress);
+            const { description, options, progress, noOptionsMode } = parseResponse(reply);
+            await displayStory(description, options, progress, noOptionsMode);
         }
     }
 
@@ -1568,6 +1629,8 @@
         selectedOption = null;
         isCustomSelected = false;
         currentProgress = 0;
+        currentRound = 0;
+        updateRoundDisplay();
         historyContent.innerHTML = '';
         storyBox.innerHTML = '<span style="color: #a09080;">✨ 故事即将开始……</span>';
         optionsArea.innerHTML = '';
