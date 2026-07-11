@@ -164,7 +164,7 @@
             background: #fcf9f6;
             border-radius: 20px;
             padding: 22px 25px;
-            min-height: 220px;
+            height: auto;
             max-height: 460px;
             overflow-y: auto;
             border: 1px solid #e9e0d8;
@@ -174,6 +174,7 @@
             color: #1e2a36;
             white-space: pre-wrap;
             word-break: break-word;
+            transition: height 0.3s ease;
         }
         .story-box::-webkit-scrollbar {
             width: 6px;
@@ -267,6 +268,44 @@
             text-align: center;
             padding: 16px 0;
             font-size: 14px;
+        }
+
+        /* ===== 导航按钮区域 ===== */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .nav-btn {
+            padding: 12px 32px;
+            background: #2d3e50;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-btn:hover {
+            background: #1f2e3d;
+            transform: scale(1.02);
+        }
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .nav-btn.secondary {
+            background: #e8dfd7;
+            color: #2d3e50;
+        }
+        .nav-btn.secondary:hover {
+            background: #d5cdc4;
         }
 
         /* ===== 选项区域 ===== */
@@ -382,10 +421,14 @@
             color: #2d3e50;
             padding: 30px 0;
         }
+        .game-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
         .reset-btn {
-            display: block;
-            margin: 20px auto 0;
-            padding: 12px 36px;
+            padding: 12px 28px;
             background: #e8dfd7;
             border: none;
             border-radius: 40px;
@@ -498,7 +541,7 @@
 
 <div class="container" id="app">
     <h1>📖 七班校园故事</h1>
-    <div class="subtitle">AI 驱动的文字冒险 · 你的选择决定剧情走向</div>
+    <div class="subtitle">AI 驱动的文字冒险 · 你的选择决定剧情走向 -（目前仅有七上剧情，后续剧情敬请期待）</div>
 
     <!-- ===== 设置面板 ===== -->
     <div id="setup-panel" class="setup-panel">
@@ -520,6 +563,7 @@
             <!-- 由 JS 动态生成 -->
         </div>
 
+        <button class="start-btn" id="continue-btn" style="display: none; margin-bottom: 10px;">🔄 继续游戏</button>
         <button class="start-btn" id="start-btn">🚀 开始冒险</button>
     </div>
 
@@ -542,7 +586,9 @@
             <span class="spinner"></span> AI 正在构思剧情…
         </div>
         <div class="options-area" id="options-area"></div>
-        <button class="reset-btn" id="reset-btn">🔄 重新开始</button>
+        <div class="game-actions">
+            <button class="reset-btn" id="reset-btn">🔄 重新开始并删除进度</button>
+        </div>
     </div>
 
     <!-- ===== 结束界面 ===== -->
@@ -572,47 +618,41 @@
 你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
 
 【故事背景】
-时间：2023年8月26日下午，你（玩家）进入华附北滘学校中学部，准备升初一。
-你叫 ${playerName}，性别是 ${gender}，宿舍是 ${dorm}（8人间，有3间厕所洗浴一体的间；全宿舍都是来自同一个班）。
-你的班级是707班，年级共12个班，每班52人。
-宿舍没有书桌，学校不允许带手机、mp3等电子设备。
-男生校服蓝白配色，女生校服粉白配色。
-某周三穿校内的纯蓝色的文化服（但这并没有强制性要求）。
-上学期间每天早上6点半打起床铃，6点40要到操场指定位置进行跑操。
-晚上21点半结束晚修，22点准时熄灯。
-班上最前面有“清大视讯”多媒体设备（一体机），屏幕两边是黑板。多媒体要刷卡才能启动。
-“七上”全程“七年级上学期”。
+ - 时间：2023.8.26下午，你（${playerName}，${gender}）到华附北滘学校中学部报到，升初一。班级707，年级12班×52人。宿舍${dorm}（8人间，3间卫浴一体，宿舍全同班）。宿舍无书桌，学校禁带手机/MP3。男生校服蓝白，女生粉白；周三穿纯蓝文化服（非强制）。
+ - 作息：6:30起床铃，6:40操场跑操；21:30晚修结束，22:00熄灯。教室有“清大视讯”一体机（需刷卡启动），两侧黑板。无小卖部，有自动售货机。“七上”=七年级上学期。
 
 【剧情走向（必须按顺序发生，但你可以自由填充细节和分支）】
 1. 开学报到：8月26日下午来到宿舍，铺床，与舍友首次见面；之后去到班级报到，班上一体机正播放着校歌《从心出发》“诚意正心，格物致知，铭记华附精神，从心出发…”。
 2. 军训（8月27日-8月31日，共5天）：
    - 班级教官的外号是"笑脸哥"（这是第三天才起的），严而不厉，惩罚方式：让表现不好的学生去其他班张开双臂、迈一只腿喊"我骄傲、我自信、我能行"。
    - 总教官口头禅"晕蛋！"，军训第三天中午罚全年级在操场太阳下蹲了20分钟，腿都蹲麻了。
+   - 第二天学唱《团结就是力量》。
+   - 第四天军营参观（足球场设陆军/空军等展区），可体验无人机、穿越火线、水火箭、打靶等。
 3. 七上开学：认识各科老师：
-   - 语文：刘志荣（女，胖胖的，和蔼），她在我们班任教前我们班换过两次语文老师。
-   - 数学：谭庆坤（男，严肃但挺好，七上后期妻子生娃而为我们发过喜糖）。
-   - 英语：何铭仪（女，班主任）。
+   - 语文：刘志荣（女，胖胖的，和蔼），她在我们班任教前我们班换过两次语文老师。讲课爱跑题废话多。
+   - 数学：谭庆坤（男，严肃但挺好，七上后期妻子生娃，他发喜糖）。
+   - 英语：何铭仪（女，班主任，三十来岁）。
    - 道法：梁靖（女，和蔼，常把单个知识点的标题写黑板上让我们默写）。
-   - 历史：陈洵（女，挺好，有时严厉，默写管得严，分享过亲戚住在长安城附近）。
-   - 地理：谢春霞（女，温柔）。
+   - 历史：陈洵（女，挺好，有时严厉，默写严，分享过亲戚住在长安城附近）。
+   - 地理：谢春霞（女，温柔，国庆假期布置作业制作建议地球仪）。
    - 生物：吕绍钿（女，温柔，分享午睡时间不宜太长的常识，每节课前播放性教育小视频）。
-   - 班主任：何铭仪（女，初期温柔，但后期变得有点严厉了。七上开学后发纸让写班干部意向）。
-4. 4人为以小组，以小组为单位上交了10多份口号，投票选出班级口号："七班七班，筑梦云端，不惧困难，跨越山川！"
-5. 同学之间逐渐熟络。
+   - 班主任：何铭仪（初期温柔，后期渐严，七上开学发纸写班干部意向）。
+4. 4人小组，上交10多份口号，投票选出“七班七班，逐梦云端，不惧困难，跨越山川！”，后改“逐”为“筑”。票数第二：“七班七班我最棒，七班七班我最强，七班七班，耶！”。
+5. 同学逐渐熟络。
 6. 第一次校运会：班级一分钟文艺表演《小城夏天》。
-7. 红歌比赛：表演《我和我的祖国》，4名同学先是朗诵，完毕后其余合唱+手势舞，1名同学指挥歌唱的节奏。
-8. 篮球赛：班与班对战（男生上半场20分钟，女生投篮，男生下半场，女生再投篮）。与10班发生争执（怀疑裁判黑哨、怀疑对方翻比分牌），后来在班主任调解下和平解决。
+7. 红歌比赛：表演《我和我的祖国》，4名同学先朗诵，后其余合唱+手势舞，1名同学指挥歌唱节奏。
+8. 篮球赛：男上半场20分钟→女投篮→男下半场→女投篮。周末线上与10班争执（怀疑裁判黑哨、怀疑对方翻比分牌），班主任调解和平解决。
 9. 第一次期末考试。
-10. 期末考后在教室看电影。
-11. 放假前一天上午是在教室，中午回宿舍收行李并搞卫生，家长接走，正式放寒假（七上结束）。
+10. 考后在教室看电影。
+11. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，寒假开始（七上结束）。
 
 【游戏规则】
 - 你每次生成一段故事描述，并在结尾提供若干选项供玩家选择。
 - 描述要生动、细腻，包含环境、心理、对话等，长度控制在 200~400 字左右。
 - 选项要合理，且能推动剧情发展，符合当前时间线。
 - 生成格式：
-  第一行开始为故事描述（多行分段，每段开头空2格），
-  之后必须单独一行写"【选项】"，接着每行一个选项，无需列出自定义选项了，如：
+  第一行开始为故事描述（多行分段，尽量每段不多于180字）。描述结束后无需询问具体问题（比如“接下来要做什么？”）。
+  描述结束后必须单独一行写"【选项】"，接着每行一个选项，无需列出自定义选项了，如：
   1. 去食堂吃饭
   2. 回宿舍休息
   3. 在操场散步
@@ -632,6 +672,7 @@
     const setupPanel = document.getElementById('setup-panel');
     const gameArea = document.getElementById('game-area');
     const startBtn = document.getElementById('start-btn');
+    const continueBtn = document.getElementById('continue-btn');
     const resetBtn = document.getElementById('reset-btn');
     const storyBox = document.getElementById('story-box');
     const optionsArea = document.getElementById('options-area');
@@ -700,6 +741,51 @@
     let selectedOption = null;  // 当前选中的选项文本
     let isCustomSelected = false;  // 是否选中了自定义选项
     let playerInfo = { name: '', gender: '', dorm: '' };  // 玩家信息
+
+    // ================================================================
+    //  存档功能
+    // ================================================================
+    const SAVE_KEY = 'school_story_save';
+
+    function saveGame() {
+        const lastMsg = messages[messages.length - 1];
+        const isComplete = lastMsg && lastMsg.role === 'assistant';
+        
+        const saveData = {
+            messages: messages,
+            historyEntries: historyEntries,
+            currentStory: currentStory,
+            allowCustom: allowCustom,
+            playerInfo: playerInfo,
+            savedAt: new Date().toISOString(),
+            isComplete: isComplete
+        };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+    }
+
+    function loadGame() {
+        const saveDataStr = localStorage.getItem(SAVE_KEY);
+        if (!saveDataStr) return null;
+        
+        try {
+            return JSON.parse(saveDataStr);
+        } catch (e) {
+            localStorage.removeItem(SAVE_KEY);
+            return null;
+        }
+    }
+
+    function deleteSave() {
+        localStorage.removeItem(SAVE_KEY);
+    }
+
+    function hasSave() {
+        return localStorage.getItem(SAVE_KEY) !== null;
+    }
+
+    if (hasSave()) {
+        continueBtn.style.display = 'block';
+    }
 
     // ================================================================
     //  历史记录功能
@@ -832,29 +918,91 @@
     }
 
     // ================================================================
-    //  显示剧情 (逐行)
+    //  显示剧情 (手动导航)
     // ================================================================
     function displayStory(description, options) {
         return new Promise((resolve) => {
             optionsArea.innerHTML = '';
             storyBox.innerHTML = '';
 
-            // 保存当前剧情（尚未加入历史）
             currentStory = description;
 
-            const lines = description.split('\n').filter(line => line.trim() !== '');
-            let idx = 0;
+            const paragraphs = description.split('\n').filter(line => line.trim() !== '');
+            let currentIndex = 0;
+            let navButtonsContainer = null;
 
-            function showNextLine() {
-                if (idx < lines.length) {
-                    const p = document.createElement('div');
-                    p.textContent = lines[idx];
-                    p.style.marginBottom = '4px';
-                    storyBox.appendChild(p);
-                    storyBox.scrollTop = storyBox.scrollHeight;
-                    idx++;
-                    timeoutId = setTimeout(showNextLine, 2000);
+            function renderCurrent() {
+                storyBox.innerHTML = '';
+                
+                const p = document.createElement('div');
+                p.textContent = paragraphs[currentIndex];
+                p.style.marginBottom = '8px';
+                storyBox.appendChild(p);
+                storyBox.scrollTop = storyBox.scrollHeight;
+
+                updateNavButtons();
+            }
+
+            function updateNavButtons() {
+                if (!navButtonsContainer) {
+                    navButtonsContainer = document.createElement('div');
+                    navButtonsContainer.className = 'nav-buttons';
+                    navButtonsContainer.innerHTML = `
+                        <button class="nav-btn secondary" id="prev-btn">◀️ 上一步</button>
+                        <button class="nav-btn" id="next-btn">下一步 ▶️</button>
+                    `;
+                    optionsArea.appendChild(navButtonsContainer);
+
+                    document.getElementById('prev-btn').addEventListener('click', goPrev);
+                    document.getElementById('next-btn').addEventListener('click', goNext);
+                }
+
+                const prevBtn = document.getElementById('prev-btn');
+                const nextBtn = document.getElementById('next-btn');
+
+                prevBtn.disabled = currentIndex === 0 && !isWaitingForChoice;
+            }
+
+            function goPrev() {
+                if (isWaitingForChoice) {
+                    optionsArea.innerHTML = '';
+                    
+                    const promptDiv = document.getElementById('choice-prompt');
+                    if (promptDiv) {
+                        promptDiv.remove();
+                    }
+                    
+                    navButtonsContainer = null;
+                    isWaitingForChoice = false;
+                    renderCurrent();
+                } else if (currentIndex > 0) {
+                    currentIndex--;
+                    renderCurrent();
+                }
+            }
+
+            function goNext() {
+                if (currentIndex < paragraphs.length - 1) {
+                    currentIndex++;
+                    renderCurrent();
                 } else {
+                    storyBox.innerHTML = '';
+                    
+                    const promptDiv = document.createElement('div');
+                    promptDiv.id = 'choice-prompt';
+                    promptDiv.textContent = '接下来你要干什么？';
+                    promptDiv.style.marginTop = '12px';
+                    promptDiv.style.fontWeight = '600';
+                    promptDiv.style.color = '#f6b83d';
+                    promptDiv.style.textAlign = 'center';
+                    storyBox.appendChild(promptDiv);
+                    storyBox.scrollTop = storyBox.scrollHeight;
+
+                    const nextBtn = document.getElementById('next-btn');
+                    if (nextBtn) {
+                        nextBtn.remove();
+                    }
+
                     if (options.length > 0) {
                         selectedOption = null;
                         isCustomSelected = false;
@@ -875,14 +1023,12 @@
                             optionsArea.appendChild(customBtn);
                         }
 
-                        // 自定义输入框
                         const customInputArea = document.createElement('div');
                         customInputArea.className = 'custom-input-area';
                         customInputArea.id = 'custom-input-area';
                         customInputArea.innerHTML = '<input type="text" id="custom-option-input" placeholder="输入你的自定义选项..." autocomplete="off">';
                         optionsArea.appendChild(customInputArea);
 
-                        // 确定按钮
                         const confirmBtn = document.createElement('button');
                         confirmBtn.className = 'confirm-btn';
                         confirmBtn.id = 'confirm-btn';
@@ -892,8 +1038,14 @@
                         optionsArea.appendChild(confirmBtn);
 
                         isWaitingForChoice = true;
+                        
+                        const prevBtn = document.getElementById('prev-btn');
+                        if (prevBtn) {
+                            prevBtn.disabled = false;
+                        }
                     } else {
-                        // 故事结束，立即将当前剧情加入历史
+                        navButtonsContainer.remove();
+                        navButtonsContainer = null;
                         if (currentStory) {
                             addHistoryEntry('story', currentStory);
                             currentStory = '';
@@ -906,7 +1058,7 @@
                 }
             }
 
-            showNextLine();
+            renderCurrent();
         });
     }
 
@@ -1028,6 +1180,7 @@
         }
 
         messages.push({ role: 'user', content: userMessage });
+        saveGame();
 
         loadingIndicator.style.display = 'block';
 
@@ -1047,6 +1200,7 @@
         }
 
         messages.push({ role: 'assistant', content: reply });
+        saveGame();
 
         // 5. 设置下一轮的自定义选项状态
         allowCustom = nextAllowCustom;
@@ -1068,6 +1222,13 @@
             alert('请先在设置中填写你的 DeepSeek API Key！');
             apiKeyInput.focus();
             return;
+        }
+
+        if (hasSave()) {
+            if (!confirm('检测到已有存档，确定要重新开始吗？这将删除原有存档。')) {
+                return;
+            }
+            deleteSave();
         }
 
         const name = playerNameInput.value.trim() || '小明';
@@ -1129,10 +1290,111 @@
         }
 
         messages.push({ role: 'assistant', content: reply });
+        saveGame();
 
         const { description, options } = parseResponse(reply);
         // 初始剧情暂不加入历史，等待第一次选择
         await displayStory(description, options);
+    }
+
+    async function continueGame() {
+        if (isPlaying) return;
+
+        const apiKey = apiKeyInput.value.trim();
+        if (!apiKey) {
+            alert('请先在设置中填写你的 DeepSeek API Key！');
+            apiKeyInput.focus();
+            return;
+        }
+
+        const saveData = loadGame();
+        if (!saveData) {
+            continueBtn.style.display = 'none';
+            return;
+        }
+
+        messages = saveData.messages || [];
+        historyEntries = saveData.historyEntries || [];
+        currentStory = saveData.currentStory || '';
+        allowCustom = saveData.allowCustom || false;
+        playerInfo = saveData.playerInfo || { name: '', gender: '', dorm: '' };
+
+        setupPanel.style.display = 'none';
+        document.getElementById('end-screen').style.display = 'none';
+        gameArea.style.display = 'block';
+        isPlaying = true;
+        continueBtn.style.display = 'none';
+
+        historyContent.innerHTML = '';
+        renderHistory();
+
+        const isComplete = saveData.isComplete !== undefined ? saveData.isComplete : true;
+        
+        if (isComplete && messages.length > 0) {
+            if (currentStory) {
+                storyBox.innerHTML = currentStory;
+            }
+            
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage && lastMessage.role === 'assistant') {
+                const { description, options } = parseResponse(lastMessage.content);
+                await displayStory(description, options);
+            } else {
+                storyBox.innerHTML = '❌ 存档数据异常，无法继续游戏。';
+                isPlaying = false;
+            }
+        } else {
+            if (!playerInfo.name) {
+                storyBox.innerHTML = '❌ 存档数据异常，玩家信息缺失。';
+                isPlaying = false;
+                continueBtn.style.display = 'block';
+                return;
+            }
+            
+            storyBox.innerHTML = '⏳ 存档不完整，正在重新生成剧情……';
+            
+            messages = [];
+            currentStory = '';
+            historyContent.innerHTML = '';
+            renderHistory();
+            
+            const { name, gender, dorm } = playerInfo;
+            const systemPrompt = buildSystemPrompt(name, gender, dorm);
+            messages.push({ role: 'system', content: systemPrompt });
+            
+            allowCustom = Math.random() < 0.4;
+            selectedOption = null;
+            isCustomSelected = false;
+            
+            if (allowCustom) {
+                messages.push({ role: 'user', content: '【首轮允许自定义】请生成2~3个选项（程序会额外提供自定义选项）' });
+            } else {
+                messages.push({ role: 'user', content: '【首轮不允许自定义】请生成2~4个选项' });
+            }
+
+            loadingIndicator.style.display = 'block';
+            let reply = null;
+            try {
+                reply = await callDeepSeek(messages);
+            } catch (err) {
+                loadingIndicator.style.display = 'none';
+                storyBox.innerHTML = `❌ ${err.message}`;
+                isPlaying = false;
+                return;
+            }
+            loadingIndicator.style.display = 'none';
+
+            if (!reply) {
+                storyBox.innerHTML = '❌ 启动失败，请检查网络或密钥是否正确。';
+                isPlaying = false;
+                return;
+            }
+
+            messages.push({ role: 'assistant', content: reply });
+            saveGame();
+            const { description, options } = parseResponse(reply);
+            await displayStory(description, options);
+        }
     }
 
     // ================================================================
@@ -1158,6 +1420,7 @@
         gameArea.style.display = 'none';
         setupPanel.style.display = 'block';
         document.getElementById('end-screen').style.display = 'none';
+        continueBtn.style.display = 'none';
         renderDormButtons();
 
         if (isHistoryOpen) {
@@ -1171,7 +1434,12 @@
     //  绑定事件
     // ================================================================
     startBtn.addEventListener('click', startGame);
+    continueBtn.addEventListener('click', continueGame);
     resetBtn.addEventListener('click', () => {
+        if (!confirm('确定要重新开始并删除进度吗？此操作无法撤销。')) {
+            return;
+        }
+        deleteSave();
         if (timeoutId) {
             clearTimeout(timeoutId);
             timeoutId = null;
@@ -1193,7 +1461,38 @@
     });
 
     // 结束界面按钮事件
-    document.getElementById('restart-btn').addEventListener('click', resetGame);
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+        isPlaying = false;
+        isWaitingForChoice = false;
+        messages = [];
+        historyEntries = [];
+        currentStory = '';
+        allowCustom = false;
+        selectedOption = null;
+        isCustomSelected = false;
+        historyContent.innerHTML = '';
+        storyBox.innerHTML = '<span style="color: #a09080;">✨ 故事即将开始……</span>';
+        optionsArea.innerHTML = '';
+        loadingIndicator.style.display = 'none';
+        gameArea.style.display = 'none';
+        document.getElementById('end-screen').style.display = 'none';
+        setupPanel.style.display = 'block';
+        
+        if (isHistoryOpen) {
+            isHistoryOpen = false;
+            historyArea.style.display = 'none';
+            historyToggle.innerHTML = '<span class="icon">▼</span> 📜 展开历史剧情';
+        }
+        
+        if (hasSave()) {
+            continueBtn.style.display = 'block';
+        }
+        renderDormButtons();
+    });
     
     document.getElementById('export-btn').addEventListener('click', () => {
         let text = `📖 七班校园故事 - 冒险历程\n\n`;
