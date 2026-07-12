@@ -6,11 +6,7 @@
     <title>七班校园故事 · AI 文字冒险</title>
     <style>
         /* ===== 全局样式 ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             background: linear-gradient(145deg, #f5f0eb 0%, #e8dfd7 100%);
@@ -69,9 +65,7 @@
             margin-bottom: 4px;
             font-size: 14px;
         }
-        .setup-panel label:first-of-type {
-            margin-top: 0;
-        }
+        .setup-panel label:first-of-type { margin-top: 0; }
         .setup-panel input[type="text"],
         .setup-panel input[type="password"] {
             width: 100%;
@@ -147,14 +141,67 @@
             transition: 0.2s;
             letter-spacing: 1px;
         }
-        .start-btn:hover {
-            background: #1f2e3d;
-            transform: scale(1.01);
+        .start-btn:hover { background: #1f2e3d; transform: scale(1.01); }
+        .start-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .start-btn.warn {
+            background: #e67e22;
         }
-        .start-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .start-btn.warn:hover { background: #d35400; }
+
+        /* ===== 学期选择 ===== */
+        .semester-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 14px;
+        }
+        .semester-card {
+            padding: 14px 8px;
+            border: 2px solid #d5cdc4;
+            border-radius: 16px;
+            background: white;
+            cursor: pointer;
+            transition: 0.15s;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #3d4f5e;
+            position: relative;
+        }
+        .semester-card:hover {
+            border-color: #f6b83d;
+            background: #fef9f0;
+            transform: translateY(-2px);
+        }
+        .semester-card.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            font-size: 14px;
+            color: #27ae60;
+        }
+        .semester-card.selected.completed::after { color: white; }
+        .semester-card.in-progress,
+        .semester-card.ready {
+            border-color: #3498db;
+        }
+        .semester-card.in-progress {
+            background: #eef6fd;
+        }
+        .semester-card.ready {
+            background: #f0f8ff;
+        }
+        .semester-card.selected {
+            border-color: #f6b83d !important;
+            background: #f6b83d !important;
+            color: white;
+        }
+        .semester-status {
+            font-size: 11px;
+            font-weight: 400;
+            margin-top: 4px;
+            opacity: 0.8;
         }
 
         /* ===== 游戏主界面 ===== */
@@ -182,17 +229,9 @@
             word-break: break-word;
             transition: height 0.3s ease;
         }
-        .story-box::-webkit-scrollbar {
-            width: 6px;
-        }
-        .story-box::-webkit-scrollbar-track {
-            background: #ede7e1;
-            border-radius: 10px;
-        }
-        .story-box::-webkit-scrollbar-thumb {
-            background: #cbc0b6;
-            border-radius: 10px;
-        }
+        .story-box::-webkit-scrollbar { width: 6px; }
+        .story-box::-webkit-scrollbar-track { background: #ede7e1; border-radius: 10px; }
+        .story-box::-webkit-scrollbar-thumb { background: #cbc0b6; border-radius: 10px; }
 
         /* ===== 历史剧情区域 ===== */
         .history-toggle {
@@ -210,18 +249,9 @@
             transition: 0.2s;
             text-align: center;
         }
-        .history-toggle:hover {
-            background: #e8dfd7;
-            border-color: #cbc0b6;
-        }
-        .history-toggle .icon {
-            display: inline-block;
-            transition: 0.3s;
-        }
-        .history-toggle .icon.open {
-            transform: rotate(180deg);
-        }
-
+        .history-toggle:hover { background: #e8dfd7; border-color: #cbc0b6; }
+        .history-toggle .icon { display: inline-block; transition: 0.3s; }
+        .history-toggle .icon.open { transform: rotate(180deg); }
         #history-area {
             display: none;
             background: #f8f5f1;
@@ -232,51 +262,25 @@
             overflow-y: auto;
             border: 1px solid #e9e0d8;
         }
-        #history-area::-webkit-scrollbar {
-            width: 6px;
-        }
-        #history-area::-webkit-scrollbar-track {
-            background: #ede7e1;
-            border-radius: 10px;
-        }
-        #history-area::-webkit-scrollbar-thumb {
-            background: #cbc0b6;
-            border-radius: 10px;
-        }
-        .history-entry {
-            padding: 8px 0;
-            border-bottom: 1px solid #ede7e1;
-        }
-        .history-entry:last-child {
-            border-bottom: none;
-        }
-        .history-entry .h-type {
-            font-weight: 700;
-            color: #f6b83d;
-            font-size: 13px;
-        }
-        .history-entry .h-type.story {
-            color: #2d3e50;
-        }
-        .history-entry .h-type.choice {
-            color: #e67e22;
-        }
+        #history-area::-webkit-scrollbar { width: 6px; }
+        #history-area::-webkit-scrollbar-track { background: #ede7e1; border-radius: 10px; }
+        #history-area::-webkit-scrollbar-thumb { background: #cbc0b6; border-radius: 10px; }
+        .history-entry { padding: 8px 0; border-bottom: 1px solid #ede7e1; }
+        .history-entry:last-child { border-bottom: none; }
+        .history-entry .h-type { font-weight: 700; font-size: 13px; }
+        .history-entry .h-type.story { color: #2d3e50; }
+        .history-entry .h-type.choice { color: #e67e22; }
         .history-entry .h-text {
             margin-top: 4px;
             font-size: 14px;
             color: #3d4f5e;
             line-height: 1.6;
-            white-space: pre-wrap;   /* 保留换行 */
+            white-space: pre-wrap;
             word-break: break-word;
         }
-        .history-empty {
-            color: #a09080;
-            text-align: center;
-            padding: 16px 0;
-            font-size: 14px;
-        }
+        .history-empty { color: #a09080; text-align: center; padding: 16px 0; font-size: 14px; }
 
-        /* ===== 导航按钮区域 ===== */
+        /* ===== 导航按钮 ===== */
         .nav-buttons {
             display: flex;
             justify-content: center;
@@ -297,22 +301,10 @@
             align-items: center;
             gap: 8px;
         }
-        .nav-btn:hover {
-            background: #1f2e3d;
-            transform: scale(1.02);
-        }
-        .nav-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .nav-btn.secondary {
-            background: #e8dfd7;
-            color: #2d3e50;
-        }
-        .nav-btn.secondary:hover {
-            background: #d5cdc4;
-        }
+        .nav-btn:hover { background: #1f2e3d; transform: scale(1.02); }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .nav-btn.secondary { background: #e8dfd7; color: #2d3e50; }
+        .nav-btn.secondary:hover { background: #d5cdc4; }
 
         /* ===== 选项区域 ===== */
         .options-area {
@@ -342,21 +334,13 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 14px rgba(246, 184, 61, 0.2);
         }
-        .option-btn:active {
-            transform: scale(0.98);
-        }
         .option-btn.selected {
             border-color: #f6b83d;
             background: #fef9f0;
             box-shadow: 0 4px 12px rgba(246, 184, 61, 0.3);
         }
-        .custom-input-area {
-            display: none;
-            margin-top: 4px;
-        }
-        .custom-input-area.show {
-            display: block;
-        }
+        .custom-input-area { display: none; margin-top: 4px; }
+        .custom-input-area.show { display: block; }
         .custom-input-area input {
             width: 100%;
             padding: 14px 24px;
@@ -384,18 +368,9 @@
             width: 100%;
             display: none;
         }
-        .confirm-btn.show {
-            display: block;
-        }
-        .confirm-btn:hover {
-            background: #1f2e3d;
-            transform: scale(1.01);
-        }
-        .confirm-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .confirm-btn.show { display: block; }
+        .confirm-btn:hover { background: #1f2e3d; transform: scale(1.01); }
+        .confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
         .loading-indicator {
             display: none;
@@ -416,9 +391,7 @@
             vertical-align: middle;
             margin-right: 10px;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ===== 进度条 ===== */
         .progress-container {
@@ -460,17 +433,8 @@
             margin-left: 16px;
             white-space: nowrap;
         }
-        .progress-icon {
-            font-size: 18px;
-        }
+        .progress-icon { font-size: 18px; }
 
-        .end-message {
-            text-align: center;
-            font-size: 20px;
-            font-weight: 600;
-            color: #394a5d;
-            padding: 30px 0;
-        }
         .game-actions {
             display: flex;
             justify-content: center;
@@ -488,15 +452,10 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .reset-btn:hover {
-            background: #d5cdc4;
-        }
+        .reset-btn:hover { background: #d5cdc4; }
 
         /* ===== 结束界面 ===== */
-        #end-screen {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
+        #end-screen { display: none; animation: fadeIn 0.5s ease; }
         .end-title {
             text-align: center;
             font-size: 28px;
@@ -510,11 +469,19 @@
             color: #7a8b9b;
             margin-bottom: 25px;
         }
+        .end-section-title {
+            font-weight: 700;
+            color: #2d3e50;
+            font-size: 18px;
+            margin-bottom: 12px;
+            border-left: 4px solid #f6b83d;
+            padding-left: 12px;
+        }
         .end-history-box {
             background: #fcf9f6;
             border-radius: 20px;
             padding: 20px 24px;
-            max-height: 400px;
+            max-height: 300px;
             overflow-y: auto;
             border: 1px solid #e9e0d8;
             margin-bottom: 20px;
@@ -524,17 +491,32 @@
             white-space: pre-wrap;
             word-break: break-word;
         }
-        .end-history-box::-webkit-scrollbar {
-            width: 6px;
+        .end-reflection-box {
+            background: #fcf9f6;
+            border-radius: 20px;
+            padding: 20px 24px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9e0d8;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 15px;
+            color: #1e2a36;
+            text-align: left;
         }
-        .end-history-box::-webkit-scrollbar-track {
-            background: #ede7e1;
-            border-radius: 10px;
+        .end-reflection-box h2 {
+            font-size: 17px;
+            color: #2d3e50;
+            margin: 16px 0 8px;
         }
-        .end-history-box::-webkit-scrollbar-thumb {
-            background: #cbc0b6;
-            border-radius: 10px;
-        }
+        .end-reflection-box h2:first-child { margin-top: 0; }
+        .end-reflection-box p { margin-bottom: 8px; }
+        .end-reflection-box::-webkit-scrollbar,
+        .end-history-box::-webkit-scrollbar { width: 6px; }
+        .end-reflection-box::-webkit-scrollbar-track,
+        .end-history-box::-webkit-scrollbar-track { background: #ede7e1; border-radius: 10px; }
+        .end-reflection-box::-webkit-scrollbar-thumb,
+        .end-history-box::-webkit-scrollbar-thumb { background: #cbc0b6; border-radius: 10px; }
         .end-actions {
             display: flex;
             flex-direction: column;
@@ -553,10 +535,7 @@
             width: 100%;
             text-align: center;
         }
-        .export-btn:hover {
-            background: #e5a52a;
-            transform: scale(1.01);
-        }
+        .export-btn:hover { background: #e5a52a; transform: scale(1.01); }
         .restart-btn {
             padding: 14px;
             background: #2d3e50;
@@ -570,20 +549,15 @@
             width: 100%;
             text-align: center;
         }
-        .restart-btn:hover {
-            background: #1f2e3d;
-            transform: scale(1.01);
-        }
+        .restart-btn:hover { background: #1f2e3d; transform: scale(1.01); }
 
         /* ===== 响应式 ===== */
         @media (max-width: 600px) {
             .container { padding: 20px; }
             .story-box { max-height: 320px; }
-            .option-btn {
-                font-size: 15px;
-                padding: 12px 18px;
-            }
+            .option-btn { font-size: 15px; padding: 12px 18px; }
             #history-area { max-height: 300px; }
+            .semester-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -591,7 +565,7 @@
 
 <div class="container" id="app">
     <h1>📖 七班校园故事</h1>
-    <div class="subtitle">AI 驱动的文字冒险 · 你的选择决定剧情走向 -（目前仅有七上剧情，后续剧情敬请期待）</div>
+    <div class="subtitle">AI 驱动的文字冒险 · 你的选择决定剧情走向</div>
     <div class="save-hint">💾 具备存档功能，可随时退出，重新进入可继续游戏</div>
 
     <!-- ===== 设置面板 ===== -->
@@ -600,11 +574,41 @@
         <input type="password" id="api-key-input" placeholder="请输入你的 DeepSeek API Key (sk-...)" value="">
         <div style="font-size:12px; color:#9a8a7a; margin-top:4px;">密钥仅保存在本地浏览器，不会上传至任何服务器</div>
 
-        <button class="start-btn" id="continue-btn" style="display: none; margin-bottom: 10px;">▶️ 继续游戏</button>
-        <button class="start-btn" id="start-btn">🚀 开始冒险</button>
+        <button class="start-btn" id="continue-btn" style="display: none;">▶️ 继续游戏</button>
+
+        <!-- 管理存档 / 开始新冒险 -->
+        <div style="margin-top:18px; padding-top:18px; border-top:2px solid #e9e0d8;">
+            <p style="font-size:14px; color:#7a8b9b; margin-bottom:10px;">⚙️ 选择学期开始冒险，或管理已保存的进度</p>
+            <button class="start-btn" id="manage-saves-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:0;">
+                🗂️ 选择学期 / 管理存档
+            </button>
+        </div>
     </div>
 
-    <!-- ===== 角色设定面板（开始后弹出） ===== -->
+    <!-- ===== 学期选择面板 ===== -->
+    <div id="semester-select" class="setup-panel" style="display:none;">
+        <h2 style="font-size:22px; margin-bottom:8px; color:#2d3e50;">📅 选择学期</h2>
+        <p style="color:#7a8b9b; font-size:14px; margin-bottom:16px;">选择你要开始的学期（只能按顺序解锁，后续学期在前一学期完成后解锁）</p>
+        <div class="semester-grid" id="semester-grid">
+            <!-- JS 动态生成 -->
+        </div>
+        <button class="start-btn" id="continue-semester-btn" style="display:none; background:#3498db;">▶️ 继续本学期的历程</button>
+        <button class="start-btn" id="confirm-semester-btn">待开始</button>
+        <button class="start-btn" id="back-from-semester-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:8px;">↩️ 返回</button>
+
+        <!-- 删除操作 -->
+        <div style="margin-top:18px; padding-top:18px; border-top:2px solid #e9e0d8;">
+            <p style="font-size:14px; color:#7a8b9b; margin-bottom:10px;">⚠️ 危险操作</p>
+            <button class="start-btn warn" id="delete-current-semester-btn" style="margin-top:0;">
+                🗑️ 删除所选学期进度（将级联删除后续学期）
+            </button>
+            <button class="start-btn warn" id="delete-all-semesters-btn" style="background:#c0392b;">
+                💣 删除全部进度
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== 角色设定面板 ===== -->
     <div id="character-setup" class="setup-panel" style="display:none;">
         <h2 style="font-size:22px; margin-bottom:8px; color:#2d3e50;">🎭 创建你的角色</h2>
         <p style="color:#7a8b9b; font-size:14px; margin-bottom:16px;">开始冒险前，先设定你的角色信息</p>
@@ -619,9 +623,7 @@
         </div>
 
         <label>🏠 选择宿舍</label>
-        <div id="dorm-buttons" class="dorm-select">
-            <!-- 由 JS 动态生成 -->
-        </div>
+        <div id="dorm-buttons" class="dorm-select"></div>
 
         <button class="start-btn" id="confirm-character-btn">✅ 确认，开始冒险</button>
         <button class="start-btn" id="back-to-setup-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:8px;">↩️ 返回</button>
@@ -629,17 +631,15 @@
 
     <!-- ===== 游戏主界面 ===== -->
     <div id="game-area">
-        <!-- 历史剧情切换按钮 -->
+        <div style="font-size:14px; color:#7a8b9b; margin-bottom:10px; text-align:center;" id="current-semester-label"></div>
+
         <button class="history-toggle" id="history-toggle">
             <span class="icon">▼</span> 📜 展开历史剧情
         </button>
-
-        <!-- 历史剧情区域 -->
         <div id="history-area">
             <div id="history-content"></div>
         </div>
 
-        <!-- 进度条 -->
         <div class="progress-container" id="progress-container">
             <span class="progress-icon">📊</span>
             <div class="progress-bar-wrapper">
@@ -657,123 +657,266 @@
         </div>
         <div class="options-area" id="options-area"></div>
         <div class="game-actions">
-            <button class="reset-btn" id="reset-btn">🔄 重新开始并删除进度</button>
+            <button class="reset-btn" id="reset-btn">🔄 重新开始本学期并删除进度</button>
         </div>
     </div>
 
-    <!-- ===== 结束界面 ===== -->
-    <div id="end-screen">
-        <div class="end-title">🎉 故事结束</div>
-        <div class="end-subtitle">感谢你的参与！以下是你的冒险历程</div>
-        <div class="end-history-box" id="end-history-content"></div>
-        <div class="end-actions">
-            <button class="export-btn" id="export-btn">📥 导出为txt</button>
-            <button class="restart-btn" id="restart-btn">🔄 重新开始</button>
+    <!-- ===== 结束界面 - 页1：冒险历程 ===== -->
+    <div id="end-screen" style="display:none;">
+        <div class="end-title">🎉 本学期结束</div>
+        <div class="end-subtitle" id="end-semester-label"></div>
+
+        <div id="end-page-1">
+            <div class="end-section-title">📜 冒险历程</div>
+            <div class="end-history-box" id="end-history-content"></div>
+            <div class="end-actions">
+                <button class="export-btn" id="export-history-btn">📥 导出冒险历程为txt</button>
+                <button class="restart-btn" id="end-to-reflection-btn">✅ 关闭，查看学期总结</button>
+            </div>
+        </div>
+
+        <div id="end-page-2" style="display:none;">
+            <div class="end-section-title">📝 学期总结</div>
+            <div class="end-reflection-box" id="end-reflection-content">
+                <span style="color: #a09080;">⏳ 正在生成学期总结……</span>
+            </div>
+            <div class="end-actions">
+                <button class="export-btn" id="export-reflection-btn">📥 导出学期总结为txt</button>
+                <button class="restart-btn" id="end-continue-btn" style="background:#3498db;">▶️ 继续游戏</button>
+                <button class="restart-btn" id="end-to-menu-btn">✅ 关闭，返回主界面</button>
+            </div>
+        </div>
+
+        <!-- 九下专属：页3 毕业胜利 -->
+        <div id="end-page-3" style="display:none;">
+            <div style="text-align:center; margin: 20px 0;">
+                <div style="font-size:48px; margin-bottom:12px;">🎓🎉</div>
+                <div class="end-title" style="font-size:28px;">毕业快乐！</div>
+                <p style="color:#7a8b9b; margin:8px 0 20px;">恭喜你完成了整个初中的冒险旅程！</p>
+            </div>
+            <div class="end-section-title">📖 初中总结</div>
+            <div class="end-reflection-box" id="end-graduation-content">
+                <span style="color: #a09080;">⏳ 正在生成初中总结……</span>
+            </div>
+            <div class="end-actions">
+                <button class="export-btn" id="export-graduation-btn">📥 导出初中总结为txt</button>
+                <button class="restart-btn" id="end-graduation-to-menu-btn">✅ 关闭，返回主界面</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
     // ================================================================
-    //  配置（不再硬编码 API Key，改为从输入框读取）
+    //  配置
     // ================================================================
     const BASE_URL = "https://api.deepseek.com/chat/completions";
     const MODEL = "deepseek-v4-flash";
+    const SEMESTERS = ['七上', '七下', '八上', '八下', '九上', '九下'];
 
     // ================================================================
-    //  系统提示词
+    //  IndexedDB 存储层
     // ================================================================
-    function buildSystemPrompt(playerName, gender, dorm) {
-        return `
-你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
+    const DB_NAME = 'SchoolStoryDB';
+    const DB_VERSION = 2;
+    const META_KEY = 'game_meta';
+
+    let db = null;
+
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            if (db) {
+                // 检查缓存版本是否匹配
+                if (db.version >= DB_VERSION &&
+                    db.objectStoreNames.contains('semesters') &&
+                    db.objectStoreNames.contains('meta')) {
+                    resolve(db); return;
+                }
+                db.close();
+                db = null;
+            }
+            const req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onupgradeneeded = (e) => {
+                const d = e.target.result;
+                if (!d.objectStoreNames.contains('semesters')) {
+                    d.createObjectStore('semesters', { keyPath: 'id' });
+                }
+                if (!d.objectStoreNames.contains('meta')) {
+                    d.createObjectStore('meta', { keyPath: 'key' });
+                }
+            };
+            req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async function dbGet(storeName, key) {
+        await openDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(storeName, 'readonly');
+            const req = tx.objectStore(storeName).get(key);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => resolve(null);
+        });
+    }
+
+    async function dbPut(storeName, data) {
+        await openDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(storeName, 'readwrite');
+            tx.objectStore(storeName).put(data);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+        });
+    }
+
+    async function dbDelete(storeName, key) {
+        await openDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(storeName, 'readwrite');
+            tx.objectStore(storeName).delete(key);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+        });
+    }
+
+    async function dbGetAll(storeName) {
+        await openDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(storeName, 'readonly');
+            const req = tx.objectStore(storeName).getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+        });
+    }
+
+    async function dbClear(storeName) {
+        await openDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction(storeName, 'readwrite');
+            tx.objectStore(storeName).clear();
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+        });
+    }
+
+    // 学期存档读写
+    async function saveSemester(semesterId, data) {
+        await dbPut('semesters', { id: semesterId, ...data });
+    }
+
+    async function loadSemester(semesterId) {
+        const d = await dbGet('semesters', semesterId);
+        return d || null;
+    }
+
+    async function deleteSemesterDB(semesterId) {
+        await dbDelete('semesters', semesterId);
+    }
+
+    async function getAllSemesters() {
+        return await dbGetAll('semesters');
+    }
+
+    // Meta 数据
+    async function getMeta() {
+        const m = await dbGet('meta', META_KEY);
+        return m || { playerInfo: { name: '', gender: '', dorm: '' }, lastSemester: null };
+    }
+
+    async function saveMeta(meta) {
+        await dbPut('meta', { key: META_KEY, ...meta });
+    }
+
+    // 是否有可继续的进度
+    async function hasAnySave() {
+        const all = await getAllSemesters();
+        return all.some(s => !s.isComplete && s.messages && s.messages.length > 0);
+    }
+
+    // ================================================================
+    //  学期提示词
+    // ================================================================
+    function getSemesterPromptContent(semester) {
+        const prompts = {
+            '七上': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
 
 【故事背景】
- - 时间：2023.8.26下午，你（${playerName}，${gender}）到华附北滘学校中学部报到，升初一。班级707，年级12班×52人。
- - 宿舍${dorm}（8人间（铁床），3间卫浴一体。707的宿舍有（男，四楼）402,403,404和（女，五楼）538,539,540）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现“手机收到班主任发的消息”之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
+ - 时间：2023.8.26下午，你（{name}，{gender}）到华附北滘学校中学部报到，升初一。班级707，年级12班×52人。
+ - 宿舍{dorm}（8人间（铁床），3间卫浴一体。707的宿舍有（男，四楼）402,403,404和（女，五楼）538,539,540）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现"手机收到班主任发的消息"之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
  - 作息：6:30起床铃，6:40操场跑操；晚饭和洗澡是在下午五六点；21:30晚修结束，22:00熄灯。
- - 教室有“清大视讯”一体机（需刷卡启动），两侧黑板。无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝）。
- - “七上”=七年级上学期。
+ - 教室有"清大视讯"一体机（需刷卡启动），两侧黑板。无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝）。
+ - "七上"=七年级上学期。
 
-【剧情走向（必须按顺序发生！，但你可以自由填充细节和分支）】
-1. 开学报到：8月26日下午来到宿舍，铺床，与舍友首次见面；之后去到班级报到，每个人的位置已经被安排好（桌上有姓名牌），班上一体机正播放着校歌《从心出发》“诚意正心，格物致知，铭记华附精神，从心出发…”。
-2. 军训（8月27日-8月31日，共5天）：
-   - 班级教官的外号是"笑脸哥"（这是第三天才起的外号，所以前几天不能出现），严而不厉，惩罚方式：让表现不好的学生去其他班张开双臂、迈一只腿喊"我骄傲、我自信、我能行"。
-   - 总教官口头禅"晕蛋！"，军训第三天中午罚全年级在操场太阳下蹲了20分钟，腿都蹲麻了。
-   - 第二天学唱《团结就是力量》。
-   - 第四天军营参观（足球场设陆军/空军等展区），可体验无人机、穿越火线、水火箭、打靶等。
-   - 第五天结营仪式，全年级在操场上进行了队列展示。
-3. 七上开学：认识各科老师：
-   - 语文：刘志荣（女，胖胖的，和蔼），她在我们班任教前我们班换过两次语文老师。讲课爱跑题废话多。
-   - 数学：谭庆坤（男，严肃但挺好，七上后期妻子生娃，他发喜糖）。
-   - 英语：何铭仪（女，班主任，三十来岁）。
-   - 道法：梁靖（女，和蔼，常把单个知识点的标题写黑板上让我们默写）。
-   - 历史：陈洵（女，挺好，有时严厉，默写严，分享过亲戚住在长安城附近）。
-   - 地理：谢春霞（女，温柔，国庆假期布置作业制作建议地球仪）。
-   - 生物：吕绍钿（女，温柔，分享午睡时间不宜太长的常识，每节课前播放性教育小视频）。
-   - 班主任：何铭仪（初期温柔，后期渐严，七上开学发纸写班干部意向）。
-4. 4人小组，上交10多份班级口号，投票选出“七班七班，逐梦云端，不惧困难，跨越山川！”，后改“逐”为“筑”。票数第二：“七班七班我最棒，七班七班我最强，七班七班，耶！”。
+【剧情走向（必须按顺序发生！）】
+1. 开学报到：8月26日下午来到宿舍，铺床，与舍友首次见面；之后去到班级报到，每个人的位置已经被安排好（桌上有姓名牌），班上一体机正播放着校歌《从心出发》。
+2. 军训（8月27日-8月31日，共5天）：班级教官的外号是"笑脸哥"（第三天才起的外号），严而不厉，惩罚方式：让表现不好的学生去其他班张开双臂、迈一只腿喊"我骄傲、我自信、我能行"。总教官口头禅"晕蛋！"，军训第三天中午罚全年级在操场太阳下蹲了20分钟。第二天学唱《团结就是力量》。第四天军营参观（足球场设陆军/空军等展区），可体验无人机、穿越火线、水火箭、打靶等。第五天结营仪式。
+3. 七上开学：认识各科老师：语文刘志荣（女，胖胖的，和蔼）、数学谭庆坤（男，严肃但挺好，七上后期妻子生娃）、英语何铭仪（女，班主任）、道法梁靖（女，和蔼）、历史陈洵（女，默写严）、地理谢春霞（女，温柔）、生物吕绍钿（女，温柔）。班主任何铭仪初期温柔后期渐严。
+4. 4人小组，上交10多份班级口号，投票选出"七班七班，逐梦云端，不惧困难，跨越山川！"，后改"逐"为"筑"。
 5. 同学逐渐熟络。
-6. 10月篮球赛：男上半场20分钟→女投篮→男下半场→女投篮。周末线上与10班争执（怀疑裁判黑哨、怀疑对方翻比分牌），班主任调解和平解决。
-7. 11月第一次校运会：班级一分钟文艺表演《小城夏天》。
-8. 12月红歌比赛：表演《我和我的祖国》，4名同学先朗诵，后其余合唱+手势舞，1名同学指挥歌唱节奏。
+6. 10月篮球赛。周末线上与10班争执（怀疑裁判黑哨），班主任调解和平解决。
+7. 11月第一次校运会：班级文艺表演《小城夏天》。
+8. 12月红歌比赛：表演《我和我的祖国》。
 9. 第一次期末考试。
 10. 考后在教室看电影。
-11. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，寒假开始（七上结束）。
+11. 放假前一天上午在教室，中午回宿舍收行李搞卫生，家长接走，寒假开始（七上结束）。`,
 
-【游戏规则】
-- 你每次生成一段故事描述，并在结尾提供若干选项供玩家选择。
-- 描述要生动、细腻，包含环境、心理、对话等，长度控制在 200~400 字左右。
-- 选项要合理，且能推动剧情发展，符合当前时间线。
-- 生成格式：
-  第一行开始为故事描述（不使用Markdown格式；多行分段，尽量每段（行）不多于140字，一句对话可以单独占一行）。描述结束后无需询问（比如“接下来要做什么？”）。
-  故事描述结束后先单独一行输出当前进度（见【进度跟踪】），然后单独一行写"【选项】"，接着每行一个选项，无需列出自定义选项了，如：
-  ...（故事描述）
-  【进度: 12.35%】
-  【选项】
-  1. 去食堂吃饭
-  2. 回宿舍休息
-  3. 在操场散步
-- 如果故事已经结束（例如放寒假），则不再提供选项，只输出"故事结束"之类的文字。
-- ！某些场景下（如班干部意向、老师点名提问等），剧情需要玩家自己输入内容，此时故事描述部分的最后一行需提问，【选项】后不输出任何选项（直接以【选项】行结束）。
-- 每次只推进一小段剧情，不要一次性跨越多个关键事件。
-- 自定义选项由程序提供，你不需要在选项中包含"自定义"、"其他"、"自己决定"等类似选项。
-- 玩家消息中会包含本轮是否允许自定义选项的标记，请根据标记生成合适数量的选项。
+            '七下': `七下提示词`,
+            '八上': `八上提示词`,
+            '八下': `八下提示词`,
+            '九上': `九上提示词`,
+            '九下': `九下提示词`
+        };
+        return prompts[semester] || `${semester}提示词`;
+    }
 
-【进度跟踪】
-整个七上剧情按顺序共11个主要事件，你必须根据当前剧情所处的事件阶段，在每次输出的**故事描述末尾另起一行**输出当前进度，格式为：
-【进度: XX.XX%】
-各事件对应的大致进度范围如下（严格按照顺序！你只需合理评估当前位置即可，但还是尽量保持下方的进度范围）：
-  - 事件1 开学报到（0% ~ 6%）
-  - 事件2 军训（6% ~ 28%）
-  - 事件3 七上开学/认识老师（28% ~ 35%）
-  - 事件4 班级口号投票（35% ~ 40%）
-  - 事件5 同学逐渐熟络（40% ~ 43%）
-  - 事件6 10月篮球赛（43% ~ 56%）
-  - 事件7 11月第一次校运会（56% ~ 68%）
-  - 事件8 12月红歌比赛（68% ~ 80%）
-  - 事件9 第一次期末考试（80% ~ 87%）
-  - 事件10 考后看电影（87% ~ 94%）
-  - 事件11 放假/寒假开始（94% ~ 100%）
-每轮进度应递增范围为0.2%至0.8%，两位小数。当故事结束时，进度为 100.00%。
-示例输出结尾：
-  ...（故事描述）
-  【进度: 12.35%】
-  然后下一行再写【选项】...
+    function buildSystemPrompt(semester, playerName, gender, dorm, prevSummaries) {
+        let prompt = getSemesterPromptContent(semester);
+        prompt = prompt.replace(/\{name\}/g, playerName).replace(/\{gender\}/g, gender).replace(/\{dorm\}/g, dorm);
 
-【当前状态】
-军训开始前一天（2023.8.26），你和你家长带着重重的行李进入宿舍。
-        `.trim();
+        // 注入前面学期的梗概
+        if (prevSummaries && prevSummaries.length > 0) {
+            prompt += '\n\n【往期回顾】\n';
+            prevSummaries.forEach(s => {
+                prompt += `\n${s.semester}梗概：\n${s.summary}\n`;
+            });
+            prompt += '\n以上是之前学期的梗概，请基于这些历史，继续本学期的故事。记住所有已出现的同学和老师角色及其性格特点。';
+        }
+
+        prompt += '\n\n【游戏规则】\n' +
+            '- 使用第二人称视角。\n\n' +
+            '- 每次生成一段故事描述，并在结尾提供若干选项供玩家选择。\n' +
+            '- 描述要生动、细腻，包含环境、心理、对话等，长度控制在 200~400 字左右。\n' +
+            '- 选项要合理，且能推动剧情发展，符合当前时间线。\n' +
+            '- 生成格式：第一行开始为故事描述（不使用Markdown格式；多行分段，尽量每段不多于140字）。描述结束后无需询问。\n' +
+            '  故事描述结束后先单独一行输出当前进度，然后单独一行写"【选项】"，接着每行一个选项，无需列出自定义选项，如：\n' +
+            '  ...（故事描述）\n' +
+            '  【进度: 12.35%】\n' +
+            '  【选项】\n' +
+            '  1. 去食堂吃饭\n' +
+            '  2. 回宿舍休息\n' +
+            '- 如果故事已经结束（例如放寒假），则不再提供选项，只输出"故事结束"之类的文字。\n' +
+            '- 某些场景下（如班干部意向、老师点名提问等），剧情需要玩家自己输入内容，此时故事描述最后一行需提问，【选项】后不输出任何选项。\n' +
+            '- 每次只推进一小段剧情，不要一次性跨越多个关键事件。\n' +
+            '- 自定义选项由程序提供，你不需要在选项中包含"自定义"、"其他"等类似选项。\n' +
+            '- 玩家消息中会包含本轮是否允许自定义选项的标记。\n\n' +
+            '【进度跟踪】\n' +
+            '整个学期剧情按顺序有若干主要事件，你必须根据当前剧情所处的事件阶段，在每次输出的故事描述末尾另起一行输出当前进度，格式为：【进度: XX.XX%】\n' +
+            '每轮进度应递增范围为0.2%至0.8%，两位小数。当故事结束时，进度为 100.00%。';
+
+        return prompt;
     }
 
     // ================================================================
     //  DOM 引用
     // ================================================================
     const setupPanel = document.getElementById('setup-panel');
+    const semesterSelect = document.getElementById('semester-select');
+    const semesterGrid = document.getElementById('semester-grid');
     const characterSetup = document.getElementById('character-setup');
     const confirmCharacterBtn = document.getElementById('confirm-character-btn');
     const backToSetupBtn = document.getElementById('back-to-setup-btn');
     const gameArea = document.getElementById('game-area');
-    const startBtn = document.getElementById('start-btn');
     const continueBtn = document.getElementById('continue-btn');
     const resetBtn = document.getElementById('reset-btn');
     const storyBox = document.getElementById('story-box');
@@ -789,13 +932,10 @@
     const dormButtonsContainer = document.getElementById('dorm-buttons');
 
     // ================================================================
-    //  宿舍选择逻辑
+    //  宿舍选择
     // ================================================================
     let selectedDorm = null;
-    const dormMap = {
-        '男': ['402', '403', '404'],
-        '女': ['538', '539', '540']
-    };
+    const dormMap = { '男': ['402', '403', '404'], '女': ['538', '539', '540'] };
 
     function renderDormButtons() {
         const gender = document.querySelector('input[name="gender"]:checked').value;
@@ -803,10 +943,8 @@
         dormButtonsContainer.innerHTML = '';
         dorms.forEach(d => {
             const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'dorm-btn';
-            btn.textContent = d;
-            btn.dataset.dorm = d;
+            btn.type = 'button'; btn.className = 'dorm-btn';
+            btn.textContent = d; btn.dataset.dorm = d;
             if (selectedDorm === d) btn.classList.add('active');
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.dorm-btn').forEach(b => b.classList.remove('active'));
@@ -815,19 +953,13 @@
             });
             dormButtonsContainer.appendChild(btn);
         });
-        if (!dorms.includes(selectedDorm)) {
-            selectedDorm = null;
-        }
+        if (!dorms.includes(selectedDorm)) selectedDorm = null;
         if (!selectedDorm && dorms.length) {
             selectedDorm = dorms[0];
             document.querySelector('.dorm-btn')?.classList.add('active');
         }
     }
-
-    genderRadios.forEach(radio => {
-        radio.addEventListener('change', renderDormButtons);
-    });
-    renderDormButtons();
+    genderRadios.forEach(r => r.addEventListener('change', renderDormButtons));
 
     // ================================================================
     //  游戏状态
@@ -838,12 +970,14 @@
     let timeoutId = null;
     let historyEntries = [];
     let isHistoryOpen = false;
-    let currentStory = '';   // 存储当前显示的剧情（未加入历史）
-    let allowCustom = false;  // 当前回合是否允许自定义选项
-    let selectedOption = null;  // 当前选中的选项文本
-    let isCustomSelected = false;  // 是否选中了自定义选项
-    let playerInfo = { name: '', gender: '', dorm: '' };  // 玩家信息
-    let currentRound = 0;  // 当前回合数
+    let currentStory = '';
+    let allowCustom = false;
+    let selectedOption = null;
+    let isCustomSelected = false;
+    let playerInfo = { name: '', gender: '', dorm: '' };
+    let currentRound = 0;
+    let currentProgress = 0;
+    let currentSemester = '七上';  // 当前正在玩的学期
 
     function updateRoundDisplay() {
         const el = document.getElementById('round-label');
@@ -851,60 +985,12 @@
     }
 
     // ================================================================
-    //  存档功能
-    // ================================================================
-    const SAVE_KEY = 'school_story_save';
-
-    function saveGame() {
-        const lastMsg = messages[messages.length - 1];
-        const isComplete = lastMsg && lastMsg.role === 'assistant';
-        
-        const saveData = {
-            messages: messages,
-            historyEntries: historyEntries,
-            currentStory: currentStory,
-            allowCustom: allowCustom,
-            playerInfo: playerInfo,
-            savedAt: new Date().toISOString(),
-            isComplete: isComplete,
-            currentProgress: currentProgress,
-            currentRound: currentRound
-        };
-        localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
-    }
-
-    function loadGame() {
-        const saveDataStr = localStorage.getItem(SAVE_KEY);
-        if (!saveDataStr) return null;
-        
-        try {
-            return JSON.parse(saveDataStr);
-        } catch (e) {
-            localStorage.removeItem(SAVE_KEY);
-            return null;
-        }
-    }
-
-    function deleteSave() {
-        localStorage.removeItem(SAVE_KEY);
-    }
-
-    function hasSave() {
-        return localStorage.getItem(SAVE_KEY) !== null;
-    }
-
-    if (hasSave()) {
-        continueBtn.style.display = 'block';
-    }
-
-    // ================================================================
-    //  历史记录功能
+    //  历史记录
     // ================================================================
     function addHistoryEntry(type, text) {
         historyEntries.push({ type, text });
         renderHistory();
     }
-
     function renderHistory() {
         if (historyEntries.length === 0) {
             historyContent.innerHTML = '<div class="history-empty">📭 还没有剧情记录，开始冒险吧！</div>';
@@ -914,33 +1000,24 @@
         historyEntries.forEach((entry) => {
             const typeClass = entry.type === 'story' ? 'story' : 'choice';
             const typeLabel = entry.type === 'story' ? '📖 剧情' : '👉 选择';
-            html += `
-                <div class="history-entry">
-                    <div class="h-type ${typeClass}">${typeLabel}</div>
-                    <div class="h-text">${escapeHtml(entry.text)}</div>
-                </div>
-            `;
+            html += `<div class="history-entry"><div class="h-type ${typeClass}">${typeLabel}</div><div class="h-text">${escapeHtml(entry.text)}</div></div>`;
         });
         historyContent.innerHTML = html;
         historyArea.scrollTop = historyArea.scrollHeight;
     }
-
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
-    // 切换历史面板
     historyToggle.addEventListener('click', () => {
         isHistoryOpen = !isHistoryOpen;
         historyArea.style.display = isHistoryOpen ? 'block' : 'none';
-        if (isHistoryOpen) {
-            historyToggle.innerHTML = '<span class="icon open">▼</span> 📜 收起历史剧情';
-            renderHistory();
-        } else {
-            historyToggle.innerHTML = '<span class="icon">▼</span> 📜 展开历史剧情';
-        }
+        historyToggle.innerHTML = isHistoryOpen
+            ? '<span class="icon open">▼</span> 📜 收起历史剧情'
+            : '<span class="icon">▼</span> 📜 展开历史剧情';
+        if (isHistoryOpen) renderHistory();
     });
 
     // ================================================================
@@ -949,34 +1026,16 @@
     async function callDeepSeek(messagesArr, retries = 3) {
         const apiKey = apiKeyInput.value.trim();
         if (!apiKey) throw new Error('请先填写 DeepSeek API Key');
-
-        const headers = {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-        };
-        const payload = {
-            model: MODEL,
-            messages: messagesArr,
-            temperature: 0.8,
-            max_tokens: 1500,
-            stream: false
-        };
-
-        for (let attempt = 0; attempt < retries; attempt++) {
+        const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
+        const payload = { model: MODEL, messages: messagesArr, temperature: 0.8, max_tokens: 4000, stream: false };
+        for (let i = 0; i < retries; i++) {
             try {
-                const resp = await fetch(BASE_URL, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(payload)
-                });
-                if (!resp.ok) {
-                    const errText = await resp.text();
-                    throw new Error(`HTTP ${resp.status}: ${errText}`);
-                }
+                const resp = await fetch(BASE_URL, { method: 'POST', headers, body: JSON.stringify(payload) });
+                if (!resp.ok) { const et = await resp.text(); throw new Error(`HTTP ${resp.status}: ${et}`); }
                 const data = await resp.json();
                 return data.choices[0].message.content;
             } catch (e) {
-                console.warn(`API 调用失败 (第${attempt+1}次):`, e);
+                console.warn(`API 调用失败 (第${i+1}次):`, e);
                 await new Promise(r => setTimeout(r, 1500));
             }
         }
@@ -986,108 +1045,57 @@
     // ================================================================
     //  解析 AI 回复
     // ================================================================
-    let currentProgress = 0;  // 当前进度 (0~100)
-
     function parseResponse(text) {
         const lines = text.split('\n').map(s => s.trim());
-        let options = [];
-        let descriptionLines = [];
-        let inOptions = false;
-        let foundOptionsMarker = false;
-        let progress = null;
-
-        // 先尝试提取进度标记
+        let options = [], descriptionLines = [], inOptions = false, foundOptionsMarker = false, progress = null;
         for (let line of lines) {
-            const match = line.match(/【进度:\s*(\d+\.?\d*)\s*%】/);
-            if (match) {
-                progress = parseFloat(match[1]);
-                if (progress < 0) progress = 0;
-                if (progress > 100) progress = 100;
-                break;
-            }
+            const m = line.match(/【进度:\s*(\d+\.?\d*)\s*%】/);
+            if (m) { progress = parseFloat(m[1]); if (progress < 0) progress = 0; if (progress > 100) progress = 100; break; }
         }
-
         for (let line of lines) {
-            // 跳过进度行（不显示在故事中）
             if (/【进度:\s*\d+\.?\d*\s*%】/.test(line)) continue;
-
-            if (line.startsWith('【选项】')) {
-                inOptions = true;
-                foundOptionsMarker = true;
-                continue;
-            }
-            if (inOptions) {
-                if (/^\s*\d+[\.、\)]\s*/.test(line)) {
-                    options.push(line);
-                } else {
-                    descriptionLines.push(line);
-                }
-            } else {
-                descriptionLines.push(line);
-            }
+            if (line.startsWith('【选项】')) { inOptions = true; foundOptionsMarker = true; continue; }
+            if (inOptions) { if (/^\s*\d+[\.、\)]\s*/.test(line)) options.push(line); else descriptionLines.push(line); }
+            else descriptionLines.push(line);
         }
-
         if (options.length === 0 && !foundOptionsMarker) {
             const allLines = text.split('\n').map(s => s.trim());
             const desc = [];
             for (let line of allLines) {
                 if (/【进度:\s*\d+\.?\d*\s*%】/.test(line)) continue;
-                if (/^\s*\d+[\.、\)]\s*/.test(line)) {
-                    options.push(line);
-                } else {
-                    desc.push(line);
-                }
+                if (/^\s*\d+[\.、\)]\s*/.test(line)) options.push(line); else desc.push(line);
             }
             descriptionLines = desc;
         }
-
-        return {
-            description: descriptionLines.join('\n').trim(),
-            options,
-            progress,
-            noOptionsMode: foundOptionsMarker && options.length === 0
-        };
+        return { description: descriptionLines.join('\n').trim(), options, progress, noOptionsMode: foundOptionsMarker && options.length === 0 };
     }
 
     function updateProgressBar(progress) {
-        if (progress !== null && progress !== undefined) {
-            currentProgress = progress;
-        }
+        if (progress !== null && progress !== undefined) currentProgress = progress;
         const fill = document.getElementById('progress-bar-fill');
         const label = document.getElementById('progress-label');
-        if (fill && label) {
-            fill.style.width = currentProgress.toFixed(2) + '%';
-            label.textContent = currentProgress.toFixed(2) + '%';
-        }
+        if (fill && label) { fill.style.width = currentProgress.toFixed(2) + '%'; label.textContent = currentProgress.toFixed(2) + '%'; }
     }
 
     // ================================================================
-    //  显示剧情 (手动导航)
+    //  显示剧情
     // ================================================================
     function displayStory(description, options, progress, noOptionsMode) {
         return new Promise((resolve) => {
             optionsArea.innerHTML = '';
             storyBox.innerHTML = '';
-
-            if (progress !== null && progress !== undefined) {
-                updateProgressBar(progress);
-            }
-
+            if (progress !== null && progress !== undefined) updateProgressBar(progress);
             currentStory = description;
-
             const paragraphs = description.split('\n').filter(line => line.trim() !== '');
-            let currentIndex = 0;
-            let navButtonsContainer = null;
+            let currentIndex = 0, navButtonsContainer = null;
 
             function renderCurrent() {
                 storyBox.innerHTML = '';
-                
                 const p = document.createElement('div');
                 p.textContent = paragraphs[currentIndex];
                 p.style.marginBottom = '8px';
                 storyBox.appendChild(p);
                 storyBox.scrollTop = 0;
-
                 updateNavButtons();
             }
 
@@ -1095,47 +1103,30 @@
                 if (!navButtonsContainer) {
                     navButtonsContainer = document.createElement('div');
                     navButtonsContainer.className = 'nav-buttons';
-                    navButtonsContainer.innerHTML = `
-                        <button class="nav-btn secondary" id="prev-btn">◀️ 上一步</button>
-                        <button class="nav-btn" id="next-btn">下一步 ▶️</button>
-                    `;
+                    navButtonsContainer.innerHTML = '<button class="nav-btn secondary" id="prev-btn">◀ 上一步</button><button class="nav-btn" id="next-btn">下一步 ▶</button>';
                     optionsArea.appendChild(navButtonsContainer);
-
                     document.getElementById('prev-btn').addEventListener('click', goPrev);
                     document.getElementById('next-btn').addEventListener('click', goNext);
                 }
-
                 const prevBtn = document.getElementById('prev-btn');
-                const nextBtn = document.getElementById('next-btn');
-
                 prevBtn.disabled = currentIndex === 0 && !isWaitingForChoice;
             }
 
             function goPrev() {
                 if (isWaitingForChoice) {
                     optionsArea.innerHTML = '';
-                    
                     const promptDiv = document.getElementById('choice-prompt');
-                    if (promptDiv) {
-                        promptDiv.remove();
-                    }
-                    
+                    if (promptDiv) promptDiv.remove();
                     navButtonsContainer = null;
                     isWaitingForChoice = false;
                     renderCurrent();
-                } else if (currentIndex > 0) {
-                    currentIndex--;
-                    renderCurrent();
-                }
+                } else if (currentIndex > 0) { currentIndex--; renderCurrent(); }
             }
 
             function goNext() {
-                if (currentIndex < paragraphs.length - 1) {
-                    currentIndex++;
-                    renderCurrent();
-                } else {
+                if (currentIndex < paragraphs.length - 1) { currentIndex++; renderCurrent(); }
+                else {
                     storyBox.innerHTML = '';
-                    
                     const promptDiv = document.createElement('div');
                     promptDiv.id = 'choice-prompt';
                     promptDiv.textContent = '接下来你要干什么？';
@@ -1145,273 +1136,318 @@
                     promptDiv.style.textAlign = 'center';
                     storyBox.appendChild(promptDiv);
                     storyBox.scrollTop = 0;
-
-                    const nextBtn = document.getElementById('next-btn');
-                    if (nextBtn) {
-                        nextBtn.remove();
-                    }
+                    document.getElementById('next-btn')?.remove();
 
                     if (options.length > 0) {
-                        selectedOption = null;
-                        isCustomSelected = false;
-
-                        options.forEach((opt) => {
+                        selectedOption = null; isCustomSelected = false;
+                        options.forEach(opt => {
                             const btn = document.createElement('button');
-                            btn.className = 'option-btn';
-                            btn.textContent = opt;
+                            btn.className = 'option-btn'; btn.textContent = opt;
                             btn.addEventListener('click', () => selectOption(btn, opt));
                             optionsArea.appendChild(btn);
                         });
-
                         if (allowCustom) {
-                            const customBtn = document.createElement('button');
-                            customBtn.className = 'option-btn';
-                            customBtn.textContent = '✍️ 自定义选项...';
-                            customBtn.addEventListener('click', () => selectCustom(customBtn));
-                            optionsArea.appendChild(customBtn);
+                            const cb = document.createElement('button');
+                            cb.className = 'option-btn'; cb.textContent = '✍ 自定义选项...';
+                            cb.addEventListener('click', () => selectCustom(cb));
+                            optionsArea.appendChild(cb);
                         }
-
-                        const customInputArea = document.createElement('div');
-                        customInputArea.className = 'custom-input-area';
-                        customInputArea.id = 'custom-input-area';
-                        customInputArea.innerHTML = '<input type="text" id="custom-option-input" placeholder="输入你的自定义选项..." autocomplete="off">';
-                        optionsArea.appendChild(customInputArea);
-
-                        const confirmBtn = document.createElement('button');
-                        confirmBtn.className = 'confirm-btn';
-                        confirmBtn.id = 'confirm-btn';
-                        confirmBtn.textContent = '确定';
-                        confirmBtn.disabled = true;
-                        confirmBtn.addEventListener('click', handleConfirm);
-                        optionsArea.appendChild(confirmBtn);
-
+                        const cia = document.createElement('div');
+                        cia.className = 'custom-input-area'; cia.id = 'custom-input-area';
+                        cia.innerHTML = '<input type="text" id="custom-option-input" placeholder="输入你的自定义选项..." autocomplete="off">';
+                        optionsArea.appendChild(cia);
+                        const cfmBtn = document.createElement('button');
+                        cfmBtn.className = 'confirm-btn'; cfmBtn.id = 'confirm-btn';
+                        cfmBtn.textContent = '确定'; cfmBtn.disabled = true;
+                        cfmBtn.addEventListener('click', handleConfirm);
+                        optionsArea.appendChild(cfmBtn);
                         isWaitingForChoice = true;
-                        
-                        const prevBtn = document.getElementById('prev-btn');
-                        if (prevBtn) {
-                            prevBtn.disabled = false;
-                        }
-                    } else if (noOptionsMode) {
-                        // AI明确输出无选项，强制开启自定义输入
-                        document.getElementById('next-btn')?.remove();
-                        
-                        selectedOption = null;
-                        isCustomSelected = true;
-
-                        const customInputArea = document.createElement('div');
-                        customInputArea.className = 'custom-input-area show';
-                        customInputArea.innerHTML = '<input type="text" id="custom-option-input" placeholder="输入你的想法..." autocomplete="off">';
-                        optionsArea.appendChild(customInputArea);
-
-                        const confirmBtn = document.createElement('button');
-                        confirmBtn.className = 'confirm-btn show';
-                        confirmBtn.id = 'confirm-btn';
-                        confirmBtn.textContent = '确定';
-                        confirmBtn.disabled = false;
-                        confirmBtn.addEventListener('click', handleConfirm);
-                        optionsArea.appendChild(confirmBtn);
-
-                        isWaitingForChoice = true;
-                        
                         const prevBtn = document.getElementById('prev-btn');
                         if (prevBtn) prevBtn.disabled = false;
-
+                    } else if (noOptionsMode) {
+                        document.getElementById('next-btn')?.remove();
+                        selectedOption = null; isCustomSelected = true;
+                        const cia = document.createElement('div');
+                        cia.className = 'custom-input-area show';
+                        cia.innerHTML = '<input type="text" id="custom-option-input" placeholder="输入你的想法..." autocomplete="off">';
+                        optionsArea.appendChild(cia);
+                        const cfmBtn = document.createElement('button');
+                        cfmBtn.className = 'confirm-btn show'; cfmBtn.id = 'confirm-btn';
+                        cfmBtn.textContent = '确定'; cfmBtn.disabled = false;
+                        cfmBtn.addEventListener('click', handleConfirm);
+                        optionsArea.appendChild(cfmBtn);
+                        isWaitingForChoice = true;
+                        const prevBtn = document.getElementById('prev-btn');
+                        if (prevBtn) prevBtn.disabled = false;
                         setTimeout(() => document.getElementById('custom-option-input')?.focus(), 100);
                     } else {
                         navButtonsContainer.remove();
                         navButtonsContainer = null;
-                        if (currentStory) {
-                            addHistoryEntry('story', currentStory);
-                            currentStory = '';
-                        }
-                        setTimeout(() => {
-                            showEndScreen();
-                        }, 1000);
+                        if (currentStory) { addHistoryEntry('story', currentStory); currentStory = ''; }
+                        setTimeout(() => { endSemesterFlow(); }, 1000);
                     }
                     resolve();
                 }
             }
-
             renderCurrent();
         });
     }
 
-    function buildHistoryText() {
-        let text = `姓名：${playerInfo.name}\n性别：${playerInfo.gender}\n宿舍：${playerInfo.dorm}\n\n`;
-        
-        if (historyEntries.length === 0) {
-            return text + '📭 没有剧情记录';
+    // ================================================================
+    //  学期结束流程
+    // ================================================================
+    async function endSemesterFlow() {
+        isPlaying = false;
+        loadingIndicator.style.display = 'block';
+        storyBox.innerHTML = '⏳ 正在生成学期梗概……';
+        optionsArea.innerHTML = '';
+
+        // 保存当前完成状态
+        await saveSemesterProgress(true);
+
+        // 1. 生成学期梗概（用于注入下学期提示词）
+        const summaryMessages = [...messages];
+        summaryMessages.push({ role: 'user', content: '请根据以上完整剧情，生成一份约1000字的学期梗概，概括本学期发生的主要事件、认识的同学和老师（包括他们的性格特点）。' });
+        const summaryReply = await callDeepSeek(summaryMessages);
+        const semesterSummary = summaryReply || '（梗概生成失败）';
+
+        // 存储梗概
+        const semData = await loadSemester(currentSemester) || {};
+        semData.summary = semesterSummary;
+        await saveSemester(currentSemester, semData);
+
+        // 2. 生成学期总结（Markdown格式，展示给用户）
+        storyBox.innerHTML = '⏳ 正在生成学期总结……';
+        const refMessages = [...messages];
+        refMessages.push({ role: 'user', content: '请根据以上完整剧情，生成一份学期总结，使用第二人称，包含以下三个板块，总共约1200字，使用Markdown格式（全文不要有一级标题）：\n\n## 认识的人\n（描述本学期认识的同学、老师、朋友等，以及他们的性格特点和你们的关系）\n\n## 做了的事\n（描述本学期参与的主要活动和经历）\n\n## 收获的感受\n（描述本学期的成长、感悟和心情）' });
+        const refReply = await callDeepSeek(refMessages);
+        const reflection = refReply || '## 认识的人\n\n（总结生成失败）\n\n## 做了的事\n\n（总结生成失败）\n\n## 收获的感受\n\n（总结生成失败）';
+
+        semData.reflection = reflection;
+        await saveSemester(currentSemester, semData);
+
+        loadingIndicator.style.display = 'none';
+        showEndScreen(reflection);
+
+        // 九下：额外生成初中总结
+        if (currentSemester === '九下') {
+            await generateGraduationSummary();
         }
-        
+    }
+
+    async function generateGraduationSummary() {
+        storyBox.innerHTML = '⏳ 正在生成初中毕业总结……';
+        loadingIndicator.style.display = 'block';
+
+        // 收集所有学期的梗概
+        const allSummaries = [];
+        for (const sem of SEMESTERS) {
+            const semData = await loadSemester(sem);
+            if (semData && semData.summary) {
+                allSummaries.push(`【${sem}】\n${semData.summary}`);
+            }
+        }
+        const summariesText = allSummaries.join('\n\n');
+
+        const gradMessages = [
+            { role: 'system', content: '你是一位初中毕业班班主任，请根据学生整个初中生涯的经历，写一份1200字左右的初中总结。' },
+            { role: 'user', content: `以下是我初中六学期的完整经历梗概：\n\n${summariesText}\n\n请根据以上经历，写一份1200字左右的初中总结，回顾整个初中生活。请使用纯文本格式，不需要Markdown格式。` }
+        ];
+
+        const gradReply = await callDeepSeek(gradMessages);
+        const graduationSummary = gradReply || '（初中总结生成失败）';
+
+        // 存到九下数据中
+        const semData = await loadSemester('九下') || {};
+        semData.graduationSummary = graduationSummary;
+        await saveSemester('九下', semData);
+
+        loadingIndicator.style.display = 'none';
+        // 填充毕业页面
+        document.getElementById('end-graduation-content').textContent = graduationSummary;
+    }
+
+    async function saveSemesterProgress(isComplete) {
+        const data = {
+            messages: [...messages],
+            historyEntries: [...historyEntries],
+            currentStory,
+            allowCustom,
+            currentProgress,
+            currentRound,
+            isComplete: isComplete || false,
+            summary: '',
+            reflection: '',
+            playerInfo: { ...playerInfo },
+            savedAt: new Date().toISOString()
+        };
+        // 保留已有的 summary 和 reflection
+        const existing = await loadSemester(currentSemester);
+        if (existing) {
+            if (existing.summary) data.summary = existing.summary;
+            if (existing.reflection) data.reflection = existing.reflection;
+        }
+        await saveSemester(currentSemester, data);
+        await saveMeta({ playerInfo: { ...playerInfo }, lastSemester: currentSemester });
+    }
+
+    function buildHistoryText() {
+        let text = `学期：${currentSemester}\n姓名：${playerInfo.name}\n性别：${playerInfo.gender}\n宿舍：${playerInfo.dorm}\n\n`;
+        if (historyEntries.length === 0) return text + '📭 没有剧情记录';
         let round = 1;
         for (let i = 0; i < historyEntries.length; i += 2) {
-            text += `【第${round}回合】\n`;
-            text += `剧情：\n`;
-            if (historyEntries[i] && historyEntries[i].type === 'story') {
-                text += `${historyEntries[i].text}\n`;
-            }
-            text += `--------------------------\n`;
-            text += `选择：`;
-            if (historyEntries[i + 1] && historyEntries[i + 1].type === 'choice') {
-                text += `${historyEntries[i + 1].text}`;
-            }
+            text += `【第${round}回合】\n剧情：\n`;
+            if (historyEntries[i] && historyEntries[i].type === 'story') text += `${historyEntries[i].text}\n`;
+            text += `--------------------------\n选择：`;
+            if (historyEntries[i + 1] && historyEntries[i + 1].type === 'choice') text += `${historyEntries[i + 1].text}`;
             text += `\n================\n\n`;
             round++;
         }
-        
         return text;
     }
 
-    function showEndScreen() {
+    function showEndScreen(reflection) {
         gameArea.style.display = 'none';
         const endScreen = document.getElementById('end-screen');
-        const endHistoryContent = document.getElementById('end-history-content');
-        
-        endHistoryContent.textContent = buildHistoryText();
+        document.getElementById('end-semester-label').textContent = `${currentSemester} 学期已完成`;
+        document.getElementById('end-history-content').textContent = buildHistoryText();
+
+        // 页1：冒险历程
+        document.getElementById('end-page-1').style.display = 'block';
+        // 页2：学期总结
+        const refBox = document.getElementById('end-reflection-content');
+        refBox.innerHTML = renderMarkdown(reflection || '暂无总结');
+        document.getElementById('end-page-2').style.display = 'none';
+        document.getElementById('end-page-3').style.display = 'none';
+
+        // 九下时修改页2关闭按钮文字，并隐藏继续游戏按钮
+        const toMenuOrPage3 = document.getElementById('end-to-menu-btn');
+        const continueBtnEnd = document.getElementById('end-continue-btn');
+        if (currentSemester === '九下') {
+            toMenuOrPage3.textContent = '✅ 关闭，查看毕业总结';
+            continueBtnEnd.style.display = 'none';
+        } else {
+            toMenuOrPage3.textContent = '✅ 关闭，返回主界面';
+            continueBtnEnd.style.display = 'inline-block';
+        }
+
         endScreen.style.display = 'block';
     }
 
+    function renderMarkdown(md) {
+        let html = md;
+        // 二级标题
+        html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+        // 加粗
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        // 换行保留
+        html = html.replace(/\n\n/g, '</p><p>');
+        html = html.replace(/\n/g, '<br>');
+        html = '<p>' + html + '</p>';
+        // 清理空标签
+        html = html.replace(/<p><\/p>/g, '');
+        html = html.replace(/<p><br>/g, '<p>');
+        return html;
+    }
+
     // ================================================================
-    //  选项选择逻辑
+    //  选项逻辑
     // ================================================================
     function selectOption(btn, opt) {
         document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        selectedOption = opt;
-        isCustomSelected = false;
+        selectedOption = opt; isCustomSelected = false;
         document.getElementById('custom-input-area').classList.remove('show');
-        const confirmBtn = document.getElementById('confirm-btn');
-        confirmBtn.classList.add('show');
-        confirmBtn.disabled = false;
+        const cfm = document.getElementById('confirm-btn'); cfm.classList.add('show'); cfm.disabled = false;
     }
 
     function selectCustom(btn) {
         document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        selectedOption = null;
-        isCustomSelected = true;
+        selectedOption = null; isCustomSelected = true;
         document.getElementById('custom-input-area').classList.add('show');
         document.getElementById('custom-option-input').focus();
-        const confirmBtn = document.getElementById('confirm-btn');
-        confirmBtn.classList.add('show');
-        confirmBtn.disabled = false;
+        const cfm = document.getElementById('confirm-btn'); cfm.classList.add('show'); cfm.disabled = false;
     }
 
     async function handleConfirm() {
         if (!isWaitingForChoice) return;
-
         let chosenText;
         if (isCustomSelected) {
             const input = document.getElementById('custom-option-input');
             chosenText = input.value.trim();
-            if (!chosenText) {
-                input.focus();
-                return;
-            }
-        } else if (selectedOption) {
-            chosenText = selectedOption;
-        } else {
-            return;
-        }
-
+            if (!chosenText) { input.focus(); return; }
+        } else if (selectedOption) { chosenText = selectedOption; }
+        else return;
         await handleChoice(chosenText, isCustomSelected);
     }
 
     // ================================================================
-    //  处理玩家选择
+    //  处理选择
     // ================================================================
     async function handleChoice(chosenText, usedCustom) {
         if (!isWaitingForChoice) return;
         isWaitingForChoice = false;
         optionsArea.innerHTML = '';
 
-        // 1. 先将刚才看到的剧情加入历史（如果有）
-        if (currentStory) {
-            addHistoryEntry('story', currentStory);
-            currentStory = '';
-        }
-
-        // 2. 记录用户的选择
+        if (currentStory) { addHistoryEntry('story', currentStory); currentStory = ''; }
         addHistoryEntry('choice', chosenText);
 
-        // 3. 决定下一轮是否允许自定义选项（约2/5概率）
         const nextAllowCustom = Math.random() < 0.4;
-
-        // 4. 告知AI（包括上一轮的情况和下一轮的设置）
         let userMessage = `我选择了：${chosenText}`;
         if (allowCustom) {
-            if (usedCustom) {
-                userMessage += '\n（玩家使用了自定义选项，请根据这个自定义选择继续推进剧情）';
-            } else {
-                userMessage += '\n（本回合允许了自定义选项，玩家选择了预设选项）';
-            }
+            userMessage += usedCustom
+                ? '\n（玩家使用了自定义选项，请根据这个自定义选择继续推进剧情）'
+                : '\n（本回合允许了自定义选项，玩家选择了预设选项）';
         }
-        
-        if (nextAllowCustom) {
-            userMessage += '\n【下轮允许自定义】请生成2~3个选项（程序会额外提供自定义选项）';
-        } else {
-            userMessage += '\n【下轮不允许自定义】请生成2~4个选项';
-        }
+        if (nextAllowCustom) userMessage += '\n【下轮允许自定义】请生成2~3个选项（程序会额外提供自定义选项）';
+        else userMessage += '\n【下轮不允许自定义】请生成2~4个选项';
 
         messages.push({ role: 'user', content: userMessage });
         currentRound++;
         updateRoundDisplay();
-        saveGame();
+        await saveSemesterProgress(false);
 
         loadingIndicator.style.display = 'block';
-
         let reply = null;
-        try {
-            reply = await callDeepSeek(messages);
-        } catch (err) {
-            loadingIndicator.style.display = 'none';
-            storyBox.innerHTML += `\n\n❌ ${err.message}`;
-            return;
-        }
+        try { reply = await callDeepSeek(messages); }
+        catch (err) { loadingIndicator.style.display = 'none'; storyBox.innerHTML += `\n\n❌ ${err.message}`; return; }
         loadingIndicator.style.display = 'none';
 
-        if (!reply) {
-            storyBox.innerHTML += '\n\n❌ AI 响应失败，请稍后重试。';
-            return;
-        }
+        if (!reply) { storyBox.innerHTML += '\n\n❌ AI 响应失败，请稍后重试。'; return; }
 
         messages.push({ role: 'assistant', content: reply });
-        saveGame();
-
-        // 5. 设置下一轮的自定义选项状态
+        await saveSemesterProgress(false);
         allowCustom = nextAllowCustom;
-        selectedOption = null;
-        isCustomSelected = false;
+        selectedOption = null; isCustomSelected = false;
 
         const { description, options, progress, noOptionsMode } = parseResponse(reply);
         await displayStory(description, options, progress, noOptionsMode);
-        saveGame();  // 保存更新后的进度
+        await saveSemesterProgress(false);
     }
 
     // ================================================================
-    //  开始游戏
+    //  开始游戏（学期已选定，角色已设定）
     // ================================================================
     async function startGame() {
         if (isPlaying) return;
 
-        if (hasSave()) {
-            if (!confirm('检测到已有存档，确定要重新开始吗？这将删除原有存档。')) {
-                return;
-            }
-            deleteSave();
-            continueBtn.style.display = 'none';
+        // 检查是否已有该学期存档
+        const existingSave = await loadSemester(currentSemester);
+        if (existingSave && existingSave.messages && existingSave.messages.length > 0) {
+            if (!confirm(`检测到 ${currentSemester} 已有存档，确定要重新开始吗？这将删除该学期及后续学期的进度。`)) return;
+            await deleteSemesterAndLater(currentSemester);
         }
 
-        const name = playerNameInput.value.trim() || '小明';
-        const gender = document.querySelector('input[name="gender"]:checked').value;
-        if (!selectedDorm) {
-            alert('请选择一个宿舍！');
-            return;
+        // 如果 playerInfo 已有值（从存档恢复），则使用；否则从输入框读取
+        if (!playerInfo.name) {
+            const name = playerNameInput.value.trim() || '小华';
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            if (!selectedDorm) { alert('请选择一个宿舍！'); return; }
+            const dorm = selectedDorm;
+            playerInfo = { name, gender, dorm };
         }
-        const dorm = selectedDorm;
-        playerInfo = { name, gender, dorm };
 
-        // 重置历史
         historyEntries = [];
         currentStory = '';
         historyContent.innerHTML = '';
@@ -1419,8 +1455,10 @@
 
         characterSetup.style.display = 'none';
         setupPanel.style.display = 'none';
+        semesterSelect.style.display = 'none';
         document.getElementById('end-screen').style.display = 'none';
         gameArea.style.display = 'block';
+        document.getElementById('current-semester-label').textContent = `📍 ${currentSemester}`;
         isPlaying = true;
         currentRound = 1;
         updateRoundDisplay();
@@ -1429,69 +1467,126 @@
         optionsArea.innerHTML = '';
         messages = [];
 
-        const systemPrompt = buildSystemPrompt(name, gender, dorm);
+        // 获取前面学期的梗概
+        const prevSummaries = [];
+        const currentIdx = SEMESTERS.indexOf(currentSemester);
+        for (let i = 0; i < currentIdx; i++) {
+            const prevData = await loadSemester(SEMESTERS[i]);
+            if (prevData && prevData.summary) {
+                prevSummaries.push({ semester: SEMESTERS[i], summary: prevData.summary });
+            }
+        }
+
+        const systemPrompt = buildSystemPrompt(currentSemester, playerInfo.name, playerInfo.gender, playerInfo.dorm, prevSummaries);
         messages.push({ role: 'system', content: systemPrompt });
 
-        // 决定第一轮是否允许自定义选项（约2/5概率）
         allowCustom = Math.random() < 0.4;
-        selectedOption = null;
-        isCustomSelected = false;
+        selectedOption = null; isCustomSelected = false;
 
-        // 告知AI第一轮的设置
-        if (allowCustom) {
-            messages.push({ role: 'user', content: '【首轮允许自定义】请生成2~3个选项（程序会额外提供自定义选项）' });
-        } else {
-            messages.push({ role: 'user', content: '【首轮不允许自定义】请生成2~4个选项' });
-        }
+        if (allowCustom) messages.push({ role: 'user', content: '【首轮允许自定义】请生成2~3个选项（程序会额外提供自定义选项）' });
+        else messages.push({ role: 'user', content: '【首轮不允许自定义】请生成2~4个选项' });
 
         loadingIndicator.style.display = 'block';
-
         let reply = null;
-        try {
-            reply = await callDeepSeek(messages);
-        } catch (err) {
-            loadingIndicator.style.display = 'none';
-            storyBox.innerHTML = `❌ ${err.message}`;
-            isPlaying = false;
-            return;
-        }
+        try { reply = await callDeepSeek(messages); }
+        catch (err) { loadingIndicator.style.display = 'none'; storyBox.innerHTML = `❌ ${err.message}`; isPlaying = false; return; }
         loadingIndicator.style.display = 'none';
 
-        if (!reply) {
-            storyBox.innerHTML = '❌ 启动失败，请检查网络或密钥是否正确。';
-            isPlaying = false;
-            return;
-        }
+        if (!reply) { storyBox.innerHTML = '❌ 启动失败，请检查网络或密钥是否正确。'; isPlaying = false; return; }
 
         messages.push({ role: 'assistant', content: reply });
-        saveGame();
+        await saveSemesterProgress(false);
 
         const { description, options, progress, noOptionsMode } = parseResponse(reply);
-        // 初始剧情暂不加入历史，等待第一次选择
         await displayStory(description, options, progress, noOptionsMode);
     }
 
+    // ================================================================
+    //  继续游戏
+    // ================================================================
     async function continueGame() {
+        console.log('continueGame 被调用, isPlaying =', isPlaying);
         if (isPlaying) return;
+        try {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) { alert('请先在设置中填写你的 DeepSeek API Key！'); apiKeyInput.focus(); return; }
 
-        const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) {
-            alert('请先在设置中填写你的 DeepSeek API Key！');
-            apiKeyInput.focus();
-            return;
-        }
+            const meta = await getMeta();
+            const allSaves = await getAllSemesters();
 
-        const saveData = loadGame();
-        if (!saveData) {
-            continueBtn.style.display = 'none';
-            return;
-        }
+            // 无任何存档 → 直接进入角色设定（七上）
+            if (allSaves.length === 0) {
+                currentSemester = '七上';
+                setupPanel.style.display = 'none';
+                characterSetup.style.display = 'block';
+                renderDormButtons();
+                return;
+            }
 
-        messages = saveData.messages || [];
+            let lastSemester = meta.lastSemester || '七上';
+            let savedPlayerInfo = meta.playerInfo || { name: '', gender: '', dorm: '' };
+            // 如果 meta 中 playerInfo 为空，从存档恢复
+            if (!savedPlayerInfo.name) {
+                const restored = await restorePlayerInfoFromSaves();
+                if (restored) savedPlayerInfo = restored;
+            }
+            playerInfo = savedPlayerInfo;
+
+            // 如果最后学期已完成，尝试跳到下一学期
+            let lastSave = await loadSemester(lastSemester);
+
+            // 修复：如果 lastSemester 无存档数据，回退到最近的有存档的学期
+            if (!lastSave && allSaves.length > 0) {
+                const sortedSaves = SEMESTERS.filter(s => allSaves.some(a => a.id === s));
+                const fallbackSem = sortedSaves[sortedSaves.length - 1];
+                console.log('continueGame: 回退从', lastSemester, '到', fallbackSem);
+                lastSave = await loadSemester(fallbackSem);
+                if (lastSave) {
+                    currentSemester = fallbackSem;
+                    lastSemester = fallbackSem;  // 修正变量
+                }
+            }
+            if (lastSave && lastSave.isComplete) {
+                const idx = SEMESTERS.indexOf(lastSemester);
+                const nextSem = idx < SEMESTERS.length - 1 ? SEMESTERS[idx + 1] : null;
+                if (nextSem) {
+                    currentSemester = nextSem;
+                    selectedDorm = playerInfo.dorm;
+                    const savedInfo = playerInfo;
+                    const needsSetup = currentSemester === '七上' || !savedInfo.name;
+                    if (needsSetup) {
+                        setupPanel.style.display = 'none';
+                        characterSetup.style.display = 'block';
+                        renderDormButtons();
+                    } else {
+                        startGame();
+                    }
+                    return;
+                } else {
+                    // 所有学期都已完成，打开学期选择
+                    setupPanel.style.display = 'none';
+                    semesterSelect.style.display = 'block';
+                    await renderSemesterGrid();
+                    return;
+                }
+            }
+
+            currentSemester = lastSemester;
+            const saveData = lastSave;
+            console.log('continueGame: lastSemester =', lastSemester, 'saveData =', saveData ? 'exists' : 'null');
+            if (!saveData || !saveData.messages || saveData.messages.length === 0) {
+                // 如果所有回退都失败，打开学期选择
+                console.warn('continueGame: 所有回退失败，打开学期选择');
+                setupPanel.style.display = 'none';
+                semesterSelect.style.display = 'block';
+                await renderSemesterGrid();
+                return;
+            }
+
+            messages = saveData.messages || [];
         historyEntries = saveData.historyEntries || [];
         currentStory = saveData.currentStory || '';
         allowCustom = saveData.allowCustom || false;
-        playerInfo = saveData.playerInfo || { name: '', gender: '', dorm: '' };
         currentProgress = saveData.currentProgress !== undefined ? saveData.currentProgress : 0;
         updateProgressBar(currentProgress);
         currentRound = saveData.currentRound !== undefined ? saveData.currentRound : 0;
@@ -1499,21 +1594,20 @@
 
         setupPanel.style.display = 'none';
         characterSetup.style.display = 'none';
+        semesterSelect.style.display = 'none';
         document.getElementById('end-screen').style.display = 'none';
         gameArea.style.display = 'block';
+        document.getElementById('current-semester-label').textContent = `📍 ${currentSemester}`;
         isPlaying = true;
         continueBtn.style.display = 'none';
-
         historyContent.innerHTML = '';
         renderHistory();
 
-        const isComplete = saveData.isComplete !== undefined ? saveData.isComplete : true;
-        
-        if (isComplete && messages.length > 0) {
-            if (currentStory) {
-                storyBox.innerHTML = currentStory;
-            }
-            
+        // 直接检查最后一条消息是否为 AI 回复，而不是依赖 isComplete 标记
+        const lastMsgCheck = messages.length > 0 ? messages[messages.length - 1] : null;
+        const isLastMessageValid = lastMsgCheck && lastMsgCheck.role === 'assistant';
+
+        if (isLastMessageValid) {
             const lastMessage = messages[messages.length - 1];
             if (lastMessage && lastMessage.role === 'assistant') {
                 const { description, options, progress, noOptionsMode } = parseResponse(lastMessage.content);
@@ -1525,101 +1619,205 @@
         } else {
             if (!playerInfo.name) {
                 storyBox.innerHTML = '❌ 存档数据异常，玩家信息缺失。';
-                isPlaying = false;
-                continueBtn.style.display = 'block';
-                return;
+                isPlaying = false; continueBtn.style.display = 'block'; return;
             }
-
             if (messages.length > 1) {
-                // 有现有消息（用户已做出选择但AI未完成），保留消息继续请求AI
                 storyBox.innerHTML = '⏳ 存档不完整，正在继续生成剧情……';
                 const lastMsg = messages[messages.length - 1];
                 if (lastMsg && lastMsg.role === 'user') {
-                    // 最后一条是用户选择，重新请求AI回复
                     loadingIndicator.style.display = 'block';
                     let reply = null;
-                    try {
-                        reply = await callDeepSeek(messages);
-                    } catch (err) {
-                        loadingIndicator.style.display = 'none';
-                        storyBox.innerHTML = `❌ ${err.message}`;
-                        isPlaying = false;
-                        return;
-                    }
+                    try { reply = await callDeepSeek(messages); }
+                    catch (err) { loadingIndicator.style.display = 'none'; storyBox.innerHTML = `❌ ${err.message}`; isPlaying = false; return; }
                     loadingIndicator.style.display = 'none';
-
-                    if (!reply) {
-                        storyBox.innerHTML = '❌ AI 响应失败，请稍后重试。';
-                        isPlaying = false;
-                        return;
-                    }
-
+                    if (!reply) { storyBox.innerHTML = '❌ AI 响应失败，请稍后重试。'; isPlaying = false; return; }
                     messages.push({ role: 'assistant', content: reply });
-                    saveGame();
-
+                    await saveSemesterProgress(false);
                     const { description, options, progress, noOptionsMode } = parseResponse(reply);
                     await displayStory(description, options, progress, noOptionsMode);
                     return;
                 }
             }
-
-            // 完全无消息时从头开始
+            // 完全无消息时重新生成
             storyBox.innerHTML = '⏳ 存档不完整，正在重新生成剧情……';
-            
-            messages = [];
-            currentStory = '';
-            currentRound = 0;
-            updateRoundDisplay();
-            historyContent.innerHTML = '';
-            renderHistory();
-            
-            const { name, gender, dorm } = playerInfo;
-            const systemPrompt = buildSystemPrompt(name, gender, dorm);
-            messages.push({ role: 'system', content: systemPrompt });
-            
-            allowCustom = Math.random() < 0.4;
-            selectedOption = null;
-            isCustomSelected = false;
-            
-            if (allowCustom) {
-                messages.push({ role: 'user', content: '【首轮允许自定义】请生成2~3个选项（程序会额外提供自定义选项）' });
-            } else {
-                messages.push({ role: 'user', content: '【首轮不允许自定义】请生成2~4个选项' });
+            messages = []; currentStory = ''; currentRound = 0;
+            updateRoundDisplay(); historyContent.innerHTML = ''; renderHistory();
+
+            const prevSummaries = [];
+            const currentIdx = SEMESTERS.indexOf(lastSemester);
+            for (let i = 0; i < currentIdx; i++) {
+                const pd = await loadSemester(SEMESTERS[i]);
+                if (pd && pd.summary) prevSummaries.push({ semester: SEMESTERS[i], summary: pd.summary });
             }
+            const systemPrompt = buildSystemPrompt(lastSemester, playerInfo.name, playerInfo.gender, playerInfo.dorm, prevSummaries);
+            messages.push({ role: 'system', content: systemPrompt });
+            allowCustom = Math.random() < 0.4;
+            selectedOption = null; isCustomSelected = false;
+            if (allowCustom) messages.push({ role: 'user', content: '【首轮允许自定义】请生成2~3个选项（程序会额外提供自定义选项）' });
+            else messages.push({ role: 'user', content: '【首轮不允许自定义】请生成2~4个选项' });
 
             loadingIndicator.style.display = 'block';
             let reply = null;
-            try {
-                reply = await callDeepSeek(messages);
-            } catch (err) {
-                loadingIndicator.style.display = 'none';
-                storyBox.innerHTML = `❌ ${err.message}`;
-                isPlaying = false;
-                return;
-            }
+            try { reply = await callDeepSeek(messages); }
+            catch (err) { loadingIndicator.style.display = 'none'; storyBox.innerHTML = `❌ ${err.message}`; isPlaying = false; return; }
             loadingIndicator.style.display = 'none';
-
-            if (!reply) {
-                storyBox.innerHTML = '❌ 启动失败，请检查网络或密钥是否正确。';
-                isPlaying = false;
-                return;
-            }
-
+            if (!reply) { storyBox.innerHTML = '❌ 启动失败，请检查网络或密钥是否正确。'; isPlaying = false; return; }
             messages.push({ role: 'assistant', content: reply });
-            saveGame();
+            await saveSemesterProgress(false);
             const { description, options, progress, noOptionsMode } = parseResponse(reply);
             await displayStory(description, options, progress, noOptionsMode);
         }
+        } catch (err) {
+            console.error('继续游戏出错:', err);
+            alert('继续游戏时出错：' + err.message + '\n\n请查看浏览器控制台(F12→Console)获取详细信息。');
+            isPlaying = false;
+            setupPanel.style.display = 'block';
+            gameArea.style.display = 'none';
+            characterSetup.style.display = 'none';
+            semesterSelect.style.display = 'none';
+        }
+    }
+
+    // ================================================================
+    //  删除操作
+    // ================================================================
+    async function deleteSemesterAndLater(semesterId) {
+        const idx = SEMESTERS.indexOf(semesterId);
+        for (let i = idx; i < SEMESTERS.length; i++) {
+            await deleteSemesterDB(SEMESTERS[i]);
+        }
+    }
+
+    async function deleteAllSemesters() {
+        await dbClear('semesters');
+        await saveMeta({ playerInfo: { name: '', gender: '', dorm: '' }, lastSemester: null });
+    }
+
+    // ================================================================
+    //  学期选择面板
+    // ================================================================
+    let selectedSemester = '七上';
+
+    // 从现有的学期存档中恢复玩家信息（当 meta 中没有时）
+    async function restorePlayerInfoFromSaves() {
+        const allSaves = await getAllSemesters();
+        for (const sem of SEMESTERS) {
+            const s = allSaves.find(a => a.id === sem);
+            if (s && s.playerInfo && s.playerInfo.name) return s.playerInfo;
+        }
+        return null;
+    }
+
+    function updateSemesterButtons(sem) {
+        const saveMap = {};
+        document.querySelectorAll('.semester-card').forEach(c => {
+            const s = c.dataset.semester;
+            const isCompleted = c.classList.contains('completed');
+            const isInProgress = c.classList.contains('in-progress');
+            if (isCompleted) saveMap[s] = { isComplete: true };
+            else if (isInProgress) saveMap[s] = { messages: ['placeholder'] };
+        });
+        const save = saveMap[sem];
+        const confirmBtn = document.getElementById('confirm-semester-btn');
+        const continueSemBtn = document.getElementById('continue-semester-btn');
+
+        if (save && save.isComplete) {
+            confirmBtn.textContent = '🔄 重新开始本学期并删除后续进度';
+            continueSemBtn.style.display = 'none';
+        } else if (save && save.messages) {
+            confirmBtn.textContent = '🔄 重新开始本学期并删除进度';
+            continueSemBtn.textContent = '▶️ 继续本学期的历程';
+            continueSemBtn.style.display = 'block';
+        } else {
+            confirmBtn.textContent = '▶️ 开启本学期的历程';
+            continueSemBtn.style.display = 'none';
+        }
+    }
+
+    async function renderSemesterGrid() {
+        const allSaves = await getAllSemesters();
+        const saveMap = {};
+        allSaves.forEach(s => { saveMap[s.id] = s; });
+
+        semesterGrid.innerHTML = '';
+        SEMESTERS.forEach((sem, idx) => {
+            const save = saveMap[sem];
+            const card = document.createElement('div');
+            card.className = 'semester-card';
+            card.dataset.semester = sem;
+
+            let statusText = '';
+            if (save && save.isComplete) {
+                card.classList.add('completed');
+                statusText = '已完成';
+            } else if (save && save.messages && save.messages.length > 0) {
+                card.classList.add('in-progress');
+                statusText = '进行中';
+            } else if (idx === 0 || (saveMap[SEMESTERS[idx - 1]] && saveMap[SEMESTERS[idx - 1]].isComplete)) {
+                // 可开始但无存档
+                card.classList.add('ready');
+                statusText = '待开始';
+            } else {
+                // 未解锁
+                if (idx > 0) {
+                    const prevSave = saveMap[SEMESTERS[idx - 1]];
+                    if (!prevSave || !prevSave.isComplete) {
+                        card.style.opacity = '0.5';
+                        card.style.cursor = 'not-allowed';
+                        statusText = '🔒 未解锁';
+                    }
+                }
+            }
+
+            card.innerHTML = `${sem}<div class="semester-status">${statusText}</div>`;
+
+            if (card.style.cursor !== 'not-allowed') {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.semester-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedSemester = sem;
+                    updateSemesterButtons(sem);
+                });
+            }
+
+            semesterGrid.appendChild(card);
+        });
+
+        // 默认选中：进行中 > 已完成的下一个待开始 > 第一个可用
+        const firstInProgress = SEMESTERS.find(s => saveMap[s] && !saveMap[s].isComplete && saveMap[s].messages && saveMap[s].messages.length > 0);
+        let target = null;
+        if (firstInProgress) {
+            target = firstInProgress;
+        } else {
+            const lastCompletedIdx = SEMESTERS.reduce((max, s, i) => (saveMap[s] && saveMap[s].isComplete) ? i : max, -1);
+            const nextIdx = lastCompletedIdx + 1;
+            if (nextIdx < SEMESTERS.length) {
+                const nextSem = SEMESTERS[nextIdx];
+                if (nextSem === '七上' || (saveMap[SEMESTERS[nextIdx - 1]] && saveMap[SEMESTERS[nextIdx - 1]].isComplete)) {
+                    target = nextSem;
+                }
+            }
+        }
+        if (!target) target = '七上';
+        selectedSemester = target;
+        const targetCard = document.querySelector(`.semester-card[data-semester="${target}"]`);
+        if (targetCard && targetCard.style.cursor !== 'not-allowed') {
+            targetCard.classList.add('selected');
+        } else {
+            const firstUnlocked = document.querySelector('.semester-card:not([style*="not-allowed"])');
+            if (firstUnlocked) {
+                firstUnlocked.classList.add('selected');
+                selectedSemester = firstUnlocked.dataset.semester;
+            }
+        }
+        updateSemesterButtons(selectedSemester);
     }
 
     // ================================================================
     //  重置游戏
     // ================================================================
-    function resetGame() {
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-            timeoutId = null;
-        }
+    async function resetGame() {
+        if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
         isPlaying = false;
         isWaitingForChoice = false;
         messages = [];
@@ -1638,11 +1836,32 @@
         gameArea.style.display = 'none';
         setupPanel.style.display = 'block';
         characterSetup.style.display = 'none';
+        semesterSelect.style.display = 'none';
         document.getElementById('end-screen').style.display = 'none';
-        continueBtn.style.display = 'none';
+        // 恢复继续游戏按钮或显示毕业信息
+        const all = await getAllSemesters();
+        const allComplete = SEMESTERS.every(s => all.some(a => a.id === s && a.isComplete));
+        if (allComplete) {
+            continueBtn.innerHTML = '🎓 你已毕业，毕业快乐！';
+            continueBtn.style.display = 'block';
+            continueBtn.disabled = true;
+            continueBtn.style.background = '#27ae60';
+            continueBtn.style.cursor = 'default';
+        } else if (all.length > 0) {
+            continueBtn.textContent = '▶️ 继续游戏';
+            continueBtn.style.display = 'block';
+            continueBtn.disabled = false;
+            continueBtn.style.background = '';
+            continueBtn.style.cursor = '';
+        } else {
+            continueBtn.textContent = '▶️ 开启历程';
+            continueBtn.style.display = 'block';
+            continueBtn.disabled = false;
+            continueBtn.style.background = '';
+            continueBtn.style.cursor = '';
+        }
         renderDormButtons();
         updateProgressBar(0);
-
         if (isHistoryOpen) {
             isHistoryOpen = false;
             historyArea.style.display = 'none';
@@ -1651,44 +1870,164 @@
     }
 
     // ================================================================
-    //  绑定事件
+    //  事件绑定
     // ================================================================
-    startBtn.addEventListener('click', () => {
+    // 管理存档/选择学期 → 学期选择
+    document.getElementById('manage-saves-btn').addEventListener('click', async () => {
         const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) {
-            alert('请先在设置中填写你的 DeepSeek API Key！');
-            apiKeyInput.focus();
+        if (!apiKey) { alert('请先填写你的 DeepSeek API Key！'); apiKeyInput.focus(); return; }
+        setupPanel.style.display = 'none';
+        semesterSelect.style.display = 'block';
+        await renderSemesterGrid();
+    });
+
+    // 确认学期按钮（文字动态变化）
+    document.getElementById('confirm-semester-btn').addEventListener('click', async () => {
+        const btn = document.getElementById('confirm-semester-btn');
+        const text = btn.textContent;
+        if (text.includes('重新开始本学期并删除后续进度') || text.includes('重新开始本学期并删除进度')) {
+            // 重新开始：先删除该学期及后续学期，再开始
+            if (!confirm(`确定要重新开始 ${selectedSemester} 吗？该学期及后续学期进度将被删除。`)) return;
+            await deleteSemesterAndLater(selectedSemester);
+        }
+        // 待开始或重启后：正常启动
+        currentSemester = selectedSemester;
+        let meta = await getMeta();
+        if (!meta.playerInfo || !meta.playerInfo.name) {
+            const restored = await restorePlayerInfoFromSaves();
+            if (restored) meta.playerInfo = restored;
+        }
+        const savedInfo = meta.playerInfo || { name: '', gender: '', dorm: '' };
+        const needsSetup = currentSemester === '七上' || !savedInfo.name;
+        if (needsSetup) {
+            semesterSelect.style.display = 'none';
+            characterSetup.style.display = 'block';
+            renderDormButtons();
+        } else {
+            playerInfo = { ...savedInfo };
+            selectedDorm = savedInfo.dorm;
+            semesterSelect.style.display = 'none';
+            startGame();
+        }
+    });
+
+    // 继续本学期的历程（仅进行中学期可见）
+    document.getElementById('continue-semester-btn').addEventListener('click', async () => {
+        currentSemester = selectedSemester;
+        semesterSelect.style.display = 'none';
+        const saveData = await loadSemester(selectedSemester);
+        if (!saveData || !saveData.messages || saveData.messages.length === 0) {
+            alert('存档数据异常，无法继续。');
             return;
         }
-        // 隐藏设置面板，显示角色设定
+        messages = saveData.messages || [];
+        historyEntries = saveData.historyEntries || [];
+        currentStory = saveData.currentStory || '';
+        allowCustom = saveData.allowCustom || false;
+        currentProgress = saveData.currentProgress !== undefined ? saveData.currentProgress : 0;
+        updateProgressBar(currentProgress);
+        currentRound = saveData.currentRound !== undefined ? saveData.currentRound : 0;
+        updateRoundDisplay();
         setupPanel.style.display = 'none';
-        characterSetup.style.display = 'block';
-        renderDormButtons();
-    });
-    continueBtn.addEventListener('click', continueGame);
+        characterSetup.style.display = 'none';
+        gameArea.style.display = 'block';
+        document.getElementById('end-screen').style.display = 'none';
+        document.getElementById('current-semester-label').textContent = `📍 ${currentSemester}`;
+        isPlaying = true;
+        continueBtn.style.display = 'none';
+        historyContent.innerHTML = '';
+        renderHistory();
 
-    // 角色设定 - 确认开始
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg && lastMsg.role === 'assistant') {
+            const { description, options, progress, noOptionsMode } = parseResponse(lastMsg.content);
+            await displayStory(description, options, progress, noOptionsMode);
+        } else {
+            storyBox.innerHTML = '❌ 存档数据异常，无法继续游戏。';
+            isPlaying = false;
+        }
+    });
+
+    // 返回学期选择
+    document.getElementById('back-from-semester-btn').addEventListener('click', () => {
+        semesterSelect.style.display = 'none';
+        setupPanel.style.display = 'block';
+    });
+
+    // 继续游戏
+    continueBtn.addEventListener('click', async () => {
+        console.log('继续游戏按钮被点击');
+        try { await continueGame(); }
+        catch (err) { console.error('继续游戏按钮出错:', err); alert('按钮出错: ' + err.message); }
+    });
+
+    // 角色设定 - 确认
     confirmCharacterBtn.addEventListener('click', startGame);
+
     // 角色设定 - 返回
     backToSetupBtn.addEventListener('click', () => {
         characterSetup.style.display = 'none';
         setupPanel.style.display = 'block';
     });
-    resetBtn.addEventListener('click', () => {
-        if (!confirm('确定要重新开始并删除进度吗？此操作无法撤销。')) {
-            return;
+
+    // 游戏内重新开始
+    resetBtn.addEventListener('click', async () => {
+        if (!confirm('确定要重新开始并删除进度吗？此操作无法撤销。')) return;
+        await deleteSemesterAndLater(currentSemester);
+        if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+        if (currentStory) { addHistoryEntry('story', currentStory); currentStory = ''; }
+        // 显示之前学期已有的结束界面，或回到主界面
+        isPlaying = false;
+        isWaitingForChoice = false;
+        messages = [];
+        historyEntries = [];
+        currentProgress = 0;
+        currentRound = 0;
+        updateRoundDisplay();
+        historyContent.innerHTML = '';
+        storyBox.innerHTML = '<span style="color: #a09080;">✨ 故事即将开始……</span>';
+        optionsArea.innerHTML = '';
+        loadingIndicator.style.display = 'none';
+        gameArea.style.display = 'none';
+        setupPanel.style.display = 'block';
+        document.getElementById('end-screen').style.display = 'none';
+        continueBtn.style.display = 'none';
+        renderDormButtons();
+        updateProgressBar(0);
+        if (isHistoryOpen) {
+            isHistoryOpen = false;
+            historyArea.style.display = 'none';
+            historyToggle.innerHTML = '<span class="icon">▼</span> 📜 展开历史剧情';
         }
-        deleteSave();
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-            timeoutId = null;
-        }
-        if (currentStory) {
-            addHistoryEntry('story', currentStory);
-            currentStory = '';
-        }
-        showEndScreen();
     });
+
+    // 删除所选学期
+    document.getElementById('delete-current-semester-btn').addEventListener('click', async () => {
+        const sem = selectedSemester;
+        const idx = SEMESTERS.indexOf(sem);
+        const laterSemesters = SEMESTERS.slice(idx + 1).filter(s => {
+            // 检查是否有后续学期数据
+            return true; // 只要有后续学期就提示
+        });
+        const hasLaterSave = laterSemesters.length > 0;
+        const msg = hasLaterSave
+            ? `确定要删除 ${sem}${laterSemesters.length > 0 ? ' 及后续学期（' + laterSemesters.join('、') + '）' : ''} 的所有进度吗？此操作无法撤销。`
+            : `确定要删除 ${sem} 的进度吗？此操作无法撤销。`;
+        if (!confirm(msg)) return;
+        await deleteSemesterAndLater(sem);
+        await renderSemesterGrid();
+        alert(`${sem} 及后续学期进度已删除。`);
+    });
+
+    // 删除全部
+    document.getElementById('delete-all-semesters-btn').addEventListener('click', async () => {
+        if (!confirm('确定要删除全部六个学期的所有进度吗？此操作完全无法恢复！')) return;
+        await deleteAllSemesters();
+        await renderSemesterGrid();
+        continueBtn.style.display = 'none';
+        alert('全部进度已删除。');
+    });
+
     // Enter 键快捷操作
     playerNameInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && characterSetup.style.display === 'block') {
@@ -1708,59 +2047,136 @@
         }
     });
 
-    // 结束界面按钮事件
-    document.getElementById('restart-btn').addEventListener('click', () => {
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-            timeoutId = null;
+    // 隐藏调试快捷键：Ctrl+Shift+E 模拟学期结束
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+            e.preventDefault();
+            if (!isPlaying) {
+                alert('调试：游戏未在进行中，无法模拟学期结束。');
+                return;
+            }
+            if (!confirm('调试：确定要模拟当前学期故事结束吗？这将触发学期结束流程（生成梗概+总结）。')) return;
+            // 直接触发学期结束流程
+            if (currentStory) { addHistoryEntry('story', currentStory); currentStory = ''; }
+            endSemesterFlow();
         }
-        isPlaying = false;
-        isWaitingForChoice = false;
-        messages = [];
-        historyEntries = [];
-        currentStory = '';
-        allowCustom = false;
-        selectedOption = null;
-        isCustomSelected = false;
-        currentProgress = 0;
-        historyContent.innerHTML = '';
-        storyBox.innerHTML = '<span style="color: #a09080;">✨ 故事即将开始……</span>';
-        optionsArea.innerHTML = '';
-        loadingIndicator.style.display = 'none';
-        gameArea.style.display = 'none';
-        document.getElementById('end-screen').style.display = 'none';
-        setupPanel.style.display = 'block';
-        characterSetup.style.display = 'none';
-        updateProgressBar(0);
-        
-        if (isHistoryOpen) {
-            isHistoryOpen = false;
-            historyArea.style.display = 'none';
-            historyToggle.innerHTML = '<span class="icon">▼</span> 📜 展开历史剧情';
-        }
-        
-        if (hasSave()) {
-            continueBtn.style.display = 'block';
-        }
-        renderDormButtons();
     });
-    
-    document.getElementById('export-btn').addEventListener('click', () => {
-        let text = `📖 七班校园故事 - 冒险历程\n\n`;
+
+    // 结束界面按钮
+    // 页1 → 页2（关闭冒险历程，查看学期总结）
+    document.getElementById('end-to-reflection-btn').addEventListener('click', () => {
+        document.getElementById('end-page-1').style.display = 'none';
+        document.getElementById('end-page-2').style.display = 'block';
+    });
+
+    // 页2 → 继续游戏（学期结束后跳转下一学期）
+    document.getElementById('end-continue-btn').addEventListener('click', async () => {
+        document.getElementById('end-screen').style.display = 'none';
+        const idx = SEMESTERS.indexOf(currentSemester);
+        const nextSem = idx < SEMESTERS.length - 1 ? SEMESTERS[idx + 1] : null;
+        if (nextSem) {
+            currentSemester = nextSem;
+            let meta = await getMeta();
+            if (!meta.playerInfo || !meta.playerInfo.name) {
+                const restored = await restorePlayerInfoFromSaves();
+                if (restored) meta.playerInfo = restored;
+            }
+            playerInfo = meta.playerInfo || { name: '', gender: '', dorm: '' };
+            selectedDorm = playerInfo.dorm;
+            if (currentSemester !== '七上' && playerInfo.name) {
+                semesterSelect.style.display = 'none';
+                startGame();
+            } else {
+                semesterSelect.style.display = 'none';
+                characterSetup.style.display = 'block';
+                renderDormButtons();
+            }
+        } else {
+            resetGame();
+        }
+    });
+
+    // 页2 → 页3（九下）或主界面（其他学期）
+    document.getElementById('end-to-menu-btn').addEventListener('click', async () => {
+        if (currentSemester === '九下') {
+            document.getElementById('end-page-2').style.display = 'none';
+            document.getElementById('end-page-3').style.display = 'block';
+        } else {
+            document.getElementById('end-screen').style.display = 'none';
+            resetGame();
+        }
+    });
+
+    // 页3 → 主界面（九下毕业）
+    document.getElementById('end-graduation-to-menu-btn').addEventListener('click', async () => {
+        document.getElementById('end-screen').style.display = 'none';
+        await resetGame();
+    });
+
+    // 页1：导出冒险历程
+    document.getElementById('export-history-btn').addEventListener('click', () => {
+        let text = `📖 七班校园故事 - ${currentSemester} 冒险历程\n\n`;
         text += buildHistoryText();
-        
+        downloadTxt(text, `七班校园故事_${currentSemester}_冒险历程_${new Date().toLocaleDateString()}.txt`);
+    });
+
+    // 页2：导出学期总结
+    document.getElementById('export-reflection-btn').addEventListener('click', () => {
+        const refBox = document.getElementById('end-reflection-content');
+        let text = `📖 七班校园故事 - ${currentSemester} 学期总结\n\n`;
+        text += (refBox.textContent || '暂无总结');
+        downloadTxt(text, `七班校园故事_${currentSemester}_学期总结_${new Date().toLocaleDateString()}.txt`);
+    });
+
+    // 页3：导出初中毕业总结
+    document.getElementById('export-graduation-btn').addEventListener('click', () => {
+        const gradBox = document.getElementById('end-graduation-content');
+        let text = `🎓 七班校园故事 - 初中毕业总结\n\n`;
+        text += (gradBox.textContent || '暂无总结');
+        downloadTxt(text, `七班校园故事_初中毕业总结_${new Date().toLocaleDateString()}.txt`);
+    });
+
+    function downloadTxt(text, filename) {
         const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `七班校园故事_${new Date().toLocaleDateString()}.txt`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    });
+    }
 
-    console.log('🎮 七班校园故事已加载！');
+    // ================================================================
+    //  初始化
+    // ================================================================
+    (async function init() {
+        await openDB();
+        const allSaves = await getAllSemesters();
+        if (SEMESTERS.every(s => allSaves.some(a => a.id === s && a.isComplete))) {
+            continueBtn.innerHTML = '🎓 你已毕业，毕业快乐！';
+            continueBtn.style.display = 'block';
+            continueBtn.disabled = true;
+            continueBtn.style.background = '#27ae60';
+            continueBtn.style.cursor = 'default';
+        } else if (allSaves.length > 0) {
+            continueBtn.textContent = '▶️ 继续游戏';
+            continueBtn.style.display = 'block';
+            continueBtn.disabled = false;
+            continueBtn.style.background = '';
+            continueBtn.style.cursor = '';
+        } else {
+            continueBtn.textContent = '▶️ 开启历程';
+            continueBtn.style.display = 'block';
+            continueBtn.disabled = false;
+            continueBtn.style.background = '';
+            continueBtn.style.cursor = '';
+        }
+        renderDormButtons();
+        console.log('🎮 七班校园故事已加载！支持 七上~九下 六学期冒险。');
+        console.log('🔧 调试：按 Ctrl+Shift+E 可模拟当前学期故事结束（仅在游戏进行中有效）');
+    })();
 </script>
 </body>
 </html>
