@@ -456,6 +456,7 @@
 
         /* ===== 结束界面 ===== */
         #end-screen { display: none; animation: fadeIn 0.5s ease; }
+        #summary-viewer { display: none; animation: fadeIn 0.5s ease; }
         .end-title {
             text-align: center;
             font-size: 28px;
@@ -575,6 +576,7 @@
         <div style="font-size:12px; color:#9a8a7a; margin-top:4px;">密钥仅保存在本地浏览器，不会上传至任何服务器</div>
 
         <button class="start-btn" id="continue-btn" style="display: none;">▶️ 继续游戏</button>
+        <button class="start-btn" id="graduation-summary-btn" style="display: none; background:#8e44ad; margin-top:10px;">📖 查看初中总结</button>
 
         <!-- 管理存档 / 开始新冒险 -->
         <div style="margin-top:18px; padding-top:18px; border-top:2px solid #e9e0d8;">
@@ -594,6 +596,7 @@
         </div>
         <button class="start-btn" id="continue-semester-btn" style="display:none; background:#3498db;">▶️ 继续本学期的历程</button>
         <button class="start-btn" id="confirm-semester-btn">待开始</button>
+        <button class="start-btn" id="view-summary-btn" style="display:none; background:#27ae60; margin-top:8px;">📖 查看总结</button>
         <button class="start-btn" id="back-from-semester-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:8px;">↩️ 返回</button>
 
         <!-- 删除操作 -->
@@ -627,6 +630,16 @@
 
         <button class="start-btn" id="confirm-character-btn">✅ 确认，开始冒险</button>
         <button class="start-btn" id="back-to-setup-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:8px;">↩️ 返回</button>
+    </div>
+
+    <!-- ===== 宿舍重选面板（八上/九上专用） ===== -->
+    <div id="dorm-reselect" class="setup-panel" style="display:none;">
+        <h2 style="font-size:22px; margin-bottom:8px; color:#2d3e50;">🏠 选择新学期的宿舍</h2>
+        <p style="color:#7a8b9b; font-size:14px; margin-bottom:16px;">新学期开始了，你的宿舍是？</p>
+        <div id="dorm-reselect-buttons" class="dorm-select"></div>
+        <button class="start-btn" id="confirm-dorm-reselect-btn" style="margin-top:18px;">✅ 确认宿舍，开始新学期</button>
+        <button class="start-btn" id="back-from-dorm-reselect-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:8px;">↩️ 返回</button>
+        <p id="dorm-reselect-hint" style="display:none; color:#c0392b; font-size:13px; margin-top:8px;">请选择一个宿舍</p>
     </div>
 
     <!-- ===== 游戏主界面 ===== -->
@@ -704,6 +717,42 @@
             </div>
         </div>
     </div>
+
+    <!-- ===== 学期总结查看面板 ===== -->
+    <div id="summary-viewer" style="display:none;">
+        <div class="end-title" id="summary-viewer-title">📜 冒险历程</div>
+        <div class="end-subtitle" id="summary-viewer-subtitle"></div>
+
+        <div id="summary-viewer-page1">
+            <div class="end-section-title">📜 冒险历程</div>
+            <div class="end-history-box" id="summary-viewer-history"></div>
+            <div class="end-actions">
+                <button class="export-btn" id="summary-export-history-btn">📥 导出冒险历程为txt</button>
+                <button class="restart-btn" id="summary-to-page2-btn">✅ 关闭，查看学期总结</button>
+            </div>
+        </div>
+
+        <div id="summary-viewer-page2" style="display:none;">
+            <div class="end-section-title">📝 学期总结</div>
+            <div class="end-reflection-box" id="summary-viewer-reflection"></div>
+            <div class="end-actions">
+                <button class="export-btn" id="summary-export-reflection-btn">📥 导出学期总结为txt</button>
+                <button class="restart-btn" id="summary-to-page3-btn" style="display:none; background:#8e44ad;">🎓 查看初中总结</button>
+                <button class="restart-btn" id="summary-close-btn2" style="display:none;">✅ 关闭，返回</button>
+                <button class="restart-btn" id="summary-close-btn">✅ 关闭，返回</button>
+            </div>
+        </div>
+
+        <div id="summary-viewer-page3" style="display:none;">
+            <div class="end-section-title">🎓 初中总结</div>
+            <div class="end-reflection-box" id="summary-viewer-graduation"></div>
+            <div class="end-actions">
+                <button class="export-btn" id="summary-export-graduation-btn">📥 导出初中总结为txt</button>
+                <button class="restart-btn" id="summary-page3-close-btn">✅ 关闭，返回</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -842,30 +891,212 @@
             '七上': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
 
 【故事背景】
- - 时间：2023.8.26下午，你（{name}，{gender}）到华附北滘学校中学部报到，升初一。班级707，年级12班×52人。
+ - 时间：2023.8.26下午，你（{name}，{gender}）到华附北港学校中学部报到，升初一。班级707（4楼），年级12班×52人。
  - 宿舍{dorm}（8人间（铁床），3间卫浴一体。707的宿舍有（男，四楼）402,403,404和（女，五楼）538,539,540）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现"手机收到班主任发的消息"之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
- - 作息：6:30起床铃，6:40操场跑操；晚饭和洗澡是在下午五六点；21:30晚修结束，22:00熄灯。
- - 教室有"清大视讯"一体机（需刷卡启动），两侧黑板。无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝）。
+ - 作息：6:30起床铃。军训结束、正式开学后：6:40操场跑操，之后早餐；17:00结束课程并开始下午的跑操，17:30开始洗澡吃饭，18:50开始晚修；21:30晚修结束，22:00熄灯。周五下午就放学了。
+ - 教室有"清大视讯"一体机（需刷卡启动），一体机两侧是黑板。教室座位有8列。
+ - 校内无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝）。
  - "七上"=七年级上学期。
+ - 学科分数：语数英分别120，道法历史分别100×0.6，地理生物分别100但不计入总成绩。
+
+【各科老师】
+ - 语文：刘志荣（女，副班主任，胖胖的，和蔼），她在我们班任教前我们班换过两次语文老师。讲课爱跑题废话多，身为语文老师字不好看。
+ - 数学：谭庆坤（男，严肃但挺好，被我们班称为“坤哥”（这被谭老师承认了），这个称呼还传到了8班（他是8班班主任）。七上后期妻子生娃，他发喜糖）。
+ - 英语：何铭仪（女，班主任，三十来岁，初期温柔，后期渐严）。
+ - 道法：梁靖（女，和蔼，常把单个知识点的标题写黑板上让我们默写）。
+ - 历史：陈洵（女，挺好，有时严厉，默写严，分享过亲戚住在长安城附近）。
+ - 地理：谢春霞（女，温柔，国庆假期布置作业制作建议地球仪）。
+ - 生物：吕绍钿（女，温柔，分享午睡时间不宜太长的常识，每节课前播放性教育小视频）。
 
 【剧情走向（必须按顺序发生！）】
-1. 开学报到：8月26日下午来到宿舍，铺床，与舍友首次见面；之后去到班级报到，每个人的位置已经被安排好（桌上有姓名牌），班上一体机正播放着校歌《从心出发》。
-2. 军训（8月27日-8月31日，共5天）：班级教官的外号是"笑脸哥"（第三天才起的外号），严而不厉，惩罚方式：让表现不好的学生去其他班张开双臂、迈一只腿喊"我骄傲、我自信、我能行"。总教官口头禅"晕蛋！"，军训第三天中午罚全年级在操场太阳下蹲了20分钟。第二天学唱《团结就是力量》。第四天军营参观（足球场设陆军/空军等展区），可体验无人机、穿越火线、水火箭、打靶等。第五天结营仪式。
-3. 七上开学：认识各科老师：语文刘志荣（女，胖胖的，和蔼）、数学谭庆坤（男，严肃但挺好，七上后期妻子生娃）、英语何铭仪（女，班主任）、道法梁靖（女，和蔼）、历史陈洵（女，默写严）、地理谢春霞（女，温柔）、生物吕绍钿（女，温柔）。班主任何铭仪初期温柔后期渐严。
-4. 4人小组，上交10多份班级口号，投票选出"七班七班，逐梦云端，不惧困难，跨越山川！"，后改"逐"为"筑"。
-5. 同学逐渐熟络。
-6. 10月篮球赛。周末线上与10班争执（怀疑裁判黑哨），班主任调解和平解决。
-7. 11月第一次校运会：班级文艺表演《小城夏天》。
-8. 12月红歌比赛：表演《我和我的祖国》。
-9. 第一次期末考试。
-10. 考后在教室看电影。
-11. 放假前一天上午在教室，中午回宿舍收行李搞卫生，家长接走，寒假开始（七上结束）。`,
+1. 开学报到：8月26日下午来到宿舍，铺床，与舍友首次见面；之后去到班级报到，每个人的位置已经被安排好（桌上有姓名牌），班上一体机正播放着校歌《从心出发》（“诚意正心，格物致知，铭记华附精神，从心出发…”）。
+2. 军训（8月27日-8月31日，共5天）：班级教官的外号是"笑脸哥"（第三天才起的外号，所以前几天不能出现），严而不厉，惩罚方式：让表现不好的学生去其他班张开双臂、迈一只腿喊"我骄傲、我自信、我能行"。总教官口头禅"晕蛋！"，军训第三天中午罚全年级在操场太阳下蹲了20分钟。第二天学唱《团结就是力量》。第四天军营参观（足球场设陆军/空军等展区），操场可体验无人机、穿越火线、水火箭、打靶等。第五天结营仪式，全年级在操场上进行了队列展示。
+3. 七上开学，认识各科老师。班主任给全班发纸写班干部意向。
+4. 4人小组，上交10多份班级口号，投票选出“七班七班，逐梦云端，不惧困难，跨越山川！”，后改“逐”为“筑”。票数第二：“七班七班我最棒，七班七班我最强，七班七班，耶！”。
+5. 同学之间逐渐熟络。
+6. 11月第一次校运会（持续2天）：开幕式我们班级一分钟文艺表演《小城夏天》（文娱委员选出来的）。校运会第一天的晚上礼堂有“十大歌手”歌唱比赛。校运会第二天含有班级之间的拔河比赛。
+7. 12月红歌比赛：表演《我和我的祖国》，4名同学先朗诵，后其余合唱+手势舞，1名同学指挥歌唱节奏。
+8. 第一次期末考试前2周的期末动员，我们班要挑战8班，应战口号是“8班，汗流浃背了吧！”。然而我们期末考试没能胜过8班。
+9. 考后在礼堂看电影《建党伟业》。
+10. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，寒假开始（七上结束）。
+值得一提的是，大约每个月换一次座位`,
+            '七下': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
+            
+【故事背景】
+ - 时间：2024.2.19，你（{name}，{gender}）进入七年级下学期，班级707（4楼），年级12班×52人。
+ - 宿舍{dorm}（8人间（铁床），3间卫浴一体。707的宿舍有（男，四楼）402,403,404和（女，五楼）538,539,540）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现"手机收到班主任发的消息"之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
+ - 作息：6:30起床铃，6:40操场跑操，之后早餐；17:00结束课程并开始下午的跑操，17:30开始洗澡吃饭，18:50开始晚修；21:30晚修结束，22:00熄灯。周五下午就放学了。
+ - 教室有"清大视讯"一体机（需刷卡启动），一体机两侧是黑板。教室座位有8列，但后来变为7列。
+ - 校内无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝）。
+ - "七下"=七年级下学期。
+ - 学科分数：语数英分别120，道法历史分别100×0.6，地理生物分别100但不计入总成绩。
 
-            '七下': `七下提示词`,
-            '八上': `八上提示词`,
-            '八下': `八下提示词`,
-            '九上': `九上提示词`,
-            '九下': `九下提示词`
+【各科老师】
+ - 语文：刘志荣（女，副班主任，胖胖的，和蔼），讲课爱跑题废话多，身为语文老师字不好看。
+ - 数学：谭庆坤（男，严肃但挺好，开始随机学号让同学上讲台讲题以锻炼思维）。
+ - 英语：何铭仪（女，班主任，三十来岁）。
+ - 道法：本学期原来的老师梁靖（女，和蔼，常把单个知识点的标题写黑板上让我们默写）请假了（产假），原教别的班的陈甜甜（性格和梁靖差不多，但说话更爽快）老师代课一学期。
+ - 历史：陈洵（女，挺好，有时严厉，默写严）。
+ - 地理：谢春霞（女，温柔）。
+ - 生物：吕绍钿（女，温柔每节课前播放性教育小视频）。
+
+【剧情走向（必须按顺序发生！）】
+ 1. 开学报到：2月18日下午来到宿舍，铺床，与舍友再次见面；之后去到班级报到，目前座位还是和上学期一样。
+ 2. 刚开学第一周，有个男同学请假。第二周得知，他辍学了（然而我们七八年级时他去到很多地方旅游、骑行，他还会数码、无人机感兴趣）。
+ 3. 何老师有时太严格，常检查所有学生带红领巾（不带扣分），上英语课讲话扣分，经常进教室看到第一排座位太靠前就让他们“后退，两格半砖，两格半砖（即与前墙保持至少2格半的地砖的距离）”。
+ 4. 中期何老师收获“梅姨”外号，但她并不知情。
+ 5. 篮球赛：男上半场20分钟→女投篮→男下半场→女投篮。周末线上与10班争执（怀疑裁判黑哨、怀疑对方翻比分牌），班主任调解和平解决。
+ 6. 举办退队（少先队）仪式。
+ 8. 六一儿童节举办班级活动，分组制作寿司；班上有小游戏，之后校运会班级PPT一个一个按学号展示全班同学小时候的照片。结束前每人发一个六一纪念笔记本。
+ 9. 第二次期末考试，依旧前两周的动员，依旧挑战8班，依旧失败。
+ 10. 考后在教室看电影。
+ 11. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，暑假开始（七下结束）。
+值得一提的是，大约每个月换一次座位。`,
+            '八上': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
+【故事背景】
+ - 时间：2024.9.2，你（{name}，{gender}）进入八年级上学期，班级807（4楼且位置未变），年级12班×52人。
+ - 宿舍{dorm}（8人间（铁床），3间卫浴一体。807的宿舍换到了（男，三楼）321,322,323和（女，六楼）620,621,622）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现"手机收到班主任发的消息"之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
+ - 作息（旧）：6:30起床铃，6:40操场跑操，之后早餐；17:00结束课程并开始下午的跑操，17:30开始洗澡吃饭，18:50开始晚修；21:30晚修结束，22:00熄灯。周五下午就放学了。
+ - 作息（新）：7:00起床铃，7:10操场跑操，之后早餐；11:40结束上午的课并吃饭+自主时间，12:50开始午休，13:45起床，14:00开始下午的课；17:30结束课程并开始下午的跑操，17:55开始洗澡吃饭，19:00开始晚修；21:30晚修结束，22:00熄灯。周五下午就放学了。
+ - 教室有"清大视讯"一体机（需刷卡启动），一体机两侧是黑板。教室座位有7列。
+ - 校内无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝）。
+ - "八上"=八年级上学期。本学期新增了物理。
+ - 学科分数：语数英分别120，物理100，道法历史分别100×0.6，地理生物分别100但不计入总成绩。
+
+【各科老师】
+ - 语文：谢芬（女，和蔼）。原来的刘志荣老师继续去教七年级了。
+ - 数学：谭庆坤（男，严肃但挺好，依旧随机学号让同学上讲台讲题以锻炼思维）。
+ - 英语：何铭仪（女，班主任，三十来岁）。
+ - 物理：方佳仪（女，和蔼但有时严厉，说话大声）。
+ - 道法：梁靖（女，成为了新的副班主任，和蔼，常把单个知识点的标题写黑板上让我们默写）。
+ - 历史：陈明芬（说话语速快且小声，但很温柔，教学质量一般）。原来的陈洵老师去教七年级的道法了（她是双学位）。
+ - 地理：梁碧仪（女，和蔼，有时严格，说话大声）。原来的谢春霞老师去教别的班了。
+ - 生物：郑梦清（女，温柔，长得矮，没再播放新教育视频了）。原来的吕绍钿老师去教8班了。
+
+【剧情走向（必须按顺序发生！）】
+ 1. 开学报到：2024.9.1下午来到新宿舍，铺床；之后去到班级报到，目前座位还是和上学期一样。
+ 2. 一名男同学转到美辰中学。
+ 3. 开学第三周，作息表调整，同学们不适应而吐槽；后来逐渐适应。中午自主时间较长，你开始饭后、午休前在图书馆写作业或看书。
+ 4. 地理老师把一个中国省份拼图游戏放在一体机的桌面上。课后我们男生偷偷把这个游戏存到了D盘的随便一个文件夹，选到了“CNTV”目录下。
+ 5. 国庆假期期间，语文老师布置作业自行组队制作电子版报纸；后续两周又让我们改进。
+ 6. 每月有月考。
+ 7. 11月14、15日校运会；校运会前2周，班主任选出一首歌曲《少年有志》（“我们有志向，我们有梦想，我们是祖国的明天和希望…”）作为开幕式本班1分钟表演歌曲，有点幼稚（像幼儿园跳的），和别的班潮歌形成鲜明对比，我们吐槽。校运会第一天的晚上操场有“十大歌手”歌唱比赛。
+ 8. 12月20日研学，地点是南海影视城，上午有脸谱非遗绘画体验、表演《靖港海战》（剧情有点逆天，还有示爱环节），下午有有半个小时在动物去自主活动，原本还会有另外半小时在游玩区活动，但前半小时结束后有几名同学找不到人而耽搁了十多分钟。结束后返校，总结后放学（那天在周五）。
+ 9. 外号被班主任得知。于是我们开始重新选择外号，称她为“将军”，这个外号整个学期她都没知道。
+ 10. 期末考试，依旧动员，依旧挑战8班，依旧失败。
+ 11. 考后在教室看电影。
+ 12. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，寒假开始（八上结束）。
+值得一提的是，大约每个月换一次座位。`,
+            '八下': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
+【故事背景】
+ - 时间：2025.2.10，你（{name}，{gender}）进入八年级下学期，班级807（4楼），年级12班×52人。
+ - 宿舍{dorm}（8人间（铁床），3间卫浴一体。807的宿舍有（男，三楼）321,322,323和（女，六楼）620,621,622）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现"手机收到班主任发的消息"之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
+ - 作息：7:00起床铃，7:10操场跑操，之后早餐；11:40结束上午的课并吃饭+自主时间，12:50开始午休，13:45起床，14:00开始下午的课；17:30结束课程并开始下午的跑操，17:55开始洗澡吃饭，19:00开始晚修；21:30晚修结束，22:00熄灯。周五下午就放学了。
+ - 教室有"清大视讯"一体机（需刷卡启动），一体机两侧是黑板。教室座位有7列。
+ - 校内无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝）。
+ - "八下"=八年级下学期。
+ - 学科分数：语数英分别120，物理100，道法历史分别100×0.6，地理生物分别100但不计入总成绩。
+
+【各科老师（未变）】
+ - 语文：谢芬（女，和蔼）。
+ - 数学：谭庆坤（男，严肃但挺好，很少随机学号让同学上讲台讲题以锻炼思维）。
+ - 英语：何铭仪（女，班主任，三十来岁，外号“将军”（整个学期她都没知道））。
+ - 物理：方佳仪（女，和蔼但有时严厉，说话大声）。
+ - 道法：梁靖（女，副班主任，和蔼，常把单个知识点的标题写黑板上让我们默写）。
+ - 历史：陈明芬（说话语速快且小声，但很温柔，教学质量一般）。
+ - 地理：梁碧仪（女，和蔼，有时严格，说话大声）。
+ - 生物：郑梦清（女，温柔，长得矮）。初一的吕老师去别的学校了。
+
+【研学活动】
+ - 2025.4.27上午7点半乘大巴车去到广东科学中心。9点半到达后班级活动（沉浸式互动体验与前沿科技展示），然后12:00就是午饭时间了。我们去到-1层的餐厅就餐，然后下午全天进行自主游览。
+ - 2025.4.27下午3点半集中后，我们继续乘大巴去到“满唐红酒楼”晚餐，16:30到达。10人/一桌，8菜1汤。
+ - 2025.4.27晚上18:00，入住聚龙湾天然温泉度假村酒店，两人一间房，每人一张床。19:00后锁门，门口贴封条，我们不能出来。我们在酒店内吃零吃、看电视，甚至熬夜到一两点。
+ - 2025.4.28早上7点起床出门后，发现所谓“封条”其实就是一小截双面胶。我们去到酒店一楼自助餐厅（凭房卡）吃早餐。
+ - 2025.4.28早上09:00-10:00，乘车前往【清远长隆国际森林度假区】。10:00-12:00，研学探究。12:00-13:00，集中在指定区域就餐。13:00-15:00，自主活动。15:00-16:50，返程回校。17:00-18:15，回班总结。
+
+【剧情走向（必须按顺序发生！）】
+1. 开学报到：2025.2.9下午来到宿舍，铺床，与舍友再次见面；之后去到班级报到，目前座位还是和上学期一样。
+2. 本学期，AI逐渐进入同学们的视野。同学们开始学会使用豆包和DeepSeek，利用这些AI进行学习、写作业。
+3. 英语要有一节公开课。班主任给每个同学发了一个空白的扇子，要我们在上面画与spring有关的画，还要我们创作与spring有关的英文短诗歌。我们到处翻阅字典来找押韵的词，有的人还用班里的一体机问AI。公开课在周四，前三天的准备工作很顺利，公开课也很顺利。
+4. D盘内“CNTV”文件夹开始被我们男生开发，我们往里面偷偷藏老师的一些教学视频、课件等，还会带U盘存自己的东西或取里面的文件，这成为了男生的“秘密基地”（当然女生也知道也没管过，老师一直都没知道）。
+5. 中午你开始不去图书馆了，而是改成在教室学习、写作业。
+6. 2025.4.27~2025.4.28，举办两天一夜的研学。详见【研学活动】。
+7. 2025.6.1，举办六一儿童节活动，家委在班里做烤肠和手打柠檬茶。然而，活动开始前有两名同学打闹把烤肠机打翻掉到地上，玻璃碎了。
+8. 6月中旬的某个周五的中午，你同往常一样在教室学习、写作业，教室里也有十来个也在学习、写作业。教室前面讲台上有两名同学用一体机的360浏览器玩NB化学实验室（八年级还没学化学，当时只会一通乱加）。后来一名学生离去，另一名学生回到座位，讲台上出现了一坨屎。纸都我们闻到臭气才发现，我们赶紧通知班主任、离开教室。下午那个位置用废弃的英语周报垫着，放学后班主任把中午在场的人留下，一个一个询问怀疑的对象，然后托人清理。下周一，班主任公布事实：经查监控得知，其中一名玩一体机的人鞋底有个洞，一坨屎刚好不知为何去到了洞里，在讲台上掉了出来。事实一公布，班里哄堂大笑。因这是意外，未追究责任。
+9. 6.30，去到华东师范大学附属顺德美的学校（简称华东美的）参加初中学业水平考试生物地理科（简称生地会考）。
+10. 7.1~7.3，期末考试，期末前没再有期末动员了。
+11. 考后在教室看电影。
+12. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，暑假开始（八下结束）。`,
+            '九上': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
+【故事背景】
+ - 时间：2025.9.1，你（{name}，{gender}）进入九年级上学期，班级907（4楼且位置未变），年级12班×52人。
+ - 宿舍{dorm}（8人间（但变成了10张铁床），3间卫浴一体。907的宿舍换到了（男，二楼）216,217和（女，五楼）515,516,517）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现"手机收到班主任发的消息"之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
+ - 作息：7:00起床铃，7:10操场跑操，之后早餐；11:40结束上午的课并吃饭+自主时间，12:50开始午休，13:45起床，14:00开始下午的课；17:30结束课程并开始下午的跑操，17:55开始洗澡吃饭，19:00开始晚修；21:30晚修结束，22:00熄灯。
+ - 教室有"清大视讯"一体机（需刷卡启动），一体机两侧是黑板。教室座位有7列。
+ - 校内无小卖部，有自动售货机（自动售卖机只有卖瓶装水、牛奶和酸奶，那里的冰淇淋酸奶很好喝），但是后来不见了。
+ - "九上"=九年级上学期。本学期开始没有生物和地理了，新增了化学。
+ - 学科分数：语数英分别120，物理化学分别100，道法历史分别100×0.6。
+
+【各科老师】
+ - 语文：戴永红（男，和蔼又严厉）。原来的谢老师去九年级别的班教语文了。
+ - 数学：谭庆坤（男，严肃但挺好，不再随机学号让同学上讲台讲题以锻炼思维）。
+ - 英语：何铭仪（女，班主任，三十来岁，外号“将军”（整个学期她都没知道））。
+ - 物理：黄国师（男，和蔼，很“可爱”）。原来的方老师去九年级别的班教物理了。
+ - 化学：朱金兰（女，副班主任，和蔼，年轻，懂网络梗）。
+ - 道法：梁靖（女，和蔼，常把单个知识点的标题写黑板上让我们默写），去当8班的副班主任了。
+ - 历史：梁彩茹（女，很温柔，教学很好，会English）。
+
+【剧情走向】
+1. 开学报到：2025.8.31下午来到宿舍，铺床；之后去到班级报到，目前座位还是和上学期一样。
+2. 得知班里有3位学习成绩最优异的学生调到了北滘中学少科院科创班（简称北中科创班）。
+3. 学期中期开始，每周五晚上要上完晚修才放学。
+4. 某天突然发现，自动售货机好像被拆了。
+5. 这个学期佛山市教育局开始宣布实行春秋假，11月12日至14日时3天的秋假且不补课。
+6. 11月27-28日校运会，九年级开幕式只有喊口号了，没有表演。校运会第一天的晚上操场有“十大歌手”歌唱比赛。
+7. 12月31日，举办研学活动，地点是珠海横琴长隆海洋王国，上午出发，下午3点半结束并返回。晚上晚修结束后往元旦假期。
+10. 期末考试，期末前没再有期末动员了。
+11. 考后在教室看电影。
+12. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，暑假开始（八下结束）。`,
+            '九下': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
+【故事背景】
+ - 时间：2026.3.2，你（{name}，{gender}）进入九年级下学期，班级907（4楼且位置未变），年级12班×52人。
+ - 宿舍{dorm}（8人间（但变成了10张铁床），3间卫浴一体。907的宿舍有（男，二楼）216,217和（女，五楼）515,516,517）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现"手机收到班主任发的消息"之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
+ - 作息：7:00起床铃，7:10操场跑操，之后早餐；11:40结束上午的课并吃饭+自主时间，12:50开始午休，13:45起床，14:00开始下午的课；17:30结束课程并开始下午的跑操，17:55开始洗澡吃饭，19:00开始晚修；21:30晚修结束，22:00熄灯。
+ - 教室有"清大视讯"一体机（需刷卡启动），一体机两侧是黑板。教室座位有7列。
+ - 校内无小卖部。
+ - "九下"=九年级下学期。
+ - 学科分数：语数英分别120，物理化学分别100，道法历史分别100×0.6。
+
+【各科老师】
+ - 语文：戴永红（男，和蔼又严厉）。
+ - 数学：谭庆坤（男，严肃但挺好，不再随机学号让同学上讲台讲题以锻炼思维）。
+ - 英语：何铭仪（女，班主任，三十来岁，外号“将军”（整个学期她都没知道））。
+ - 物理：黄国师（男，和蔼，很“可爱”）。
+ - 化学：朱金兰（女，副班主任，和蔼，年轻，懂网络梗）。
+ - 道法：梁靖（女，和蔼，常把单个知识点的标题写黑板上让我们默写），去当8班的副班主任了。
+ - 历史：梁彩茹（女，很温柔，教学很好，会English）。
+
+【体育选项】
+ - 男生：1000m跑步/100m游泳二选一 + 篮球/跳绳二选一
+ - 女生：1000m跑步/100m游泳二选一 + 足球/跳绳二选一
+ 
+【剧情走向】
+1. 开学报到：2026.3.1下午来到宿舍，铺床，与舍友再次见面；之后去到班级报到，目前座位还是和上学期一样。
+2. 体育考试选选项。这里要给用户两次选项，详见【体育选项】。
+3. 4月有春假，和清明假期连在一起，共4天。
+4. 班里男生在一体机“CNTV”里存音乐，七班进入大音乐时代。
+5. 4月中旬在校内进行顺德区模拟考“一模”，共三天，三天安排同中考。
+6. 给语文戴老师起了外号“菠萝”（或者“大菠萝”）。他不知道，直到期末也不知道。
+7. 在离中考78天时才进行“百日誓师”，被我们称为“78日誓师”
+8. 4月下旬，班主任为了增强勤学好问的意识，提高学生问问题的积极性，推行了一项新制度。每周找老师问问题可以签名，以列为单位，每周每列统计平均数。每周列内个人次数高的可以优先选列内位置（即坐在第几排），列平均数高的可以自行协商好并优先挑选列在班内的列内的位置（即这一列选在第几列）。
+8. 4月底去到君兰中学进行体育中考。
+9. 5月底中旬在校内进行佛山市模拟考“二模”，共三天，三天安排同中考。
+10. 6月1日儿童节家委给学生们吃麦当劳和果茶。
+11. 6月上旬校内进行校模拟考“三模”，共三天，三天安排同中考。
+12. 越到临近中考，反而越不紧张。
+13. 6月30日至7月2日，去到华东美的进行初中学业水平考试（中考）。第一天下午语文，第二天上午物理道法、下午数学，第三天上午英语化学、下午历史。
+14. 7月2日下午16:30考完历史后，回校直奔大礼堂进行毕业典礼。毕业典礼结束后会班，班里有大食会。接着收拾好班级，恢复到初一刚入学前的状态，然后同学互相道别去到宿舍收行李搞卫生，互相道别，家长接走，暑假开始（初中三年结束）。
+15. 毕业后一周（7月10日）中午，回学校拿毕业证，初中三年、九年义务教育正式结束。`
         };
         return prompts[semester] || `${semester}提示词`;
     }
@@ -873,6 +1104,19 @@
     function buildSystemPrompt(semester, playerName, gender, dorm, prevSummaries) {
         let prompt = getSemesterPromptContent(semester);
         prompt = prompt.replace(/\{name\}/g, playerName).replace(/\{gender\}/g, gender).replace(/\{dorm\}/g, dorm);
+
+        // 性别条件过滤：女生去掉八上/八下/九下的第4点（男生专属内容）
+        if (gender !== '男' && (semester === '八上' || semester === '八下' || semester === '九下')) {
+            // 删除第4点那一行
+            prompt = prompt.replace(/^[ \t]*4\..*$/m, '');
+            // 删除可能产生的空行
+            prompt = prompt.replace(/\n{2,}/g, '\n');
+            // 将后续点号重新编号（5→4, 6→5, ...）
+            for (let i = 5; i <= 20; i++) {
+                const re = new RegExp(`^([ \\t]*)${i}\\. `, 'm');
+                prompt = prompt.replace(re, `$1${i - 1}. `);
+            }
+        }
 
         // 注入前面学期的梗概
         if (prevSummaries && prevSummaries.length > 0) {
@@ -886,9 +1130,9 @@
         prompt += '\n\n【游戏规则】\n' +
             '- 使用第二人称视角。\n\n' +
             '- 每次生成一段故事描述，并在结尾提供若干选项供玩家选择。\n' +
-            '- 描述要生动、细腻，包含环境、心理、对话等，长度控制在 200~400 字左右。\n' +
+            '- 描述要生动、细腻，包含环境、心理、对话等，长度控制在 200~350 字左右。\n' +
             '- 选项要合理，且能推动剧情发展，符合当前时间线。\n' +
-            '- 生成格式：第一行开始为故事描述（不使用Markdown格式；多行分段，尽量每段不多于140字）。描述结束后无需询问。\n' +
+            '- 生成格式：第一行开始为故事描述（不使用Markdown格式；多行分段，尽量每段不多于120字）。描述结束后无需询问。\n' +
             '  故事描述结束后先单独一行输出当前进度，然后单独一行写"【选项】"，接着每行一个选项，无需列出自定义选项，如：\n' +
             '  ...（故事描述）\n' +
             '  【进度: 12.35%】\n' +
@@ -958,6 +1202,55 @@
             selectedDorm = dorms[0];
             document.querySelector('.dorm-btn')?.classList.add('active');
         }
+    }
+
+    // ================================================================
+    //  宿舍重选（八上/九上专用）
+    // ================================================================
+    function renderDormReselectButtons() {
+        const container = document.getElementById('dorm-reselect-buttons');
+        container.innerHTML = '';
+        const gender = playerInfo.gender || '男';
+        const dormOptions = getDormOptionsForSemester(currentSemester);
+        const dorms = dormOptions[gender] || [];
+        dorms.forEach(d => {
+            const btn = document.createElement('button');
+            btn.type = 'button'; btn.className = 'dorm-btn';
+            btn.textContent = d; btn.dataset.dorm = d;
+            if (selectedDorm === d) btn.classList.add('active');
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#dorm-reselect-buttons .dorm-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedDorm = d;
+                document.getElementById('dorm-reselect-hint').style.display = 'none';
+            });
+            container.appendChild(btn);
+        });
+        if (!dorms.includes(selectedDorm)) selectedDorm = null;
+        if (!selectedDorm && dorms.length) {
+            selectedDorm = dorms[0];
+            document.querySelector('#dorm-reselect-buttons .dorm-btn')?.classList.add('active');
+        }
+    }
+
+    // 获取指定学期的宿舍选项（与提示词中的宿舍一致）
+    function getDormOptionsForSemester(semester) {
+        // 七上/七下：402,403,404 / 538,539,540
+        if (semester === '七上' || semester === '七下') return { '男': ['402', '403', '404'], '女': ['538', '539', '540'] };
+        // 八上/八下：321,322,323 / 620,621,622
+        if (semester === '八上' || semester === '八下') return { '男': ['321', '322', '323'], '女': ['620', '621', '622'] };
+        // 九上/九下：216,217 / 515,516,517
+        return { '男': ['216', '217'], '女': ['515', '516', '517'] };
+    }
+
+    // 获取指定学期之前的最后一个存档中的宿舍号（用于回溯恢复）
+    async function getPrevSemesterDorm(semester) {
+        const idx = SEMESTERS.indexOf(semester);
+        for (let i = idx - 1; i >= 0; i--) {
+            const save = await loadSemester(SEMESTERS[i]);
+            if (save && save.playerInfo && save.playerInfo.dorm) return save.playerInfo.dorm;
+        }
+        return null;
     }
     genderRadios.forEach(r => r.addEventListener('change', renderDormButtons));
 
@@ -1207,7 +1500,7 @@
 
         // 1. 生成学期梗概（用于注入下学期提示词）
         const summaryMessages = [...messages];
-        summaryMessages.push({ role: 'user', content: '请根据以上完整剧情，生成一份约1000字的学期梗概，概括本学期发生的主要事件、认识的同学和老师（包括他们的性格特点）。' });
+        summaryMessages.push({ role: 'user', content: '请根据以上完整剧情，生成一份约1000字的学期梗概，概括本学期发生的主要事件、认识的同学和老师（包括他们的性格特点），记住班级号和宿舍号。' });
         const summaryReply = await callDeepSeek(summaryMessages);
         const semesterSummary = summaryReply || '（梗概生成失败）';
 
@@ -1250,8 +1543,8 @@
         const summariesText = allSummaries.join('\n\n');
 
         const gradMessages = [
-            { role: 'system', content: '你是一位初中毕业班班主任，请根据学生整个初中生涯的经历，写一份1200字左右的初中总结。' },
-            { role: 'user', content: `以下是我初中六学期的完整经历梗概：\n\n${summariesText}\n\n请根据以上经历，写一份1200字左右的初中总结，回顾整个初中生活。请使用纯文本格式，不需要Markdown格式。` }
+            { role: 'system', content: '你是一位初中毕业班学生，请根据整个初中生涯的经历，写一份1200字左右的初中总结。不使用markdown格式，使用第二人称。' },
+            { role: 'user', content: `以下是初中六学期的完整经历梗概：\n\n${summariesText}\n\n请根据以上经历，写一份1200字左右的初中总结，回顾整个初中生活。请使用纯文本格式，第二人称，不需要Markdown格式。` }
         ];
 
         const gradReply = await callDeepSeek(gradMessages);
@@ -1554,7 +1847,15 @@
                     selectedDorm = playerInfo.dorm;
                     const savedInfo = playerInfo;
                     const needsSetup = currentSemester === '七上' || !savedInfo.name;
-                    if (needsSetup) {
+                    if (currentSemester === '八上' || currentSemester === '九上') {
+                        // 需要重选宿舍
+                        const prevDorm = await getPrevSemesterDorm(currentSemester);
+                        if (prevDorm) { selectedDorm = prevDorm; playerInfo.dorm = prevDorm; }
+                        setupPanel.style.display = 'none';
+                        semesterSelect.style.display = 'none';
+                        document.getElementById('dorm-reselect').style.display = 'block';
+                        renderDormReselectButtons();
+                    } else if (needsSetup) {
                         setupPanel.style.display = 'none';
                         characterSetup.style.display = 'block';
                         renderDormButtons();
@@ -1684,13 +1985,28 @@
     async function deleteSemesterAndLater(semesterId) {
         const idx = SEMESTERS.indexOf(semesterId);
         for (let i = idx; i < SEMESTERS.length; i++) {
-            await deleteSemesterDB(SEMESTERS[i]);
+            try {
+                await deleteSemesterDB(SEMESTERS[i]);
+            } catch (e) {
+                console.warn('删除', SEMESTERS[i], '失败:', e);
+            }
         }
     }
 
     async function deleteAllSemesters() {
-        await dbClear('semesters');
+        // 逐个删除确保清理干净
+        for (const sem of SEMESTERS) {
+            try {
+                await dbDelete('semesters', sem);
+            } catch (e) {
+                console.warn('删除', sem, '失败:', e);
+            }
+        }
+        // 也清除 meta
         await saveMeta({ playerInfo: { name: '', gender: '', dorm: '' }, lastSemester: null });
+        // 刷新 db 连接，避免使用缓存
+        db = null;
+        await openDB();
     }
 
     // ================================================================
@@ -1720,17 +2036,21 @@
         const save = saveMap[sem];
         const confirmBtn = document.getElementById('confirm-semester-btn');
         const continueSemBtn = document.getElementById('continue-semester-btn');
+        const viewSummaryBtn = document.getElementById('view-summary-btn');
 
         if (save && save.isComplete) {
             confirmBtn.textContent = '🔄 重新开始本学期并删除后续进度';
             continueSemBtn.style.display = 'none';
+            viewSummaryBtn.style.display = 'block';
         } else if (save && save.messages) {
             confirmBtn.textContent = '🔄 重新开始本学期并删除进度';
             continueSemBtn.textContent = '▶️ 继续本学期的历程';
             continueSemBtn.style.display = 'block';
+            viewSummaryBtn.style.display = 'none';
         } else {
             confirmBtn.textContent = '▶️ 开启本学期的历程';
             continueSemBtn.style.display = 'none';
+            viewSummaryBtn.style.display = 'none';
         }
     }
 
@@ -1814,6 +2134,55 @@
     }
 
     // ================================================================
+    //  学期总结查看器
+    // ================================================================
+    let summaryViewerSemester = null;
+
+    async function showSummaryViewer(semester) {
+        const save = await loadSemester(semester);
+        if (!save || !save.isComplete) { alert('该学期没有可查看的总结数据。'); return; }
+
+        summaryViewerSemester = semester;
+
+        // 填充标题
+        document.getElementById('summary-viewer-title').textContent = `📖 ${semester} 学期总结`;
+        document.getElementById('summary-viewer-subtitle').textContent =
+            `姓名：${save.playerInfo?.name || '未知'} · ${save.playerInfo?.gender || ''} · ${save.playerInfo?.dorm || ''}`;
+
+        // 页1：冒险历程
+        const historyText = buildArchiveHistoryText(save);
+        document.getElementById('summary-viewer-history').textContent = historyText;
+        document.getElementById('summary-viewer-page1').style.display = 'block';
+        document.getElementById('summary-viewer-page2').style.display = 'none';
+        document.getElementById('summary-viewer-page3').style.display = 'none';
+
+        // 统一用 close-btn（非九下）或 close-btn2（九下）
+        document.getElementById('summary-close-btn').style.display = 'inline-block';
+        document.getElementById('summary-close-btn2').style.display = 'none';
+
+        // 隐藏学期选择，显示查看器
+        semesterSelect.style.display = 'none';
+        document.getElementById('summary-viewer').style.display = 'block';
+    }
+
+    function buildArchiveHistoryText(save) {
+        const entries = save.historyEntries || [];
+        const info = save.playerInfo || {};
+        let text = `学期：${save.id || summaryViewerSemester || '未知'}\n姓名：${info.name || '未知'}\n性别：${info.gender || ''}\n宿舍：${info.dorm || ''}\n\n`;
+        if (entries.length === 0) return text + '📭 没有剧情记录';
+        let round = 1;
+        for (let i = 0; i < entries.length; i += 2) {
+            text += `【第${round}回合】\n剧情：\n`;
+            if (entries[i] && entries[i].type === 'story') text += `${entries[i].text}\n`;
+            text += `--------------------------\n选择：`;
+            if (entries[i + 1] && entries[i + 1].type === 'choice') text += `${entries[i + 1].text}`;
+            text += `\n================\n\n`;
+            round++;
+        }
+        return text;
+    }
+
+    // ================================================================
     //  重置游戏
     // ================================================================
     async function resetGame() {
@@ -1847,18 +2216,29 @@
             continueBtn.disabled = true;
             continueBtn.style.background = '#27ae60';
             continueBtn.style.cursor = 'default';
+            // 显示毕业总结按钮，预填充数据
+            const gradBtn = document.getElementById('graduation-summary-btn');
+            const gradSave = all.find(a => a.id === '九下');
+            if (gradSave && gradSave.graduationSummary) {
+                document.getElementById('summary-viewer-graduation').textContent = gradSave.graduationSummary;
+                gradBtn.style.display = 'block';
+            } else {
+                gradBtn.style.display = 'none';
+            }
         } else if (all.length > 0) {
             continueBtn.textContent = '▶️ 继续游戏';
             continueBtn.style.display = 'block';
             continueBtn.disabled = false;
             continueBtn.style.background = '';
             continueBtn.style.cursor = '';
+            document.getElementById('graduation-summary-btn').style.display = 'none';
         } else {
             continueBtn.textContent = '▶️ 开启历程';
             continueBtn.style.display = 'block';
             continueBtn.disabled = false;
             continueBtn.style.background = '';
             continueBtn.style.cursor = '';
+            document.getElementById('graduation-summary-btn').style.display = 'none';
         }
         renderDormButtons();
         updateProgressBar(0);
@@ -1907,7 +2287,20 @@
             playerInfo = { ...savedInfo };
             selectedDorm = savedInfo.dorm;
             semesterSelect.style.display = 'none';
-            startGame();
+            // 八上/九上需要重选宿舍；非七上回溯时恢复之前的宿舍
+            if (currentSemester === '八上' || currentSemester === '九上') {
+                // 先尝试从上一学期恢复宿舍作为默认值
+                const prevDorm = await getPrevSemesterDorm(currentSemester);
+                if (prevDorm) { selectedDorm = prevDorm; playerInfo.dorm = prevDorm; }
+                document.getElementById('dorm-reselect').style.display = 'block';
+                renderDormReselectButtons();
+            } else {
+                // 非七上且非八上/九上：恢复之前的宿舍
+                const prevDorm = await getPrevSemesterDorm(currentSemester);
+                if (prevDorm) { selectedDorm = prevDorm; playerInfo.dorm = prevDorm; }
+                await saveMeta({ playerInfo, lastSemester: currentSemester });
+                startGame();
+            }
         }
     });
 
@@ -1948,10 +2341,41 @@
         }
     });
 
-    // 返回学期选择
-    document.getElementById('back-from-semester-btn').addEventListener('click', () => {
-        semesterSelect.style.display = 'none';
+    // 查看初中总结（毕业后主界面按钮）
+    document.getElementById('graduation-summary-btn').addEventListener('click', () => {
+        document.getElementById('summary-viewer').style.display = 'block';
+        document.getElementById('summary-viewer-title').textContent = '🎓 初中毕业总结';
+        document.getElementById('summary-viewer-subtitle').textContent = '';
+        document.getElementById('summary-viewer-page1').style.display = 'none';
+        document.getElementById('summary-viewer-page2').style.display = 'none';
+        document.getElementById('summary-viewer-page3').style.display = 'block';
+        setupPanel.style.display = 'none';
+    });
+
+    // 查看总结
+    document.getElementById('view-summary-btn').addEventListener('click', async () => {
+        showSummaryViewer(selectedSemester);
+    });
+
+    // 确认宿舍重选（八上/九上）
+    document.getElementById('confirm-dorm-reselect-btn').addEventListener('click', async () => {
+        if (!selectedDorm) { document.getElementById('dorm-reselect-hint').style.display = 'block'; return; }
+        playerInfo.dorm = selectedDorm;
+        document.getElementById('dorm-reselect').style.display = 'none';
+        await saveMeta({ playerInfo, lastSemester: currentSemester });
+        startGame();
+    });
+
+    // 返回从宿舍重选
+    document.getElementById('back-from-dorm-reselect-btn').addEventListener('click', () => {
+        document.getElementById('dorm-reselect').style.display = 'none';
         setupPanel.style.display = 'block';
+    });
+
+    // 返回学期选择
+    document.getElementById('back-from-semester-btn').addEventListener('click', async () => {
+        semesterSelect.style.display = 'none';
+        await resetGame();
     });
 
     // 继续游戏
@@ -2083,7 +2507,13 @@
             }
             playerInfo = meta.playerInfo || { name: '', gender: '', dorm: '' };
             selectedDorm = playerInfo.dorm;
-            if (currentSemester !== '七上' && playerInfo.name) {
+            if (currentSemester === '八上' || currentSemester === '九上') {
+                // 需要重选宿舍
+                const prevDorm = await getPrevSemesterDorm(currentSemester);
+                if (prevDorm) { selectedDorm = prevDorm; playerInfo.dorm = prevDorm; }
+                document.getElementById('dorm-reselect').style.display = 'block';
+                renderDormReselectButtons();
+            } else if (currentSemester !== '七上' && playerInfo.name) {
                 semesterSelect.style.display = 'none';
                 startGame();
             } else {
@@ -2136,6 +2566,79 @@
         downloadTxt(text, `七班校园故事_初中毕业总结_${new Date().toLocaleDateString()}.txt`);
     });
 
+    // ================================================================
+    //  学期总结查看器 - 按钮
+    // ================================================================
+
+    // 页1 → 页2
+    document.getElementById('summary-to-page2-btn').addEventListener('click', async () => {
+        const save = await loadSemester(summaryViewerSemester);
+        const refBox = document.getElementById('summary-viewer-reflection');
+        if (save && save.reflection) {
+            refBox.innerHTML = renderMarkdown(save.reflection);
+        } else {
+            refBox.innerHTML = '<span style="color: #a09080;">暂无总结数据。</span>';
+        }
+        document.getElementById('summary-viewer-page1').style.display = 'none';
+        document.getElementById('summary-viewer-page2').style.display = 'block';
+    });
+
+    // 关闭查看器（页2 → 返回页1）
+    document.getElementById('summary-close-btn').addEventListener('click', () => {
+        document.getElementById('summary-viewer').style.display = 'none';
+        semesterSelect.style.display = 'block';
+    });
+
+    // 关闭查看器（九下页2 → 返回页1）
+    document.getElementById('summary-close-btn2').addEventListener('click', () => {
+        document.getElementById('summary-viewer').style.display = 'none';
+        semesterSelect.style.display = 'block';
+    });
+
+    // 页2 → 页3（初中总结）
+    document.getElementById('summary-to-page3-btn').addEventListener('click', () => {
+        document.getElementById('summary-viewer-page2').style.display = 'none';
+        document.getElementById('summary-viewer-page3').style.display = 'block';
+    });
+
+    // 页3 → 关闭查看器
+    document.getElementById('summary-page3-close-btn').addEventListener('click', () => {
+        document.getElementById('summary-viewer').style.display = 'none';
+        // 如果是从主界面进来的，显示主界面
+        if (document.getElementById('graduation-summary-btn').style.display === 'block') {
+            setupPanel.style.display = 'block';
+        } else {
+            semesterSelect.style.display = 'block';
+        }
+    });
+
+    // 导出冒险历程（查看器）
+    document.getElementById('summary-export-history-btn').addEventListener('click', async () => {
+        const save = await loadSemester(summaryViewerSemester);
+        if (!save) { alert('无法读取存档数据。'); return; }
+        let text = `📖 七班校园故事 - ${summaryViewerSemester} 冒险历程\n\n`;
+        text += buildArchiveHistoryText(save);
+        downloadTxt(text, `七班校园故事_${summaryViewerSemester}_冒险历程_${new Date().toLocaleDateString()}.txt`);
+    });
+
+    // 导出学期总结（查看器）
+    document.getElementById('summary-export-reflection-btn').addEventListener('click', async () => {
+        const save = await loadSemester(summaryViewerSemester);
+        if (!save || !save.reflection) { alert('该学期尚未生成学期总结。'); return; }
+        let text = `📖 七班校园故事 - ${summaryViewerSemester} 学期总结\n\n`;
+        text += (save.reflection || '暂无总结');
+        downloadTxt(text, `七班校园故事_${summaryViewerSemester}_学期总结_${new Date().toLocaleDateString()}.txt`);
+    });
+
+    // 导出初中总结（查看器）
+    document.getElementById('summary-export-graduation-btn').addEventListener('click', async () => {
+        const save = await loadSemester('九下');
+        if (!save || !save.graduationSummary) { alert('暂无初中总结数据。'); return; }
+        let text = `🎓 七班校园故事 - 初中毕业总结\n\n`;
+        text += save.graduationSummary;
+        downloadTxt(text, `七班校园故事_初中毕业总结_${new Date().toLocaleDateString()}.txt`);
+    });
+
     function downloadTxt(text, filename) {
         const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
@@ -2160,18 +2663,28 @@
             continueBtn.disabled = true;
             continueBtn.style.background = '#27ae60';
             continueBtn.style.cursor = 'default';
+            // 毕业总结按钮
+            const gradSave = allSaves.find(a => a.id === '九下');
+            if (gradSave && gradSave.graduationSummary) {
+                document.getElementById('summary-viewer-graduation').textContent = gradSave.graduationSummary;
+                document.getElementById('graduation-summary-btn').style.display = 'block';
+            } else {
+                document.getElementById('graduation-summary-btn').style.display = 'none';
+            }
         } else if (allSaves.length > 0) {
             continueBtn.textContent = '▶️ 继续游戏';
             continueBtn.style.display = 'block';
             continueBtn.disabled = false;
             continueBtn.style.background = '';
             continueBtn.style.cursor = '';
+            document.getElementById('graduation-summary-btn').style.display = 'none';
         } else {
             continueBtn.textContent = '▶️ 开启历程';
             continueBtn.style.display = 'block';
             continueBtn.disabled = false;
             continueBtn.style.background = '';
             continueBtn.style.cursor = '';
+            document.getElementById('graduation-summary-btn').style.display = 'none';
         }
         renderDormButtons();
         console.log('🎮 七班校园故事已加载！支持 七上~九下 六学期冒险。');
