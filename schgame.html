@@ -891,7 +891,7 @@
             '七上': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
 
 【故事背景】
- - 时间：2023.8.26下午，你（{name}，{gender}）到华附北港学校中学部报到，升初一。班级707（4楼），年级12班×52人。
+ - 时间：2023.8.26下午，你（{name}，{gender}）到华南师范大学附属顺德北滘学校（简称华附北滘学校）中学部（简称华附）报到，升初一。班级707（4楼），年级12班×52人。
  - 宿舍{dorm}（8人间（铁床），3间卫浴一体。707的宿舍有（男，四楼）402,403,404和（女，五楼）538,539,540）。宿舍无书桌，学校禁带手机/MP3等电子产品（因此剧情不允许出现"手机收到班主任发的消息"之类的情节）。男生校服蓝白，女生粉白（不是裙）；周三穿纯蓝文化服（非强制）。
  - 作息：6:30起床铃。军训结束、正式开学后：6:40操场跑操，之后早餐；17:00结束课程并开始下午的跑操，17:30开始洗澡吃饭，18:50开始晚修；21:30晚修结束，22:00熄灯。周五下午就放学了。
  - 教室有"清大视讯"一体机（需刷卡启动），一体机两侧是黑板。教室座位有8列。
@@ -2400,7 +2400,6 @@
         await deleteSemesterAndLater(currentSemester);
         if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
         if (currentStory) { addHistoryEntry('story', currentStory); currentStory = ''; }
-        // 显示之前学期已有的结束界面，或回到主界面
         isPlaying = false;
         isWaitingForChoice = false;
         messages = [];
@@ -2413,16 +2412,8 @@
         optionsArea.innerHTML = '';
         loadingIndicator.style.display = 'none';
         gameArea.style.display = 'none';
-        setupPanel.style.display = 'block';
         document.getElementById('end-screen').style.display = 'none';
-        continueBtn.style.display = 'none';
-        renderDormButtons();
-        updateProgressBar(0);
-        if (isHistoryOpen) {
-            isHistoryOpen = false;
-            historyArea.style.display = 'none';
-            historyToggle.innerHTML = '<span class="icon">▼</span> 📜 展开历史剧情';
-        }
+        await resetGame();
     });
 
     // 删除所选学期
