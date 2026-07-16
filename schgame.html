@@ -552,6 +552,112 @@
         }
         .restart-btn:hover { background: #1f2e3d; transform: scale(1.01); }
 
+        /* ===== 成就系统 ===== */
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            border: 2px solid #e0d6cc;
+            background: #faf8f5;
+            transition: 0.2s;
+        }
+        .achievement-item.unlocked {
+            border-color: #f6b83d;
+            background: #fef9f0;
+        }
+        .achievement-item.locked {
+            opacity: 0.5;
+            filter: grayscale(0.8);
+        }
+        .achievement-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 50%;
+            border: 2px solid #e0d6cc;
+        }
+        .achievement-item.unlocked .achievement-icon {
+            border-color: #f6b83d;
+            background: #fff8e8;
+        }
+        .achievement-info {
+            flex: 1;
+        }
+        .achievement-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: #2d3e50;
+            margin-bottom: 4px;
+        }
+        .achievement-desc {
+            font-size: 13px;
+            color: #7a8b9b;
+            line-height: 1.5;
+        }
+        .achievement-category {
+            font-size: 11px;
+            color: #9aabb8;
+            margin-top: 4px;
+        }
+        .achievements-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #f6b83d;
+            margin: 16px 0 8px;
+            padding-left: 8px;
+            border-left: 3px solid #f6b83d;
+        }
+        .achievements-section-title:first-child {
+            margin-top: 0;
+        }
+
+        /* ===== 成就解锁弹窗 ===== */
+        .achievement-toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, #f6b83d, #f5a623);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(246, 184, 61, 0.4);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 90%;
+        }
+        .achievement-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .achievement-toast-icon {
+            font-size: 32px;
+        }
+        .achievement-toast-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .achievement-toast-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .achievement-toast-name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
         /* ===== 响应式 ===== */
         @media (max-width: 600px) {
             .container { padding: 20px; }
@@ -560,9 +666,221 @@
             #history-area { max-height: 300px; }
             .semester-grid { grid-template-columns: repeat(2, 1fr); }
         }
+
+        /* ===== 暗黑模式 ===== */
+        body.dark-mode {
+            background: linear-gradient(145deg, #0f1117 0%, #1a1d27 100%);
+        }
+        body.dark-mode .container {
+            background: #1a1d27;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+        }
+        body.dark-mode h1 { color: #e8eaf0; }
+        body.dark-mode .subtitle {
+            color: #9fa8b8;
+            background: #222530;
+            border-left-color: #f6b83d;
+        }
+        body.dark-mode .save-hint { color: #7a8290; }
+        body.dark-mode .setup-panel {
+            background: #222530;
+            border-color: #2e3340;
+        }
+        body.dark-mode .setup-panel label { color: #c8d0dc; }
+        body.dark-mode .setup-panel input[type="text"],
+        body.dark-mode .setup-panel input[type="password"] {
+            background: #1a1d27;
+            border-color: #3a3f4d;
+            color: #e8eaf0;
+        }
+        body.dark-mode .dorm-btn {
+            background: #1a1d27;
+            border-color: #3a3f4d;
+            color: #c8d0dc;
+        }
+        body.dark-mode .dorm-btn:hover {
+            border-color: #f6b83d;
+            background: #2a2418;
+        }
+        body.dark-mode .dorm-btn.active {
+            border-color: #f6b83d;
+            background: #f6b83d;
+            color: #1a1d27;
+        }
+        body.dark-mode .start-btn {
+            background: #3a4555;
+            color: #e8eaf0;
+        }
+        body.dark-mode .start-btn:hover { background: #4a5565; }
+        body.dark-mode .start-btn.warn { background: #c0392b; }
+        body.dark-mode .start-btn.warn:hover { background: #a93226; }
+        body.dark-mode .semester-card {
+            background: #1a1d27;
+            border-color: #3a3f4d;
+            color: #c8d0dc;
+        }
+        body.dark-mode .semester-card:hover {
+            border-color: #f6b83d;
+            background: #2a2418;
+        }
+        body.dark-mode .semester-card.in-progress { background: #1a2530; border-color: #3498db; }
+        body.dark-mode .semester-card.ready { background: #1a2030; border-color: #3498db; }
+        body.dark-mode .semester-card.selected {
+            border-color: #f6b83d !important;
+            background: #f6b83d !important;
+            color: #1a1d27;
+        }
+        body.dark-mode .story-box {
+            background: #1e2128;
+            border-color: #2e3340;
+            color: #d8dce5;
+        }
+        body.dark-mode .story-box::-webkit-scrollbar-track { background: #1e2128; }
+        body.dark-mode .story-box::-webkit-scrollbar-thumb { background: #3a3f4d; }
+        body.dark-mode .history-toggle {
+            background: #2a2d38;
+            border-color: #3a3f4d;
+            color: #c8d0dc;
+        }
+        body.dark-mode .history-toggle:hover { background: #333744; border-color: #4a4f5d; }
+        body.dark-mode #history-area {
+            background: #222530;
+            border-color: #2e3340;
+        }
+        body.dark-mode #history-area::-webkit-scrollbar-track { background: #1e2128; }
+        body.dark-mode #history-area::-webkit-scrollbar-thumb { background: #3a3f4d; }
+        body.dark-mode .history-entry { border-bottom-color: #2e3340; }
+        body.dark-mode .history-entry .h-type.story { color: #e8eaf0; }
+        body.dark-mode .history-entry .h-type.choice { color: #f6b83d; }
+        body.dark-mode .history-entry .h-text { color: #c8d0dc; }
+        body.dark-mode .history-empty { color: #6a7280; }
+        body.dark-mode .nav-btn { background: #3a4555; color: #e8eaf0; }
+        body.dark-mode .nav-btn:hover { background: #4a5565; }
+        body.dark-mode .nav-btn.secondary { background: #2a2d38; color: #c8d0dc; }
+        body.dark-mode .nav-btn.secondary:hover { background: #333744; }
+        body.dark-mode .option-btn {
+            background: #1a1d27;
+            border-color: #3a3f4d;
+            color: #d8dce5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .option-btn:hover {
+            border-color: #f6b83d;
+            background: #2a2418;
+            box-shadow: 0 6px 14px rgba(246, 184, 61, 0.15);
+        }
+        body.dark-mode .option-btn.selected {
+            border-color: #f6b83d;
+            background: #2a2418;
+            box-shadow: 0 4px 12px rgba(246, 184, 61, 0.2);
+        }
+        body.dark-mode .custom-input-area input {
+            background: #1a1d27;
+            border-color: #3a3f4d;
+            color: #e8eaf0;
+        }
+        body.dark-mode .confirm-btn { background: #3a4555; color: #e8eaf0; }
+        body.dark-mode .confirm-btn:hover { background: #4a5565; }
+        body.dark-mode .loading-indicator { color: #9fa8b8; }
+        body.dark-mode .loading-indicator .spinner {
+            border-color: #3a3f4d;
+            border-top-color: #f6b83d;
+        }
+        body.dark-mode .progress-container { background: #2a2d38; }
+        body.dark-mode .progress-bar-wrapper { background: #3a3f4d; }
+        body.dark-mode .progress-label { color: #c8d0dc; }
+        body.dark-mode .round-label { color: #e8eaf0; }
+        body.dark-mode .reset-btn { background: #2a2d38; color: #c8d0dc; }
+        body.dark-mode .reset-btn:hover { background: #333744; }
+        body.dark-mode .end-title { color: #e8eaf0; }
+        body.dark-mode .end-subtitle { color: #9fa8b8; }
+        body.dark-mode .end-section-title { color: #e8eaf0; }
+        body.dark-mode .end-history-box {
+            background: #1e2128;
+            border-color: #2e3340;
+            color: #d8dce5;
+        }
+        body.dark-mode .end-reflection-box {
+            background: #1e2128;
+            border-color: #2e3340;
+            color: #d8dce5;
+        }
+        body.dark-mode .end-reflection-box h2 { color: #e8eaf0; }
+        body.dark-mode .end-history-box::-webkit-scrollbar-track,
+        body.dark-mode .end-reflection-box::-webkit-scrollbar-track { background: #1e2128; }
+        body.dark-mode .end-history-box::-webkit-scrollbar-thumb,
+        body.dark-mode .end-reflection-box::-webkit-scrollbar-thumb { background: #3a3f4d; }
+        body.dark-mode .restart-btn { background: #3a4555; color: #e8eaf0; }
+        body.dark-mode .restart-btn:hover { background: #4a5565; }
+
+        /* 成就系统暗黑模式 */
+        body.dark-mode .achievement-item {
+            border-color: #3a3f4d;
+            background: #222530;
+        }
+        body.dark-mode .achievement-item.unlocked {
+            border-color: #f6b83d;
+            background: #2a2418;
+        }
+        body.dark-mode .achievement-icon {
+            background: #1a1d27;
+            border-color: #3a3f4d;
+        }
+        body.dark-mode .achievement-item.unlocked .achievement-icon {
+            border-color: #f6b83d;
+            background: #3a3418;
+        }
+        body.dark-mode .achievement-name { color: #e8eaf0; }
+        body.dark-mode .achievement-desc { color: #9fa8b8; }
+        body.dark-mode .achievement-category { color: #7a8290; }
+        body.dark-mode .achievements-section-title { color: #f6b83d; }
+        body.dark-mode .achievements-list::-webkit-scrollbar-track { background: #1e2128; }
+        body.dark-mode .achievements-list::-webkit-scrollbar-thumb { background: #3a3f4d; }
+
+        /* 内联样式覆盖 */
+        body.dark-mode [style*="color:#7a8b9b"] { color: #9fa8b8 !important; }
+        body.dark-mode [style*="color:#2d3e50"] { color: #e8eaf0 !important; }
+        body.dark-mode [style*="color:#9a8a7a"] { color: #8a7a6a !important; }
+        body.dark-mode [style*="color: #a09080"] { color: #6a7280 !important; }
+        body.dark-mode [style*="color:#a09080"] { color: #6a7280 !important; }
+        body.dark-mode [style*="border-top:2px solid #e9e0d8"] { border-top-color: #2e3340 !important; }
+        body.dark-mode [style*="background:#e8dfd7"] { background-color: #2a2d38 !important; }
+
+        /* 暗黑模式切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid #d5cdc4;
+            background: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10000;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .theme-toggle {
+            background: #222530;
+            border-color: #3a3f4d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+
+        /* 暗黑模式响应式 */
+        @media (max-width: 600px) {
+            .theme-toggle { top: 12px; right: 12px; width: 38px; height: 38px; font-size: 17px; }
+        }
     </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="theme-toggle">🌙</button>
 
 <div class="container" id="app">
     <h1>📖 七班校园故事</h1>
@@ -571,12 +889,11 @@
 
     <!-- ===== 设置面板 ===== -->
     <div id="setup-panel" class="setup-panel">
-        <label>🔑 DeepSeek API Key</label>
-        <input type="password" id="api-key-input" placeholder="请输入你的 DeepSeek API Key (sk-...)" value="">
-        <div style="font-size:12px; color:#9a8a7a; margin-top:4px;">密钥仅保存在本地浏览器，不会上传至任何服务器</div>
+        <div style="font-size:14px; color:#27ae60; margin-bottom:12px; padding:8px; background:#e8f5e9; border-radius:6px;">✅ 已通过安全代理连接DeepSeek，无需登录，直接开始冒险！</div>
 
         <button class="start-btn" id="continue-btn" style="display: none;">▶️ 继续游戏</button>
         <button class="start-btn" id="graduation-summary-btn" style="display: none; background:#8e44ad; margin-top:10px;">📖 查看初中总结</button>
+        <button class="start-btn" id="achievements-btn" style="display: none; background:#f39c12; margin-top:10px;">🏆 成就系统</button>
 
         <!-- 管理存档 / 开始新冒险 -->
         <div style="margin-top:18px; padding-top:18px; border-top:2px solid #e9e0d8;">
@@ -753,14 +1070,43 @@
         </div>
     </div>
 
+    <!-- ===== 成就系统面板 ===== -->
+    <div id="achievements-panel" class="setup-panel" style="display:none;">
+        <h2 style="font-size:22px; margin-bottom:8px; color:#2d3e50;">🏆 成就系统</h2>
+        <p style="color:#7a8b9b; font-size:14px; margin-bottom:16px;">
+            <span id="achievement-count">已解锁 0 / 28 个成就</span>
+        </p>
+        <div id="achievements-list" style="max-height: 450px; overflow-y: auto; padding-right: 8px;">
+            <!-- JS 动态生成 -->
+        </div>
+        <button class="start-btn" id="back-from-achievements-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:16px;">↩️ 返回</button>
+    </div>
+
 </div>
 
 <script>
     // ================================================================
+    //  暗黑模式
+    // ================================================================
+    (function() {
+        const themeToggle = document.getElementById('theme-toggle');
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+        });
+    })();
+
+    // ================================================================
     //  配置
     // ================================================================
-    const BASE_URL = "https://api.deepseek.com/chat/completions";
-    const MODEL = "deepseek-v4-flash";
+    //const BASE_URL = "https://api.deepseek.com/chat/completions";
+    //const MODEL = "deepseek-v4-flash";
     const SEMESTERS = ['七上', '七下', '八上', '八下', '九上', '九下'];
 
     // ================================================================
@@ -870,11 +1216,270 @@
     // Meta 数据
     async function getMeta() {
         const m = await dbGet('meta', META_KEY);
-        return m || { playerInfo: { name: '', gender: '', dorm: '' }, lastSemester: null };
+        return m || { playerInfo: { name: '', gender: '', dorm: '' }, lastSemester: null, achievements: [] };
     }
 
     async function saveMeta(meta) {
         await dbPut('meta', { key: META_KEY, ...meta });
+    }
+
+    // ================================================================
+    //  成就系统
+    // ================================================================
+    const ACHIEVEMENTS = [
+        // 单学期成就
+        { id: 'teacher_favorite', name: '🌟 老师的“宠妃”', desc: '单学期被老师表扬5次以上', category: '单学期 · 师生关系', type: 'single', check: (stats) => stats.teacher_praise >= 5 },
+        { id: 'teacher_thorn', name: '😢 老师的眼中钉', desc: '单学期被老师批评3次以上', category: '单学期 · 师生关系', type: 'single', check: (stats) => stats.teacher_criticism >= 3 },
+        { id: 'first_praise', name: '📜 第一次被表扬', desc: '首次获得老师表扬', category: '单学期 · 纪念', type: 'single', check: (stats, cumulative) => cumulative.total_praise >= 1 && stats.teacher_praise >= 1 },
+        { id: 'first_criticism', name: '💢 第一次挨批', desc: '首次被老师批评', category: '单学期 · 纪念', type: 'single', check: (stats, cumulative) => cumulative.total_criticism >= 1 && stats.teacher_criticism >= 1 },
+        
+        { id: 'discipline_model', name: '🛡️ 纪律标兵', desc: '单学期零处分', category: '单学期 · 纪律', type: 'single', check: (stats) => stats.discipline === 0 },
+        { id: 'first_discipline', name: '📝 第一次领处分', desc: '人生中的第一张处分单', category: '单学期 · 纪念', type: 'single', check: (stats, cumulative) => cumulative.total_discipline >= 1 && stats.discipline >= 1 },
+        
+        { id: 'award_master', name: '🏆 获奖达人', desc: '单学期获奖3次以上', category: '单学期 · 荣誉', type: 'single', check: (stats) => stats.awards >= 3 },
+        { id: 'first_award', name: '🥇 第一次领奖', desc: '第一次站上领奖台', category: '单学期 · 纪念', type: 'single', check: (stats, cumulative) => cumulative.total_awards >= 1 && stats.awards >= 1 },
+        
+        { id: 'social_star', name: '👥 社交新星', desc: '单学期交到5个以上朋友', category: '单学期 · 社交', type: 'single', check: (stats) => stats.friendships >= 5 },
+        { id: 'lone_wolf', name: '🐺 独行侠', desc: '单学期交到朋友0个', category: '单学期 · 社交', type: 'single', check: (stats) => stats.friendships === 0 },
+        { id: 'conflict_king', name: '⚔️ 冲突王', desc: '单学期发生冲突3次以上', category: '单学期 · 社交', type: 'single', check: (stats) => stats.conflicts >= 3 },
+        { id: 'peace_maker_single', name: '🕊️ 和事佬', desc: '单学期零冲突', category: '单学期 · 社交', type: 'single', check: (stats) => stats.conflicts === 0 },
+        
+        { id: 'straight_a', name: '🧠 学霸', desc: '单学期考试总分650以上', category: '单学期 · 学业', type: 'single', check: (stats) => stats.exam_scores >= 650 },
+        { id: 'class_participant', name: '📝 课堂活跃分子', desc: '单学期课堂参与6次以上', category: '单学期 · 学业', type: 'single', check: (stats) => stats.class_participation >= 6 },
+        { id: 'first_miss', name: '📅 第一次失约', desc: '第一次放别人鸽子', category: '单学期 · 纪念', type: 'single', check: (stats, cumulative) => cumulative.total_missed >= 1 && stats.missed_appointments >= 1 },
+        
+        { id: 'perfect_semester', name: '✨ 完美学期', desc: '单学期表扬≥3次、批评0次、处分0次、获奖≥1次、失约0次', category: '单学期 · 综合', type: 'single', check: (stats) => stats.teacher_praise >= 3 && stats.teacher_criticism === 0 && stats.discipline === 0 && stats.awards >= 1 && stats.missed_appointments === 0 },
+        
+        // 累计成就
+        { id: 'start_journey', name: '🎬 开启旅程', desc: '完成第一个学期', category: '累计 · 里程碑', type: 'cumulative', check: (stats, cumulative) => cumulative.completedSemesters >= 1 },
+        { id: 'persistent', name: '🚶 坚持不懈', desc: '完成3个学期', category: '累计 · 里程碑', type: 'cumulative', check: (stats, cumulative) => cumulative.completedSemesters >= 3 },
+        { id: 'almost_grad', name: '🎓 临近毕业', desc: '完成第5个学期', category: '累计 · 里程碑', type: 'cumulative', check: (stats, cumulative) => cumulative.completedSemesters >= 5 },
+        { id: 'graduation', name: '🏁 毕业快乐', desc: '完成所有六学期', category: '累计 · 里程碑', type: 'cumulative', check: (stats, cumulative) => cumulative.completedSemesters >= 6 },
+        
+        { id: 'all_round_student', name: '🌟 全能学生', desc: '累计被老师表扬≥30次', category: '累计 · 师生关系', type: 'cumulative', check: (stats, cumulative) => cumulative.total_praise >= 30 },
+        { id: 'problem_student', name: '⚠️ 问题学生', desc: '累计领处分≥3次', category: '累计 · 纪律', type: 'cumulative', check: (stats, cumulative) => cumulative.total_discipline >= 3 },
+        { id: 'honor_loaded', name: '🏆 荣誉满身', desc: '累计获奖≥10次', category: '累计 · 荣誉', type: 'cumulative', check: (stats, cumulative) => cumulative.total_awards >= 10 },
+        
+        { id: 'social_king', name: '👥 人脉王', desc: '累计交到朋友≥20个', category: '累计 · 社交', type: 'cumulative', check: (stats, cumulative) => cumulative.total_friendships >= 20 },
+        { id: 'cross_gender_friends', name: '👫 异性之友', desc: '累计交到4个及以上的异性朋友', category: '累计 · 社交', type: 'cumulative', check: (stats, cumulative) => cumulative.total_opposite_gender_friends >= 4 },
+        { id: 'special_feeling', name: '💗 青春萌动', desc: '对异性产生了一种特殊的情感', category: '累计 · 纪念', type: 'cumulative', check: (stats, cumulative) => cumulative.has_special_feeling },
+        { id: 'top_student', name: '🧠 学霸之路', desc: '累计考试总分≥3500', category: '累计 · 学业', type: 'cumulative', check: (stats, cumulative) => cumulative.total_scores >= 3500 },
+        
+        { id: 'peace_ambassador', name: '🕊️ 和平使者', desc: '六学期全程零冲突', category: '累计 · 特殊', type: 'cumulative', check: (stats, cumulative) => cumulative.total_conflicts === 0 && cumulative.completedSemesters >= 6 },
+        { id: 'perfect_attendance', name: '📅 全勤奖', desc: '六学期全程零失约', category: '累计 · 特殊', type: 'cumulative', check: (stats, cumulative) => cumulative.total_missed === 0 && cumulative.completedSemesters >= 6 }
+    ];
+
+    let unlockedAchievements = [];
+
+    // 计算累计统计数据
+    async function calculateCumulativeStats() {
+        const allSaves = await getAllSemesters();
+        const completed = allSaves.filter(s => s.isComplete);
+        const cumulative = {
+            completedSemesters: completed.length,
+            total_praise: 0,
+            total_criticism: 0,
+            total_discipline: 0,
+            total_awards: 0,
+            total_missed: 0,
+            total_participation: 0,
+            total_homework: 0,
+            total_scores: 0,
+            total_friendships: 0,
+            total_opposite_gender_friends: 0,
+            has_special_feeling: false,
+            total_conflicts: 0
+        };
+        completed.forEach(s => {
+            const st = s.stats || {};
+            cumulative.total_praise += st.teacher_praise || 0;
+            cumulative.total_criticism += st.teacher_criticism || 0;
+            cumulative.total_discipline += st.discipline || 0;
+            cumulative.total_awards += st.awards || 0;
+            cumulative.total_missed += st.missed_appointments || 0;
+            cumulative.total_participation += st.class_participation || 0;
+            cumulative.total_homework += st.homework_done || 0;
+            cumulative.total_scores += st.exam_scores || 0;
+            cumulative.total_friendships += st.friendships || 0;
+            cumulative.total_opposite_gender_friends += st.opposite_gender_friends || 0;
+            if (st.special_feeling === 1) cumulative.has_special_feeling = true;
+            cumulative.total_conflicts += st.conflicts || 0;
+        });
+        return cumulative;
+    }
+
+    // 检测并解锁成就
+    async function checkAchievements(semesterStats) {
+        const meta = await getMeta();
+        unlockedAchievements = meta.achievements || [];
+        const cumulative = await calculateCumulativeStats();
+        const newlyUnlocked = [];
+
+        // 获取之前所有学期的统计（不含当前学期）
+        const allSaves = await getAllSemesters();
+        const prevCompleted = allSaves.filter(s => s.isComplete && s.id !== currentSemester);
+        const prevCumulative = {
+            total_praise: 0,
+            total_criticism: 0,
+            total_discipline: 0,
+            total_awards: 0,
+            total_missed: 0,
+            total_friendships: 0,
+            total_conflicts: 0
+        };
+        prevCompleted.forEach(s => {
+            const st = s.stats || {};
+            prevCumulative.total_praise += st.teacher_praise || 0;
+            prevCumulative.total_criticism += st.teacher_criticism || 0;
+            prevCumulative.total_discipline += st.discipline || 0;
+            prevCumulative.total_awards += st.awards || 0;
+            prevCumulative.total_missed += st.missed_appointments || 0;
+            prevCumulative.total_friendships += st.friendships || 0;
+            prevCumulative.total_conflicts += st.conflicts || 0;
+        });
+
+        for (const ach of ACHIEVEMENTS) {
+            if (unlockedAchievements.includes(ach.id)) continue;
+            try {
+                // 特殊处理"第一次"成就：之前没有，且当前学期有
+                if (ach.id === 'first_praise') {
+                    if (prevCumulative.total_praise === 0 && semesterStats.teacher_praise >= 1) {
+                        unlockedAchievements.push(ach.id);
+                        newlyUnlocked.push(ach);
+                    }
+                } else if (ach.id === 'first_criticism') {
+                    if (prevCumulative.total_criticism === 0 && semesterStats.teacher_criticism >= 1) {
+                        unlockedAchievements.push(ach.id);
+                        newlyUnlocked.push(ach);
+                    }
+                } else if (ach.id === 'first_discipline') {
+                    if (prevCumulative.total_discipline === 0 && semesterStats.discipline >= 1) {
+                        unlockedAchievements.push(ach.id);
+                        newlyUnlocked.push(ach);
+                    }
+                } else if (ach.id === 'first_award') {
+                    if (prevCumulative.total_awards === 0 && semesterStats.awards >= 1) {
+                        unlockedAchievements.push(ach.id);
+                        newlyUnlocked.push(ach);
+                    }
+                } else if (ach.id === 'first_miss') {
+                    if (prevCumulative.total_missed === 0 && semesterStats.missed_appointments >= 1) {
+                        unlockedAchievements.push(ach.id);
+                        newlyUnlocked.push(ach);
+                    }
+                } else {
+                    if (ach.check(semesterStats, cumulative)) {
+                        unlockedAchievements.push(ach.id);
+                        newlyUnlocked.push(ach);
+                    }
+                }
+            } catch (e) {
+                console.warn('成就检测失败:', ach.id, e);
+            }
+        }
+
+        if (newlyUnlocked.length > 0) {
+            meta.achievements = unlockedAchievements;
+            await saveMeta(meta);
+            // 依次展示解锁弹窗
+            newlyUnlocked.forEach((ach, idx) => {
+                setTimeout(() => showAchievementToast(ach), idx * 2500);
+            });
+        }
+        return newlyUnlocked;
+    }
+
+    // 成就解锁弹窗
+    function showAchievementToast(achievement) {
+        let toast = document.getElementById('achievement-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'achievement-toast';
+            toast.className = 'achievement-toast';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `
+            <div class="achievement-toast-icon">${achievement.name.split(' ')[0]}</div>
+            <div class="achievement-toast-text">
+                <div class="achievement-toast-label">🎉 成就解锁！</div>
+                <div class="achievement-toast-name">${achievement.name.split(' ').slice(1).join(' ')}</div>
+            </div>
+        `;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2200);
+    }
+
+    // 渲染成就列表
+    async function renderAchievementsList() {
+        const meta = await getMeta();
+        unlockedAchievements = meta.achievements || [];
+        const listEl = document.getElementById('achievements-list');
+        const countEl = document.getElementById('achievement-count');
+        
+        countEl.textContent = `已解锁 ${unlockedAchievements.length} / ${ACHIEVEMENTS.length} 个成就`;
+        
+        // 按分类分组
+        const categories = {};
+        ACHIEVEMENTS.forEach(ach => {
+            if (!categories[ach.category]) categories[ach.category] = [];
+            categories[ach.category].push(ach);
+        });
+        
+        let html = '';
+        for (const [cat, achs] of Object.entries(categories)) {
+            html += `<div class="achievements-section-title">${cat}</div>`;
+            achs.forEach(ach => {
+                const unlocked = unlockedAchievements.includes(ach.id);
+                html += `
+                    <div class="achievement-item ${unlocked ? 'unlocked' : 'locked'}">
+                        <div class="achievement-icon">${ach.name.split(' ')[0]}</div>
+                        <div class="achievement-info">
+                            <div class="achievement-name">${ach.name.split(' ').slice(1).join(' ')}</div>
+                            <div class="achievement-desc">${ach.desc}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        listEl.innerHTML = html;
+    }
+
+    // 重新计算所有成就（删除存档后调用）
+    async function recalculateAllAchievements() {
+        const meta = await getMeta();
+        const cumulative = await calculateCumulativeStats();
+        const newUnlocked = [];
+
+        for (const ach of ACHIEVEMENTS) {
+            try {
+                if (ach.type === 'cumulative') {
+                    if (ach.check(null, cumulative)) {
+                        newUnlocked.push(ach.id);
+                    }
+                } else if (ach.type === 'single') {
+                    // 单学期成就需要检查是否有任何一个学期满足
+                    const allSaves = await getAllSemesters();
+                    const completed = allSaves.filter(s => s.isComplete);
+                    let unlocked = false;
+                    for (const s of completed) {
+                        if (ach.check(s.stats || {}, cumulative)) {
+                            unlocked = true;
+                            break;
+                        }
+                    }
+                    if (unlocked) newUnlocked.push(ach.id);
+                }
+            } catch (e) {
+                console.warn('成就重算失败:', ach.id, e);
+            }
+        }
+
+        unlockedAchievements = newUnlocked;
+        meta.achievements = newUnlocked;
+        await saveMeta(meta);
+        return newUnlocked;
     }
 
     // 是否有可继续的进度
@@ -1054,14 +1659,15 @@
 【剧情走向（这是生成剧情的重点，必须按顺序发生！你可以自由填充细节和分支，但我所提到的所有细节不得更改！）】
 1. 开学报到：2025.8.31下午来到宿舍，铺床；之后去到班级报到，目前座位还是和上学期一样。
 2. 得知班里有3位学习成绩最优异的学生调到了北滘中学少科院科创班（简称北中科创班）。
-3. 学期中期开始，每周五晚上要上完晚修才放学。
-4. 某天突然发现，自动售货机好像被拆了。
-5. 这个学期佛山市教育局开始宣布实行春秋假，11月12日至14日时3天的秋假且不补课。
-6. 11月27-28日校运会，九年级开幕式只有喊口号了，没有表演。校运会第一天的晚上操场有“十大歌手”歌唱比赛。
-7. 12月31日，举办研学活动，地点是珠海横琴长隆海洋王国，上午出发，下午3点半结束并返回。晚上晚修结束后往元旦假期。
-10. 期末考试，期末前没再有期末动员了。
-11. 考后在教室看电影。
-12. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，暑假开始（八下结束）。
+3. 9月3日，班里观看世界反法西斯战争暨抗日战争胜利80周年阅兵。
+4. 学期中期开始，每周五晚上要上完晚修才放学。
+5. 某天突然发现，自动售货机好像被拆了。
+6. 这个学期佛山市教育局开始宣布实行春秋假，11月12日至14日时3天的秋假且不补课。
+7. 11月27-28日校运会，九年级开幕式只有喊口号了，没有表演。校运会第一天的晚上操场有“十大歌手”歌唱比赛。
+8. 12月31日，举办研学活动，地点是珠海横琴长隆海洋王国，上午出发，下午3点半结束并返回。晚上晚修结束后往元旦假期。
+9. 期末考试，期末前没再有期末动员了。
+10. 考后在教室看电影。
+11. 放假前一天上午是在教室，中午回宿舍收行李搞卫生，家长接走，暑假开始（八下结束）。
 值得一提的是，大约每个月换一次座位。`,
             '九下': `你是一位优秀的文字冒险游戏设计师。现在你需要根据以下剧情大纲，生成一个互动故事游戏。
 
@@ -1153,7 +1759,7 @@
             '- 玩家消息中会包含本轮是否允许自定义选项的标记。\n\n' +
             '【进度跟踪】\n' +
             '整个学期剧情按顺序有若干主要事件，你必须根据当前剧情所处的事件阶段，在每次输出的故事描述末尾另起一行输出当前进度，格式为：【进度: XX.XX%】\n' +
-            '每轮进度应递增范围为0.15%至0.7%，两位小数。当故事结束时，进度为 100.00%。';
+            '进度是整个学期的，而不是专指某一事件，因此要严格把控好进度，不要因某一事件进度推进太多而导后续事件进度少。因此每轮进度应递增范围为0.15%至0.6%（一定不能超出范围！），两位小数。当故事结束时，进度为 100.00%。';
 
         return prompt;
     }
@@ -1177,7 +1783,6 @@
     const historyArea = document.getElementById('history-area');
     const historyContent = document.getElementById('history-content');
 
-    const apiKeyInput = document.getElementById('api-key-input');
     const playerNameInput = document.getElementById('player-name');
     const genderRadios = document.querySelectorAll('input[name="gender"]');
     const dormButtonsContainer = document.getElementById('dorm-buttons');
@@ -1297,9 +1902,11 @@
             return;
         }
         let html = '';
+        let round = 0;
         historyEntries.forEach((entry) => {
             const typeClass = entry.type === 'story' ? 'story' : 'choice';
-            const typeLabel = entry.type === 'story' ? '📖 剧情' : '👉 选择';
+            if (entry.type === 'story') round++;
+            const typeLabel = entry.type === 'story' ? `📖 剧情 · 第${round}回合` : `👉 选择 · 第${round}回合`;
             html += `<div class="history-entry"><div class="h-type ${typeClass}">${typeLabel}</div><div class="h-text">${escapeHtml(entry.text)}</div></div>`;
         });
         historyContent.innerHTML = html;
@@ -1324,13 +1931,11 @@
     //  API 调用
     // ================================================================
     async function callDeepSeek(messagesArr, retries = 3) {
-        const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) throw new Error('请先填写 DeepSeek API Key');
-        const headers = { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' };
-        const payload = { model: MODEL, messages: messagesArr, temperature: 0.8, max_tokens: 4000, stream: false };
+        const headers = { 'Content-Type': 'application/json' };
+        const payload = { messages: messagesArr, temperature: 0.8, max_tokens: 4000, stream: false };
         for (let i = 0; i < retries; i++) {
             try {
-                const resp = await fetch(BASE_URL, { method: 'POST', headers, body: JSON.stringify(payload) });
+                const resp = await fetch('/api/chat', { method: 'POST', headers, body: JSON.stringify(payload) });
                 if (!resp.ok) { const et = await resp.text(); throw new Error(`HTTP ${resp.status}: ${et}`); }
                 const data = await resp.json();
                 return data.choices[0].message.content;
@@ -1526,6 +2131,27 @@
         semData.reflection = reflection;
         await saveSemester(currentSemester, semData);
 
+        // 3. 生成学期统计数据（内部数据，用于后续处理）
+        storyBox.innerHTML = '⏳ 正在生成学期统计数据……';
+        const statsMessages = [...messages];
+        statsMessages.push({ role: 'user', content: '请根据以上完整剧情，统计本学期各项数据，仅输出JSON格式，不要包含任何其他文字和额外描述。JSON格式如下：{"teacher_praise": 0, "teacher_criticism": 0, "discipline": 0, "awards": 0, "missed_appointments": 0, "class_participation": 0, "homework_done": 0, "exam_scores": 0, "friendships": 0, "opposite_gender_friends": 0, "special_feeling": 0, "conflicts": 0}。其中：teacher_praise为被老师表扬次数，teacher_criticism为被老师批评次数，discipline为领处分次数，awards为领奖次数，missed_appointments为失约次数，class_participation为课堂积极参与次数，homework_done为完成作业次数，exam_scores为考试总分数（估算），friendships为交到朋友数量，opposite_gender_friends为交到的异性朋友数量，special_feeling为是否对异性产生了特殊的情感（0为否，1为是），conflicts为发生冲突次数。请根据剧情内容合理估算各项数值。' });
+        const statsReply = await callDeepSeek(statsMessages);
+        let semesterStats = {};
+        try {
+            const jsonMatch = statsReply.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                semesterStats = JSON.parse(jsonMatch[0]);
+            }
+        } catch (e) {
+            console.warn('学期统计数据解析失败:', e);
+        }
+
+        semData.stats = semesterStats;
+        await saveSemester(currentSemester, semData);
+
+        // 4. 检测并解锁成就
+        await checkAchievements(semesterStats);
+
         loadingIndicator.style.display = 'none';
         showEndScreen(reflection);
 
@@ -1578,14 +2204,16 @@
             isComplete: isComplete || false,
             summary: '',
             reflection: '',
+            stats: {},
             playerInfo: { ...playerInfo },
             savedAt: new Date().toISOString()
         };
-        // 保留已有的 summary 和 reflection
+        // 保留已有的 summary、reflection 和 stats
         const existing = await loadSemester(currentSemester);
         if (existing) {
             if (existing.summary) data.summary = existing.summary;
             if (existing.reflection) data.reflection = existing.reflection;
+            if (existing.stats) data.stats = existing.stats;
         }
         await saveSemester(currentSemester, data);
         await saveMeta({ playerInfo: { ...playerInfo }, lastSemester: currentSemester });
@@ -1808,9 +2436,6 @@
         console.log('continueGame 被调用, isPlaying =', isPlaying);
         if (isPlaying) return;
         try {
-            const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) { alert('请先在设置中填写你的 DeepSeek API Key！'); apiKeyInput.focus(); return; }
-
             const meta = await getMeta();
             const allSaves = await getAllSemesters();
 
@@ -2247,6 +2872,8 @@
             continueBtn.style.cursor = '';
             document.getElementById('graduation-summary-btn').style.display = 'none';
         }
+        // 成就系统按钮始终显示
+        document.getElementById('achievements-btn').style.display = 'block';
         renderDormButtons();
         updateProgressBar(0);
         if (isHistoryOpen) {
@@ -2261,8 +2888,6 @@
     // ================================================================
     // 管理存档/选择学期 → 学期选择
     document.getElementById('manage-saves-btn').addEventListener('click', async () => {
-        const apiKey = apiKeyInput.value.trim();
-        if (!apiKey) { alert('请先填写你的 DeepSeek API Key！'); apiKeyInput.focus(); return; }
         setupPanel.style.display = 'none';
         semesterSelect.style.display = 'block';
         await renderSemesterGrid();
@@ -2445,6 +3070,8 @@
     document.getElementById('delete-all-semesters-btn').addEventListener('click', async () => {
         if (!confirm('确定要删除全部六个学期的所有进度吗？此操作完全无法恢复！')) return;
         await deleteAllSemesters();
+        // 删除后重新计算成就
+        await recalculateAllAchievements();
         await renderSemesterGrid();
         continueBtn.style.display = 'none';
         alert('全部进度已删除。');
@@ -2454,11 +3081,6 @@
     playerNameInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && characterSetup.style.display === 'block') {
             confirmCharacterBtn.click();
-        }
-    });
-    apiKeyInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && setupPanel.style.display !== 'none') {
-            startBtn.click();
         }
     });
 
@@ -2650,6 +3272,20 @@
     }
 
     // ================================================================
+    //  成就系统 - 事件绑定
+    // ================================================================
+    document.getElementById('achievements-btn').addEventListener('click', async () => {
+        setupPanel.style.display = 'none';
+        document.getElementById('achievements-panel').style.display = 'block';
+        await renderAchievementsList();
+    });
+
+    document.getElementById('back-from-achievements-btn').addEventListener('click', () => {
+        document.getElementById('achievements-panel').style.display = 'none';
+        setupPanel.style.display = 'block';
+    });
+
+    // ================================================================
     //  初始化
     // ================================================================
     (async function init() {
@@ -2684,6 +3320,8 @@
             continueBtn.style.cursor = '';
             document.getElementById('graduation-summary-btn').style.display = 'none';
         }
+        // 成就系统按钮始终显示
+        document.getElementById('achievements-btn').style.display = 'block';
         renderDormButtons();
         console.log('🎮 七班校园故事已加载！支持 七上~九下 六学期冒险。');
         console.log('🔧 调试：按 Ctrl+Shift+E 可模拟当前学期故事结束（仅在游戏进行中有效）');
