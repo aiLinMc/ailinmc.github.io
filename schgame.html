@@ -667,6 +667,24 @@
             .semester-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
+        /* ===== 连接状态 ===== */
+        .connection-status {
+            font-size: 14px;
+            margin-bottom: 12px;
+            padding: 8px;
+            border-radius: 6px;
+            color: #7a8b9b;
+            background: #f0f4f8;
+        }
+        .connection-status.success {
+            color: #27ae60;
+            background: #e8f5e9;
+        }
+        .connection-status.error {
+            color: #c0392b;
+            background: #fdecea;
+        }
+
         /* ===== 暗黑模式 ===== */
         body.dark-mode {
             background: linear-gradient(145deg, #0f1117 0%, #1a1d27 100%);
@@ -682,6 +700,18 @@
             border-left-color: #f6b83d;
         }
         body.dark-mode .save-hint { color: #7a8290; }
+        body.dark-mode .connection-status {
+            color: #9fa8b8;
+            background: #222530;
+        }
+        body.dark-mode .connection-status.success {
+            color: #4ade80;
+            background: #1e3a2f;
+        }
+        body.dark-mode .connection-status.error {
+            color: #f87171;
+            background: #3a1e1e;
+        }
         body.dark-mode .setup-panel {
             background: #222530;
             border-color: #2e3340;
@@ -889,7 +919,7 @@
 
     <!-- ===== 设置面板 ===== -->
     <div id="setup-panel" class="setup-panel">
-        <!--div style="font-size:14px; color:#27ae60; margin-bottom:12px; padding:8px; background:#e8f5e9; border-radius:6px;">✅ 已通过安全代理连接DeepSeek，无需登录，直接开始冒险！</div-->
+        <div id="connection-status" class="connection-status">⏳ 正在连接 AI 服务...</div>
 
         <button class="start-btn" id="continue-btn" style="display: none;">▶️ 继续游戏</button>
         <button class="start-btn" id="graduation-summary-btn" style="display: none; background:#8e44ad; margin-top:10px;">📖 查看初中总结</button>
@@ -1105,9 +1135,37 @@
     // ================================================================
     //  配置
     // ================================================================
-    //const BASE_URL = "https://api.deepseek.com/chat/completions";
-    //const MODEL = "deepseek-v4-flash";
+    let cachedApiKey = null;
+    let aiConnected = false;
     const SEMESTERS = ['七上', '七下', '八上', '八下', '九上', '九下'];
+
+    async function initAIConnection() {
+        const statusEl = document.getElementById('connection-status');
+        for (let i = 1; i <= 3; i++) {
+            try {
+                const resp = await fetch('/api/get-key', { method: 'POST' });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                if (data.key) {
+                    cachedApiKey = data.key;
+                    aiConnected = true;
+                    statusEl.textContent = '✅ 连接成功，开始你的冒险吧！';
+                    statusEl.className = 'connection-status success';
+                    return true;
+                }
+                throw new Error('未获取到密钥');
+            } catch (e) {
+                console.warn(`AI 连接失败 (第${i}次):`, e);
+                statusEl.textContent = `❌ 连接失败，正在重试 (${i}/3)...`;
+                statusEl.className = 'connection-status error';
+                if (i < 3) await new Promise(r => setTimeout(r, 1500));
+            }
+        }
+        aiConnected = false;
+        statusEl.textContent = '❌ AI 服务连接失败，暂时无法进行游戏，请稍后再试';
+        statusEl.className = 'connection-status error';
+        return false;
+    }
 
     // ================================================================
     //  IndexedDB 存储层
@@ -1931,11 +1989,21 @@
     //  API 调用
     // ================================================================
     async function callDeepSeek(messagesArr, retries = 3) {
-        const headers = { 'Content-Type': 'application/json' };
-        const payload = { messages: messagesArr, temperature: 0.8, max_tokens: 4000, stream: false };
+        if (!cachedApiKey) throw new Error('AI 服务未连接');
+        const headers = { 
+            'Authorization': `Bearer ${cachedApiKey}`, 
+            'Content-Type': 'application/json' 
+        };
+        const payload = { 
+            model: 'deepseek-v4-flash', 
+            messages: messagesArr, 
+            temperature: 0.8, 
+            max_tokens: 4000, 
+            stream: false 
+        };
         for (let i = 0; i < retries; i++) {
             try {
-                const resp = await fetch('/api/chat', { method: 'POST', headers, body: JSON.stringify(payload) });
+                const resp = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers, body: JSON.stringify(payload) });
                 if (!resp.ok) { const et = await resp.text(); throw new Error(`HTTP ${resp.status}: ${et}`); }
                 const data = await resp.json();
                 return data.choices[0].message.content;
@@ -3290,10 +3358,11 @@
     // ================================================================
     (async function init() {
         await openDB();
+        await initAIConnection();
         const allSaves = await getAllSemesters();
         if (SEMESTERS.every(s => allSaves.some(a => a.id === s && a.isComplete))) {
             continueBtn.innerHTML = '🎓 你已毕业，毕业快乐！';
-            continueBtn.style.display = 'block';
+            continueBtn.style.display = aiConnected ? 'block' : 'none';
             continueBtn.disabled = true;
             continueBtn.style.background = '#27ae60';
             continueBtn.style.cursor = 'default';
@@ -3301,28 +3370,27 @@
             const gradSave = allSaves.find(a => a.id === '九下');
             if (gradSave && gradSave.graduationSummary) {
                 document.getElementById('summary-viewer-graduation').textContent = gradSave.graduationSummary;
-                document.getElementById('graduation-summary-btn').style.display = 'block';
+                document.getElementById('graduation-summary-btn').style.display = aiConnected ? 'block' : 'none';
             } else {
                 document.getElementById('graduation-summary-btn').style.display = 'none';
             }
         } else if (allSaves.length > 0) {
             continueBtn.textContent = '▶️ 继续游戏';
-            continueBtn.style.display = 'block';
+            continueBtn.style.display = aiConnected ? 'block' : 'none';
             continueBtn.disabled = false;
             continueBtn.style.background = '';
             continueBtn.style.cursor = '';
             document.getElementById('graduation-summary-btn').style.display = 'none';
         } else {
             continueBtn.textContent = '▶️ 开启历程';
-            continueBtn.style.display = 'block';
+            continueBtn.style.display = aiConnected ? 'block' : 'none';
             continueBtn.disabled = false;
             continueBtn.style.background = '';
             continueBtn.style.cursor = '';
             document.getElementById('graduation-summary-btn').style.display = 'none';
         }
-        // 成就系统按钮始终显示
-        document.getElementById('achievements-btn').style.display = 'block';
-        renderDormButtons();
+        document.getElementById('achievements-btn').style.display = aiConnected ? 'block' : 'none';
+        document.getElementById('manage-saves-btn').style.display = aiConnected ? 'block' : 'none';
         console.log('🎮 七班校园故事已加载！支持 七上~九下 六学期冒险。');
         console.log('🔧 调试：按 Ctrl+Shift+E 可模拟当前学期故事结束（仅在游戏进行中有效）');
     })();
