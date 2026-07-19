@@ -1135,25 +1135,30 @@
     // ================================================================
     //  配置
     // ================================================================
-    let cachedApiKey = null;
-    let aiConnected = false;
+    let aiConnected = true;
     const SEMESTERS = ['七上', '七下', '八上', '八下', '九上', '九下'];
 
     async function initAIConnection() {
         const statusEl = document.getElementById('connection-status');
         for (let i = 1; i <= 3; i++) {
             try {
-                const resp = await fetch('/api/get-key', { method: 'POST' });
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const data = await resp.json();
-                if (data.key) {
-                    cachedApiKey = data.key;
+                const resp = await fetch('/api/chat', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        messages: [{ role: 'user', content: 'test' }],
+                        temperature: 0.8,
+                        max_tokens: 10,
+                        stream: false
+                    })
+                });
+                if (resp.ok) {
                     aiConnected = true;
                     statusEl.textContent = '✅ 连接成功，开始你的冒险吧！';
                     statusEl.className = 'connection-status success';
                     return true;
                 }
-                throw new Error('未获取到密钥');
+                throw new Error(`HTTP ${resp.status}`);
             } catch (e) {
                 console.warn(`AI 连接失败 (第${i}次):`, e);
                 statusEl.textContent = `❌ 连接失败，正在重试 (${i}/3)...`;
@@ -1989,21 +1994,11 @@
     //  API 调用
     // ================================================================
     async function callDeepSeek(messagesArr, retries = 3) {
-        if (!cachedApiKey) throw new Error('AI 服务未连接');
-        const headers = { 
-            'Authorization': `Bearer ${cachedApiKey}`, 
-            'Content-Type': 'application/json' 
-        };
-        const payload = { 
-            model: 'deepseek-v4-flash', 
-            messages: messagesArr, 
-            temperature: 0.8, 
-            max_tokens: 4000, 
-            stream: false 
-        };
+        const headers = { 'Content-Type': 'application/json' };
+        const payload = { messages: messagesArr, temperature: 0.8, max_tokens: 4000, stream: false };
         for (let i = 0; i < retries; i++) {
             try {
-                const resp = await fetch('https://api.deepseek.com/chat/completions', { method: 'POST', headers, body: JSON.stringify(payload) });
+                const resp = await fetch('/api/chat', { method: 'POST', headers, body: JSON.stringify(payload) });
                 if (!resp.ok) { const et = await resp.text(); throw new Error(`HTTP ${resp.status}: ${et}`); }
                 const data = await resp.json();
                 return data.choices[0].message.content;
