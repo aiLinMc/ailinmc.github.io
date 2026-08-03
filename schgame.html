@@ -919,7 +919,7 @@
 
     <!-- ===== 设置面板 ===== -->
     <div id="setup-panel" class="setup-panel">
-        <div id="connection-status" class="connection-status">⏳ 正在连接 AI 服务...</div>
+        <div id="connection-status" class="connection-status">⏳ 正在检测运行环境...</div>
 
         <button class="start-btn" id="continue-btn" style="display: none;">▶️ 继续游戏</button>
         <button class="start-btn" id="graduation-summary-btn" style="display: none; background:#8e44ad; margin-top:10px;">📖 查看初中总结</button>
@@ -928,7 +928,7 @@
         <!-- 管理存档 / 开始新冒险 -->
         <div style="margin-top:18px; padding-top:18px; border-top:2px solid #e9e0d8;">
             <p style="font-size:14px; color:#7a8b9b; margin-bottom:10px;">⚙️ 选择学期开始冒险，或管理已保存的进度</p>
-            <button class="start-btn" id="manage-saves-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:0;">
+            <button class="start-btn" id="manage-saves-btn" style="background:#e8dfd7; color:#2d3e50; margin-top:0; display: none;">
                 🗂️ 选择学期 / 管理存档
             </button>
         </div>
@@ -3352,6 +3352,20 @@
     //  初始化
     // ================================================================
     (async function init() {
+        // ===== 微信环境检测 =====
+        // 微信浏览器下不允许使用本应用，提示用户用默认浏览器打开
+        const ua = (navigator.userAgent || '').toLowerCase();
+        if (ua.indexOf('micromessenger') !== -1) {
+            const statusEl = document.getElementById('connection-status');
+            statusEl.innerHTML = '⚠️ 检测到微信环境<br>微信浏览器不支持使用本应用。请点击右上角“···”菜单，选择“在浏览器打开”后，使用系统默认浏览器访问本页面。';
+            statusEl.className = 'connection-status error';
+            // 微信环境下不获取 API 密钥，隐藏所有操作按钮
+            document.getElementById('manage-saves-btn').style.display = 'none';
+            console.warn('🚫 检测到微信浏览器，已阻止应用启动。');
+            return;
+        }
+        // ===== 非微信环境：开始获取 API 密钥 / 连接 AI 服务 =====
+        document.getElementById('connection-status').textContent = '⏳ 正在连接 AI 服务...';
         await openDB();
         await initAIConnection();
         const allSaves = await getAllSemesters();
