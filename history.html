@@ -20,15 +20,15 @@
         <div class="filter-group">
             <span class="filter-label">年级</span>
             <button class="filter-btn active" data-filter="grade" data-value="全部">全部</button>
-            <button class="filter-btn" data-filter="grade" data-value="七年级">七年级</button>
-            <button class="filter-btn" data-filter="grade" data-value="八年级">八年级</button>
-            <button class="filter-btn" data-filter="grade" data-value="九年级">九年级</button>
+            <button class="filter-btn" data-filter="grade" data-value="七年级">七</button>
+            <button class="filter-btn" data-filter="grade" data-value="八年级">八</button>
+            <button class="filter-btn" data-filter="grade" data-value="九年级">九</button>
         </div>
         <div class="filter-group">
             <span class="filter-label">学期</span>
             <button class="filter-btn active" data-filter="term" data-value="全部">全部</button>
-            <button class="filter-btn" data-filter="term" data-value="上学期">上学期</button>
-            <button class="filter-btn" data-filter="term" data-value="下学期">下学期</button>
+            <button class="filter-btn" data-filter="term" data-value="上学期">上</button>
+            <button class="filter-btn" data-filter="term" data-value="下学期">下</button>
         </div>
         <div class="filter-group search-group">
             <input type="text" class="filter-search" id="searchInput" placeholder="搜索周数 / 学期…">
@@ -40,15 +40,15 @@
         <div class="filter-group">
             <span class="filter-label">年级</span>
             <select class="filter-select" id="gradeSort">
-                <option value="asc">七上 → 九下</option>
-                <option value="desc" selected>九下 → 七上</option>
+                <option value="asc">七上至九下</option>
+                <option value="desc" selected>九下至七上</option>
             </select>
         </div>
         <div class="filter-group">
             <span class="filter-label">周数</span>
             <select class="filter-select" id="weekSort">
-                <option value="asc" selected>小 → 大</option>
-                <option value="desc">大 → 小</option>
+                <option value="asc" selected>正序</option>
+                <option value="desc">倒序</option>
             </select>
         </div>
     </div>
@@ -87,6 +87,38 @@
             { folder: '七上', grade: '七年级', term: '上学期', weeks: range(2,19), hasPng: false },
         ];
 
+        // 拼音映射表（仅覆盖本页用字：数字、七八九、上下学期册、第周）
+        var PINYIN_MAP = {
+            // 数字
+            '一': 'yi', '二': 'er', '三': 'san', '四': 'si', '五': 'wu',
+            '六': 'liu', '七': 'qi', '八': 'ba', '九': 'jiu', '十': 'shi',
+            // 年级
+            '年': 'nian', '级': 'ji',
+            // 学期册
+            '上': 'shang', '下': 'xia', '学': 'xue', '期': 'qi', '册': 'ce',
+            // 其他
+            '第': 'di', '周': 'zhou'
+        };
+
+        function toPinyin(str) {
+            var out = '';
+            for (var i = 0; i < str.length; i++) {
+                var c = str.charAt(i);
+                out += PINYIN_MAP[c] || c;
+            }
+            return out;
+        }
+
+        function toPinyinInitials(str) {
+            var out = '';
+            for (var i = 0; i < str.length; i++) {
+                var c = str.charAt(i);
+                var py = PINYIN_MAP[c];
+                out += py ? py.charAt(0) : c;
+            }
+            return out;
+        }
+
         // 动态生成卡片
         (function generateCards() {
             var grid = document.getElementById('cards-grid');
@@ -103,7 +135,10 @@
                         links += '<a href="' + base + '/homework.png" class="download-link" download="' + dlName + '.png">下载图片</a>';
                     }
                     var searchText = sem.folder + ' ' + sem.grade + ' ' + sem.term + ' ' + weekName + ' ' + week;
-                    html += '<div class="week-card" data-grade="' + sem.grade + '" data-term="' + sem.term + '" data-week="' + week + '" data-order="' + orderIndex + '" data-search="' + searchText + '">'
+                    // 拼音：去掉空格
+                    var pyAll = toPinyin(searchText.replace(/\s/g, ''));
+                    var pyInit = toPinyinInitials(searchText.replace(/\s/g, ''));
+                    html += '<div class="week-card" data-grade="' + sem.grade + '" data-term="' + sem.term + '" data-week="' + week + '" data-order="' + orderIndex + '" data-search="' + searchText + '" data-pinyin="' + pyAll + '" data-pinyin-initials="' + pyInit + '">'
                         + '<span class="card-tag tag-' + gradeKey + '">' + sem.folder + '</span>'
                         + '<h3 class="week-title">' + weekName + '</h3>'
                         + '<div class="download-links">' + links + '</div>'
