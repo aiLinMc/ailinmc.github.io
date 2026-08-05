@@ -22,7 +22,6 @@ import shutil
 import tempfile
 import ssl
 import subprocess
-import zipfile
 import platform
 import time
 from urllib.parse import quote
@@ -36,8 +35,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==================== 版本配置 ====================
-CURRENT_INTERNAL_VERSION = "5"  # 内部版本号（纯数字，用于比较）
-CURRENT_DISPLAY_VERSION = "v1.2.0"  # 显示版本号（展示给用户）
+CURRENT_INTERNAL_VERSION = "6"  # 内部版本号（纯数字，用于比较）
+CURRENT_DISPLAY_VERSION = "v1.3.0"  # 显示版本号（展示给用户）
 UPDATE_DOWNLOAD_URL = "https://yyxc.fun/music_update/"  # 更新下载地址
 VERSION_URL = UPDATE_DOWNLOAD_URL + "music_version.txt"  # 版本文件URL
 
@@ -67,99 +66,65 @@ def get_ffmpeg_path():
 
 
 class FFmpegInstaller:
-    # FFmpeg安装器
-    
+    """FFmpeg工具 - 检测和调用，不提供自动下载安装"""
+
     @staticmethod
-    def is_installed():
-        ffmpeg_path = get_ffmpeg_path()
-        if ffmpeg_path and os.path.exists(ffmpeg_path):
-            return True
+    def _verify_ffmpeg(ffmpeg_path):
+        """验证ffmpeg可执行文件是否实际可用"""
         try:
             creationflags = subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
-            subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True, encoding='utf-8', errors='ignore', timeout=5, creationflags=creationflags)
-            return True
-        except:
+            result = subprocess.run(
+                [ffmpeg_path, "-version"],
+                capture_output=True, text=True, encoding='utf-8', errors='ignore',
+                timeout=10, creationflags=creationflags
+            )
+            return result.returncode == 0
+        except Exception:
             return False
-    
+
     @staticmethod
-    def install(parent=None, progress_callback=None):
-        system = platform.system()
-        if system == "Windows":
-            url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-            zip_name = "ffmpeg.zip"
-        elif system == "Darwin":
-            url = "https://evermeet.cx/ffmpeg/ffmpeg-6.1.1.zip"
-            zip_name = "ffmpeg.zip"
-        else:
-            return False, "Linux系统请使用包管理器安装ffmpeg：\nsudo apt install ffmpeg  或  sudo yum install ffmpeg"
-        
+    def is_installed():
+        """检查ffmpeg是否已安装且实际可用"""
+        ffmpeg_path = get_ffmpeg_path()
+        if ffmpeg_path and os.path.exists(ffmpeg_path):
+            if FFmpegInstaller._verify_ffmpeg(ffmpeg_path):
+                return True
+            return False
+        # 检查系统PATH中是否有ffmpeg
         try:
-            if progress_callback:
-                progress_callback(10, "正在下载ffmpeg...")
-            
-            temp_dir = tempfile.gettempdir()
-            zip_path = os.path.join(temp_dir, zip_name)
-            
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            response = requests.get(url, headers=headers, stream=True, timeout=60)
-            response.raise_for_status()
-            
-            total_size = int(response.headers.get('content-length', 0))
-            downloaded = 0
-            
-            with open(zip_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-                        downloaded += len(chunk)
-                        if total_size > 0 and progress_callback:
-                            progress = 10 + int((downloaded / total_size) * 60)
-                            progress_callback(progress, f"下载ffmpeg {int(downloaded/total_size*100)}%")
-            
-            if progress_callback:
-                progress_callback(75, "正在解压ffmpeg...")
-            
-            extract_dir = os.path.join(os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(__file__), "ffmpeg")
-            os.makedirs(extract_dir, exist_ok=True)
-            
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(extract_dir)
-            
-            ffmpeg_exe = None
-            for root, dirs, files in os.walk(extract_dir):
-                if "ffmpeg.exe" in files:
-                    ffmpeg_exe = os.path.join(root, "ffmpeg.exe")
-                    break
-            
-            if ffmpeg_exe and os.path.exists(ffmpeg_exe):
-                target_exe = os.path.join(extract_dir, "ffmpeg.exe")
-                if ffmpeg_exe != target_exe:
-                    shutil.move(ffmpeg_exe, target_exe)
-            
-            os.remove(zip_path)
-            
-            if progress_callback:
-                progress_callback(100, "ffmpeg安装完成")
-            
-            return True, "安装成功"
-        except Exception as e:
-            return False, f"安装失败：{str(e)}"
-    
+            creationflags = subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
+            subprocess.run(
+                ["ffmpeg", "-version"],
+                capture_output=True, text=True, encoding='utf-8', errors='ignore',
+                timeout=5, creationflags=creationflags
+            )
+            return True
+        except Exception:
+            return False
+
     @staticmethod
     def convert_to_mp3(input_path, output_path, progress_callback=None):
         ffmpeg_path = get_ffmpeg_path()
         if not ffmpeg_path or not os.path.exists(ffmpeg_path):
             ffmpeg_path = "ffmpeg"
-        
+
         cmd = [ffmpeg_path, "-i", input_path, "-acodec", "libmp3lame", "-q:a", "2", output_path, "-y"]
-        
+
         if progress_callback:
             progress_callback(0, "开始转换...")
-        
-        creationflags = subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='ignore', creationflags=creationflags)
-        stdout, stderr = process.communicate()
-        
+
+        try:
+            creationflags = subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
+            process = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, encoding='utf-8', errors='ignore', creationflags=creationflags
+            )
+            stdout, stderr = process.communicate()
+        except FileNotFoundError:
+            if progress_callback:
+                progress_callback(0, "ffmpeg未安装")
+            return False
+
         if process.returncode == 0 and os.path.exists(output_path):
             if progress_callback:
                 progress_callback(100, "转换完成")
@@ -728,14 +693,15 @@ class MusicDownloaderGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("音乐下载工具")
-        self.root.geometry("1000x780")
-        self.root.minsize(900, 680);
+        self.root.geometry("1000x830")
+        self.root.minsize(900, 730);
         
         self.current_song_info = None
         self.search_results = []
         self.current_page = 1
         self.current_keyword = ""
         self.total_pages = 1
+        self._search_cache = {}  # 搜索结果缓存: {page_number: results_list}
         self.album_image = None
         self.album_photo = None
         
@@ -771,8 +737,8 @@ class MusicDownloaderGUI:
     def center_window(self):
         self.root.update_idletasks()
         x = (self.root.winfo_screenwidth() // 2) - (1000 // 2)
-        y = (self.root.winfo_screenheight() // 2) - (780 // 2)
-        self.root.geometry(f'1000x780+{x}+{y}')
+        y = (self.root.winfo_screenheight() // 2) - (830 // 2)
+        self.root.geometry(f'1000x830+{x}+{y}')
     
     def create_widgets(self):
         main_frame = ttk.Frame(self.root, padding="15")
@@ -808,7 +774,7 @@ class MusicDownloaderGUI:
         notice_frame = tk.Frame(parent, bg="#fff3cd", relief=tk.SUNKEN, bd=1)
         notice_frame.pack(fill=tk.X, pady=(0, 15))
         notice_label = tk.Label(notice_frame,
-            text="⚠️ 内部使用声明：本工具仅限华附北滘学校内部使用\n严禁对外传播、转载或用于商业用途 | 因擅自传播导致的一切法律责任由传播者承担",
+            text="⚠️ 内部使用声明：本工具仅限顺德一中内部使用\n严禁对外传播、转载或用于商业用途 | 因擅自传播导致的一切法律责任由传播者承担",
             bg="#fff3cd", fg="#856404", font=("微软雅黑", 9), pady=8)
         notice_label.pack()
     
@@ -969,9 +935,17 @@ class MusicDownloaderGUI:
             return
         self.current_keyword = keyword
         self.current_page = 1
+        self._search_cache = {}  # 新搜索清空缓存
         self._do_search()
     
     def _do_search(self):
+        # 优先使用缓存，避免重复请求
+        if self.current_page in self._search_cache:
+            self.search_results = self._search_cache[self.current_page]
+            self._display_search_results(self.search_results)
+            self._update_status(f"第 {self.current_page} 页（缓存）")
+            return
+
         site_page1 = self.current_page * 2 - 1
         site_page2 = self.current_page * 2
         url1 = f"https://higequ.com/s/{quote(self.current_keyword)}/{site_page1}/"
@@ -979,7 +953,17 @@ class MusicDownloaderGUI:
         self._set_buttons_state(False)
         self._update_status(f"正在搜索：{self.current_keyword} (第{self.current_page}页)...")
         self._update_progress(0, "搜索中...")
-        self._show_search_results_window()
+        self._ensure_search_results_window()
+        # 立即清空旧数据，显示加载状态，避免用户以为卡住
+        if hasattr(self, 'result_tree'):
+            for item in self.result_tree.get_children():
+                self.result_tree.delete(item)
+        if hasattr(self, 'page_info_label'):
+            self.page_info_label.config(text=f"第 {self.current_page} 页（加载中...）")
+        # 加载期间禁用翻页按钮，防止重复点击
+        if hasattr(self, 'prev_result_btn'):
+            self.prev_result_btn.config(state=tk.DISABLED)
+            self.next_result_btn.config(state=tk.DISABLED)
         thread = threading.Thread(target=self._search_thread, args=(url1, url2))
         thread.daemon = True
         thread.start()
@@ -1015,10 +999,10 @@ class MusicDownloaderGUI:
                 results.append({'id': song_id, 'title': title, 'artist': artist})
         return results, total_pages
     
-    def _show_search_results_window(self):
-        # 如果已存在搜索结果窗口，先关闭它
+    def _ensure_search_results_window(self):
+        # 窗口已存在则直接复用，不销毁重建
         if hasattr(self, 'result_window') and self.result_window.winfo_exists():
-            self.result_window.destroy()
+            return
         self.result_window = tk.Toplevel(self.root)
         self.result_window.title(f"搜索结果：{self.current_keyword}")
         self.result_window.geometry("650x500")
@@ -1079,27 +1063,34 @@ class MusicDownloaderGUI:
         self.prev_result_btn.config(state=tk.DISABLED)
         self.next_result_btn.config(state=tk.DISABLED)
     
+    def _display_search_results(self, results):
+        """更新搜索结果窗口中的列表内容"""
+        if not hasattr(self, 'result_window') or not self.result_window.winfo_exists():
+            self._ensure_search_results_window()
+
+        for item in self.result_tree.get_children():
+            self.result_tree.delete(item)
+        for r in results:
+            self.result_tree.insert("", tk.END, values=(r['id'], r['title'], r['artist']))
+        self.page_info_label.config(text=f"第 {self.current_page} / {self.total_pages} 页")
+        self.prev_result_btn.config(state=tk.NORMAL if self.current_page > 1 else tk.DISABLED)
+        self.next_result_btn.config(state=tk.NORMAL if self.current_page < self.total_pages else tk.DISABLED)
+
     def _on_search_complete(self, results, total_pages):
         self.total_pages = total_pages
         self.search_results = results
+        self._search_cache[self.current_page] = results  # 缓存当前页结果
         self._set_buttons_state(True)
         self._update_progress(100, "完成")
-        
+
         if not results:
             self._update_status(f"未找到：{self.current_keyword}")
             messagebox.showinfo("提示", f"未找到\"{self.current_keyword}\"的相关歌曲")
             if hasattr(self, 'result_window') and self.result_window.winfo_exists():
                 self.result_window.destroy()
             return
-        
-        if hasattr(self, 'result_window') and self.result_window.winfo_exists():
-            for item in self.result_tree.get_children():
-                self.result_tree.delete(item)
-            for r in results:
-                self.result_tree.insert("", tk.END, values=(r['id'], r['title'], r['artist']))
-            self.page_info_label.config(text=f"第 {self.current_page} / {total_pages} 页")
-            self.prev_result_btn.config(state=tk.NORMAL if self.current_page > 1 else tk.DISABLED)
-            self.next_result_btn.config(state=tk.NORMAL if self.current_page < total_pages else tk.DISABLED)
+
+        self._display_search_results(results)
         self._update_status(f"找到 {len(results)} 首歌曲")
     
     def _on_search_error(self, error):
@@ -1378,7 +1369,10 @@ class MusicDownloaderGUI:
                 "• 点击“否” → 直接下载原始格式文件"
             )
             if result:
-                # 转换为MP3下载
+                # 转换为MP3需要ffmpeg，未安装时直接提示
+                if not FFmpegInstaller.is_installed():
+                    messagebox.showerror("无法转换", "无法完成转换，请在电脑上安装FFmpeg")
+                    return
                 self.download_and_convert()
             else:
                 # 下载原始格式
@@ -1536,66 +1530,12 @@ class MusicDownloaderGUI:
             return
         
         if not FFmpegInstaller.is_installed():
-            result = messagebox.askyesno(
-                "需要安装FFmpeg",
-                f"要将{audio_format.upper()}格式转换为MP3，需要安装FFmpeg。\n\n"
-                "FFmpeg是开源的音视频处理工具，安装包约30MB。\n\n"
-                "是否立即下载并安装FFmpeg？\n\n"
-                "（安装后需要重启本程序才能使用转换功能）"
-            )
-            if result:
-                self.install_ffmpeg_and_convert()
+            messagebox.showerror("无法转换", "无法完成转换，请在电脑上安装FFmpeg")
             return
-        
+
         # 直接下载并转换
         self.download_and_convert()
-    
-    def install_ffmpeg_and_convert(self):
-        install_window = tk.Toplevel(self.root)
-        install_window.title("安装FFmpeg")
-        install_window.geometry("400x180")
-        install_window.transient(self.root)
-        install_window.grab_set()
-        
-        install_window.update_idletasks()
-        x = self.root.winfo_x() + (self.root.winfo_width() // 2) - 200
-        y = self.root.winfo_y() + (self.root.winfo_height() // 2) - 90
-        install_window.geometry(f"+{x}+{y}")
-        
-        main_frame = ttk.Frame(install_window, padding="20")
-        main_frame.pack(fill=tk.BOTH, expand=True)
-        
-        title_label = ttk.Label(main_frame, text="正在安装FFmpeg...", font=("微软雅黑", 10, "bold"))
-        title_label.pack(pady=(0, 15))
-        
-        progress_bar = ttk.Progressbar(main_frame, mode='determinate', length=350)
-        progress_bar.pack(pady=(0, 10))
-        
-        progress_label = ttk.Label(main_frame, text="0%")
-        progress_label.pack()
-        
-        status_label = ttk.Label(main_frame, text="准备下载...", foreground="gray")
-        status_label.pack(pady=(10, 0))
-        
-        def update_progress(value, status):
-            progress_bar['value'] = value
-            progress_label.config(text=f"{value}%")
-            status_label.config(text=status)
-            install_window.update_idletasks()
-        
-        def install_thread():
-            success, msg = FFmpegInstaller.install(self.root, update_progress)
-            install_window.after(0, install_window.destroy)
-            if success:
-                self.root.after(0, lambda: messagebox.showinfo("安装成功", "FFmpeg安装成功！\n\n现在可以进行转换。"))
-                self.root.after(0, self.download_and_convert)
-            else:
-                self.root.after(0, lambda: messagebox.showerror("安装失败", msg))
-        
-        thread = threading.Thread(target=install_thread)
-        thread.daemon = True
-        thread.start()
-    
+
     def download_and_convert(self):
         # 下载原始文件到临时目录，然后转换为MP3
         if not self.current_song_info:

@@ -3403,6 +3403,12 @@
         console.log('🎮 七班校园故事已加载！支持 七上~九下 六学期冒险。');
         console.log('🔧 调试：按 Ctrl+Shift+E 可模拟当前学期故事结束（仅在游戏进行中有效）');
     })();
+
+    // 反馈问题链接
+    var fbLink = document.createElement('div');
+    fbLink.style.cssText = 'position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:9999;';
+    fbLink.innerHTML = '<a href="feedback.html" style="color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;">反馈问题</a>';
+    document.body.appendChild(fbLink);
 </script>
 </body>
 </html>

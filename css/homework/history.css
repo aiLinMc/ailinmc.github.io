@@ -1,4 +1,4 @@
-/* history.html 样式 */
+/* history.css */
 * {
     margin: 0;
     padding: 0;
@@ -14,185 +14,277 @@ body {
     overflow-y: scroll;
 }
 
+/* ===== Header ===== */
 header {
     text-align: center;
-    margin-bottom: 30px;
-    padding: 20px;
+    margin-bottom: 20px;
+    padding: 30px 20px;
     background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
     color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(255, 87, 34, 0.2);
 }
 
 h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+    font-size: 2.2rem;
+    margin-bottom: 8px;
 }
 
-.back-btn {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 10px 20px;
+header p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* ===== 筛选栏 ===== */
+.filter-bar {
     background: white;
-    color: #FF5722;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-
-.back-btn:hover {
-    background: #f0f0f0;
-    transform: translateY(-2px);
-}
-
-.semester-container {
-    margin-bottom: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.semester-header {
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
     align-items: center;
-    padding: 15px 20px;
-    background: #f8f8f8;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-size: 0.85rem;
+    color: #999;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-right: 4px;
+}
+
+.filter-btn {
+    padding: 6px 16px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    color: #666;
+    border-radius: 20px;
     cursor: pointer;
-    transition: background 0s ease;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
-.semester-header:hover {
-    background: #f0f0f0;
+.filter-btn:hover {
+    border-color: #FF9800;
+    color: #FF9800;
 }
 
-.semester-title {
-    font-size: 1.8rem;
-    color: #333;
-    margin: 0;
+.filter-btn.active {
+    background: linear-gradient(135deg, #FF9800, #FF5722);
+    color: white;
+    border-color: transparent;
 }
 
-body.dark-mode .semester-title {
-    color: #e0e0e0;
+.search-group {
+    margin-left: auto;
 }
 
-body.dark-mode .semester-header {
-    background: #3a3a3a;
+/* ===== 排序栏 ===== */
+.sort-bar {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
 }
 
-.toggle-icon {
-    font-size: 1.5rem;
-    transition: transform 0.3s ease;
+.filter-bar > .filter-label,
+.sort-bar > .filter-label {
+    font-weight: 700;
+    color: #FF9800;
 }
 
-.semester-content {
-    padding: 20px;
-    display: none;
+.filter-select {
+    padding: 6px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    outline: none;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    transition: border-color 0.2s;
 }
 
-.semester-content.expanded {
-    display: block;
+.filter-select:focus {
+    border-color: #FF9800;
 }
 
-.weeks-grid {
+.filter-search {
+    padding: 8px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 220px;
+    max-width: 100%;
+}
+
+.filter-search:focus {
+    border-color: #FF9800;
+}
+
+/* ===== 结果计数 ===== */
+.result-info {
+    text-align: center;
+    color: #999;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+/* ===== 卡片网格 ===== */
+.cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
 }
 
+/* ===== 周卡片 ===== */
 .week-card {
     background: white;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
 }
 
 .week-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
+
+/* 年级标签 */
+.card-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.tag-七 { background: #4CAF50; }
+.tag-八 { background: #2196F3; }
+.tag-九 { background: #FF9800; }
 
 .week-title {
-    font-size: 1.4rem;
-    margin-bottom: 15px;
-    color: #2575fc;
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 12px;
 }
 
+/* 下载按钮 */
 .download-links {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 8px;
 }
 
 .download-link {
     flex: 1;
-    padding: 8px 15px;
-    background: #4CAF50;
+    padding: 8px 12px;
     color: white;
     text-decoration: none;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    transition: background 0.3s ease;
+    border-radius: 8px;
+    font-size: 0.85rem;
     text-align: center;
+    transition: opacity 0.2s;
 }
 
 .download-link:hover {
-    background: #45a049;
+    opacity: 0.85;
 }
 
 .download-link.pdf {
     background: #2196F3;
 }
 
-.download-link.pdf:hover {
-    background: #0b7dda;
+.download-link:not(.pdf) {
+    background: #4CAF50;
 }
 
+/* ===== 空结果 ===== */
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 1.2rem;
+}
+
+/* ===== Footer ===== */
 footer {
     text-align: center;
-    margin-top: 50px;
+    margin-top: 30px;
     padding: 15px;
     color: #666;
     font-size: 0.9rem;
 }
 
-@media (max-width: 768px) {
-    .weeks-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    h1 {
-        font-size: 2rem;
-    }
-}
-
-/* 暗黑模式样式 */
+/* ===== 深色模式 ===== */
 body.dark-mode {
     background-color: #1a1a1a;
     color: #e0e0e0;
 }
 
-body.dark-mode .semester-container,
+body.dark-mode .filter-bar,
+body.dark-mode .sort-bar,
 body.dark-mode .week-card {
     background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .filter-btn {
+    background: #2d2d2d;
+    border-color: #444;
+    color: #aaa;
+}
+
+body.dark-mode .filter-btn:hover {
+    border-color: #FF9800;
+    color: #FF9800;
+}
+
+body.dark-mode .filter-btn.active {
+    background: linear-gradient(135deg, #FF9800, #FF5722);
+    color: white;
+    border-color: transparent;
+}
+
+body.dark-mode .filter-search,
+body.dark-mode .filter-select {
+    background: #2d2d2d;
+    border-color: #444;
     color: #e0e0e0;
 }
 
-body.dark-mode .semester-header {
-    background: #3a3a3a;
-}
-
-body.dark-mode .semester-header:hover {
-    background: #444;
-}
-
 body.dark-mode .week-title {
-    color: #4a90e2;
+    color: #e0e0e0;
 }
 
+body.dark-mode .result-info,
+body.dark-mode .no-results {
+    color: #666;
+}
+
+/* 深色模式切换按钮 */
 .dark-mode-toggle {
     position: fixed;
     top: 20px;
@@ -219,4 +311,59 @@ body.dark-mode .dark-mode-toggle {
 .dark-mode-toggle:hover {
     transform: scale(1.1);
     background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+    .cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .week-card {
+        padding: 10px 8px;
+    }
+
+    .card-tag {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        margin-bottom: 6px;
+    }
+
+    .week-title {
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .download-links {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .download-link {
+        font-size: 0.7rem;
+        padding: 5px 4px;
+    }
+
+    .filter-bar,
+    .sort-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        justify-content: center;
+    }
+
+    .search-group {
+        margin-left: 0;
+    }
+
+    .filter-search {
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
 }
