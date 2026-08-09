@@ -9,11 +9,11 @@
 <body>
     <header>
         <h1>问题反馈</h1>
-        <div class="subtitle">提交完成后的抽奖礼品界面是由问卷星提供的广告，与本系统无关，其实没啥用，你不用管就行了</div>
+        <div class="subtitle">本页面技术支持由 问卷星 提供</div>
     </header>
 
     <div class="container">
-        <div class="feedback-form">
+        <div class="feedback-form" id="wjxContainer">
             <script type='text/javascript' src='https://v.wjx.cn/handler/jqemed.ashx?activity=eQ4SgM6&width=750&source=iframe'></script>
         </div>
     </div>
@@ -21,5 +21,74 @@
     <footer>
         <p>作业清单管理系统 &copy; 2025-2026</p>
     </footer>
+
+    <script>
+    // ===== 问卷星 iframe 高度自适应（双重保障）=====
+    // 1) 官方 jqemed.ashx 会通过 postMessage 向父页面发送高度通知；
+    // 2) 这里再加一层兜底监听，捕获常见消息格式后直接设 iframe 高度，
+    //    覆盖：桌面/手机宽度差异、提交前表单 → 提交后感谢页高度跳变、横竖屏切换等场景。
+    (function () {
+        function parseHeight(data) {
+            try {
+                if (typeof data === 'object' && data !== null) {
+                    if (typeof data.height === 'number') return data.height;
+                    if (data.data && typeof data.data.height === 'number') return data.data.height;
+                    if (typeof data.h === 'number') return data.h;
+                }
+                if (typeof data === 'string') {
+                    try {
+                        var obj = JSON.parse(data);
+                        var h = parseHeight(obj);
+                        if (h) return h;
+                    } catch (e) { /* 非 JSON 字符串，继续正则匹配 */ }
+                    // 常见格式 1：iframeHeight:1234 / iframeHeights:1234
+                    var m = data.match(/iframeHeight[s]?[:=]\s*(\d+)/i);
+                    if (m) return parseInt(m[1], 10);
+                    // 常见格式 2：wjx:resize:1234 / resize:1234
+                    m = data.match(/(?:wjx:)?resize[:=]\s*(\d+)/i);
+                    if (m) return parseInt(m[1], 10);
+                    // 常见格式 3：纯数字字符串（仅当长度合理）
+                    if (/^\d{3,5}$/.test(data)) return parseInt(data, 10);
+                }
+            } catch (e) {}
+            return 0;
+        }
+
+        function fromWjx(origin) {
+            if (!origin) return false;
+            return /(^|\.)wjx\.cn$/.test(origin.replace(/^https?:\/\//, '').split('/')[0].split(':')[0]);
+        }
+
+        function setHeight(h) {
+            if (!h || h < 200) return; // 过滤掉异常小值
+            h += 10; // 比实际多 10px，避免边缘贴边
+            var wrap = document.getElementById('wjxContainer');
+            if (!wrap) return;
+            var ifr = wrap.querySelector('iframe');
+            if (!ifr) return;
+            ifr.style.height = h + 'px';
+        }
+
+        window.addEventListener('message', function (e) {
+            if (!fromWjx(e.origin)) return;
+            var h = parseHeight(e.data);
+            if (h) setHeight(h);
+        });
+
+        // 横竖屏 / 窗口宽度变化时，通知 iframe 内部重排（有些版本的问卷星内部会再发 postMessage）
+        var resizeTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                var wrap = document.getElementById('wjxContainer');
+                if (!wrap) return;
+                var ifr = wrap.querySelector('iframe');
+                if (ifr && ifr.contentWindow) {
+                    try { ifr.contentWindow.postMessage('__wjx_resize__', '*'); } catch (err) {}
+                }
+            }, 150);
+        });
+    })();
+    </script>
 </body>
 </html>

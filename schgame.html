@@ -3356,10 +3356,47 @@
         // 微信浏览器下不允许使用本应用，提示用户用默认浏览器打开
         const ua = (navigator.userAgent || '').toLowerCase();
         if (ua.indexOf('micromessenger') !== -1) {
-            const statusEl = document.getElementById('connection-status');
-            statusEl.innerHTML = '⚠️ 检测到微信环境<br>微信浏览器不支持使用本应用。请点击右上角“···”菜单，选择“在浏览器打开”后，使用系统默认浏览器访问本页面。';
-            statusEl.className = 'connection-status error';
-            // 微信环境下不获取 API 密钥，隐藏所有操作按钮
+            // 全屏半透明遮罩，覆盖整个页面
+            var wxOverlay = document.createElement('div');
+            wxOverlay.style.cssText = [
+                'position:fixed',
+                'top:0',
+                'left:0',
+                'width:100%',
+                'height:100%',
+                'background:rgba(0,0,0,0.85)',
+                'z-index:99999',
+                'display:flex',
+                'align-items:center',
+                'justify-content:center',
+                'padding:24px',
+                'box-sizing:border-box'
+            ].join(';');
+            // 内层卡片
+            var wxCard = document.createElement('div');
+            wxCard.style.cssText = [
+                'max-width:420px',
+                'width:100%',
+                'background:#fff',
+                'border-radius:16px',
+                'padding:28px 24px',
+                'text-align:center',
+                'box-shadow:0 12px 40px rgba(0,0,0,0.4)',
+                'font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif',
+                'color:#333',
+                'line-height:1.7'
+            ].join(';');
+            wxCard.innerHTML =
+                '<div style="font-size:3rem;margin-bottom:12px;">⚠️</div>' +
+                '<div style="font-size:1.3rem;font-weight:700;color:#e74c3c;margin-bottom:14px;">检测到微信环境</div>' +
+                '<div style="font-size:0.98rem;color:#555;margin-bottom:8px;">微信浏览器不支持使用本应用。</div>' +
+                '<div style="font-size:0.98rem;color:#555;margin-bottom:14px;">请点击右上角 <strong style="color:#333;">⋯</strong> 菜单，</div>' +
+                '<div style="font-size:0.98rem;color:#555;margin-bottom:18px;">选择 <strong style="color:#27ae60;">在默认浏览器打开</strong> 后，使用系统默认浏览器访问本页面。</div>' +
+                '<div style="font-size:0.82rem;color:#aaa;border-top:1px solid #eee;padding-top:12px;">907班校园故事</div>';
+            wxOverlay.appendChild(wxCard);
+            document.body.appendChild(wxOverlay);
+
+            // 隐藏管理存档按钮（连接状态条已被遮罩盖住，无需单独处理）
             document.getElementById('manage-saves-btn').style.display = 'none';
             console.warn('🚫 检测到微信浏览器，已阻止应用启动。');
             return;
@@ -3402,7 +3439,72 @@
         document.getElementById('manage-saves-btn').style.display = aiConnected ? 'block' : 'none';
         console.log('🎮 七班校园故事已加载！支持 七上~九下 六学期冒险。');
         console.log('🔧 调试：按 Ctrl+Shift+E 可模拟当前学期故事结束（仅在游戏进行中有效）');
+        console.log('🔧 调试：按 Ctrl+Shift+M 可模拟微信环境提示（M = MicroMessenger）');
     })();
+
+    // ================================================================
+    //  调试：模拟微信环境提示（Ctrl+Shift+M，M = MicroMessenger）
+    //  注：不用 Ctrl+Shift+W，因为它是浏览器"关闭所有标签页"的系统快捷键，
+    //  preventDefault() 无法拦截，会直接关闭浏览器。
+    // ================================================================
+    function showWeChatOverlay() {
+        // 若已存在则不重复创建
+        if (document.getElementById('wx-debug-overlay')) return;
+
+        var wxOverlay = document.createElement('div');
+        wxOverlay.id = 'wx-debug-overlay';
+        wxOverlay.style.cssText = [
+            'position:fixed',
+            'top:0',
+            'left:0',
+            'width:100%',
+            'height:100%',
+            'background:rgba(0,0,0,0.85)',
+            'z-index:99999',
+            'display:flex',
+            'align-items:center',
+            'justify-content:center',
+            'padding:24px',
+            'box-sizing:border-box'
+        ].join(';');
+
+        var wxCard = document.createElement('div');
+        wxCard.style.cssText = [
+            'max-width:420px',
+            'width:100%',
+            'background:#fff',
+            'border-radius:16px',
+            'padding:28px 24px',
+            'text-align:center',
+            'box-shadow:0 12px 40px rgba(0,0,0,0.4)',
+            'font-family:-apple-system,BlinkMacSystemFont,"Microsoft YaHei",sans-serif',
+            'color:#333',
+            'line-height:1.7'
+        ].join(';');
+        wxCard.innerHTML =
+            '<div style="font-size:3rem;margin-bottom:12px;">⚠️</div>' +
+            '<div style="font-size:1.3rem;font-weight:700;color:#e74c3c;margin-bottom:14px;">检测到微信环境</div>' +
+            '<div style="font-size:0.98rem;color:#555;margin-bottom:8px;">微信浏览器不支持使用本应用。</div>' +
+            '<div style="font-size:0.98rem;color:#555;margin-bottom:14px;">请点击右上角 <strong style="color:#333;">⋯</strong> 菜单，</div>' +
+            '<div style="font-size:0.98rem;color:#555;margin-bottom:18px;">选择 <strong style="color:#27ae60;">在浏览器打开</strong> 后，使用系统默认浏览器访问本页面。</div>' +
+            '<div style="font-size:0.82rem;color:#aaa;border-top:1px solid #eee;padding-top:12px;">907班校园故事</div>' +
+            '<button id="wx-debug-close" style="margin-top:16px;padding:8px 20px;border:none;border-radius:8px;background:#667eea;color:#fff;font-size:0.9rem;cursor:pointer;">关闭（调试）</button>';
+        wxOverlay.appendChild(wxCard);
+        document.body.appendChild(wxOverlay);
+
+        // 调试用：点击关闭按钮移除遮罩
+        document.getElementById('wx-debug-close').addEventListener('click', function() {
+            wxOverlay.remove();
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+Shift+M 模拟微信环境提示（不用 W，避免与浏览器关闭快捷键冲突）
+        if (e.ctrlKey && e.shiftKey && (e.key === 'M' || e.key === 'm')) {
+            e.preventDefault();
+            showWeChatOverlay();
+        }
+    });
 
     // 反馈问题链接
     var fbLink = document.createElement('div');

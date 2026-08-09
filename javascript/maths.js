@@ -1409,7 +1409,65 @@ function findEqualitySignRecursive(arr) {
     return false;
 }
 
-async function simplifyExpression() {
+    // ================================================================
+    //  AI 连接（首次计算时初始化，成功后缓存；复用 schgame 的 /api/chat 端点）
+    // ================================================================
+    let aiConnected = false;
+
+    async function initAIConnection() {
+        if (aiConnected) return true; // 缓存命中
+        for (let i = 1; i <= 3; i++) {
+            try {
+                const resp = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: 'test' }],
+                        temperature: 0.8,
+                        max_tokens: 10,
+                        stream: false
+                    })
+                });
+                if (resp.ok) {
+                    aiConnected = true;
+                    return true;
+                }
+                throw new Error(`HTTP ${resp.status}`);
+            } catch (e) {
+                console.warn(`AI 连接失败 (第${i}次):`, e);
+                if (i < 3) await new Promise(r => setTimeout(r, 1500));
+            }
+        }
+        return false;
+    }
+
+    // AI 调用包装：POST /api/chat（OpenAI 兼容），返回文本内容；失败重试
+    async function callAI(prompt, retries = 3) {
+        const headers = { 'Content-Type': 'application/json' };
+        const payload = {
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.8,
+            max_tokens: 4000,
+            stream: false
+        };
+        for (let i = 0; i < retries; i++) {
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 30000);
+                const resp = await fetch('/api/chat', { method: 'POST', headers, body: JSON.stringify(payload), signal: controller.signal });
+                clearTimeout(timeout);
+                if (!resp.ok) { const et = await resp.text(); throw new Error(`HTTP ${resp.status}: ${et}`); }
+                const data = await resp.json();
+                return data.choices[0].message.content;
+            } catch (e) {
+                console.warn(`AI 调用失败 (第${i + 1}次):`, e);
+                if (i < retries - 1) await new Promise(r => setTimeout(r, 1500));
+            }
+        }
+        return null;
+    }
+
+    async function simplifyExpression() {
     const resultElement = document.getElementById('resultContent');
     if (simplifyExpression._running) return;
     simplifyExpression._running = true;
@@ -1426,6 +1484,17 @@ async function simplifyExpression() {
         if (!cleanLatex) {
             resultElement.innerHTML = '<span class="error-text">请输入表达式</span>';
             return;
+        }
+
+        // 首次计算时初始化 AI 连接（成功后缓存，后续计算直接复用，和 schgame 异曲同工）
+        if (!aiConnected) {
+            resultElement.innerHTML = '<span class="loading-text">正在连接 AI 服务...</span>';
+            const ok = await initAIConnection();
+            if (!ok) {
+                resultElement.innerHTML = '<span class="error-text">AI 服务连接失败，请稍后再试</span>';
+                return;
+            }
+            resultElement.innerHTML = '<span class="loading-text">正在计算...</span>';
         }
 
         // 统一的输出格式要求
@@ -1497,23 +1566,11 @@ async function simplifyExpression() {
             cleanLatex
         ].join('\n');
 
-        const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
-
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
-
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeout);
-
-        // 特殊处理 429 错误
-        if (response.status === 429) {
-            resultElement.innerHTML = '<span class="error-text">请求过于频繁(429)，请稍后再试</span>';
+        const text = await callAI(prompt, 3);
+        if (!text) {
+            resultElement.innerHTML = '<span class="error-text">计算失败，AI 服务暂时不可用，请稍后重试</span>';
             return;
         }
-
-        if (!response.ok) throw new Error(`服务器错误 (${response.status})`);
-
-        const text = await response.text();
 
         // 解析返回格式：--- ... --- === 结果 ===
         const parts = text.split('===');

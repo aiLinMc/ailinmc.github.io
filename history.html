@@ -8,148 +8,123 @@
     <script type="text/javascript" src="javascript/homework/history_pdf-download.js"></script>
 </head>
 <body>
-    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="切换深色模式">🌙</button>
+    <main class="page-shell">
+        <header>
+            <div class="header-copy">
+                <span class="eyebrow">HOMEWORK ARCHIVE</span>
+                <h1>作业历史</h1>
+                <p>按年级、学期和周数快速查找过去的作业。</p>
+            </div>
+            <div class="header-mark">📚</div>
+        </header>
 
-    <header>
-        <h1>作业历史</h1>
-        <p>查看所有曾经的作业</p>
-    </header>
+        <section class="toolbar">
+            <div class="toolbar-top">
+                <div>
+                    <span class="section-kicker">筛选与搜索</span>
+                    <h2>查找作业</h2>
+                </div>
+                <div class="result-info" id="resultInfo"></div>
+            </div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <span class="filter-label">年级</span>
+                    <div class="filter-options">
+                        <button class="filter-btn active" data-filter="grade" data-value="全部">全部</button>
+                        <button class="filter-btn" data-filter="grade" data-value="七年级">七年级</button>
+                        <button class="filter-btn" data-filter="grade" data-value="八年级">八年级</button>
+                        <button class="filter-btn" data-filter="grade" data-value="九年级">九年级</button>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">学期</span>
+                    <div class="filter-options">
+                        <button class="filter-btn active" data-filter="term" data-value="全部">全部</button>
+                        <button class="filter-btn" data-filter="term" data-value="上学期">上学期</button>
+                        <button class="filter-btn" data-filter="term" data-value="下学期">下学期</button>
+                    </div>
+                </div>
+                <div class="search-box">
+                    <span>⌕</span>
+                    <input type="text" class="filter-search" id="searchInput" placeholder="搜索周数、学期或拼音…">
+                </div>
+            </div>
+        </section>
 
-    <div class="filter-bar">
-        <span class="filter-label">筛选</span>
-        <div class="filter-group">
-            <span class="filter-label">年级</span>
-            <button class="filter-btn active" data-filter="grade" data-value="全部">全部</button>
-            <button class="filter-btn" data-filter="grade" data-value="七年级">七</button>
-            <button class="filter-btn" data-filter="grade" data-value="八年级">八</button>
-            <button class="filter-btn" data-filter="grade" data-value="九年级">九</button>
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">学期</span>
-            <button class="filter-btn active" data-filter="term" data-value="全部">全部</button>
-            <button class="filter-btn" data-filter="term" data-value="上学期">上</button>
-            <button class="filter-btn" data-filter="term" data-value="下学期">下</button>
-        </div>
-        <div class="filter-group search-group">
-            <input type="text" class="filter-search" id="searchInput" placeholder="搜索周数 / 学期…">
-        </div>
-    </div>
+        <section class="sort-bar">
+            <span class="section-kicker">排序</span>
+            <div class="sort-control"><label for="gradeSort">年级</label><select class="filter-select" id="gradeSort"><option value="asc">七上至九下</option><option value="desc" selected>九下至七上</option></select></div>
+            <div class="sort-control"><label for="weekSort">周数</label><select class="filter-select" id="weekSort"><option value="asc" selected>正序</option><option value="desc">倒序</option></select></div>
+        </section>
 
-    <div class="sort-bar">
-        <span class="filter-label">排序</span>
-        <div class="filter-group">
-            <span class="filter-label">年级</span>
-            <select class="filter-select" id="gradeSort">
-                <option value="asc">七上至九下</option>
-                <option value="desc" selected>九下至七上</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">周数</span>
-            <select class="filter-select" id="weekSort">
-                <option value="asc" selected>正序</option>
-                <option value="desc">倒序</option>
-            </select>
-        </div>
-    </div>
+        <section class="archive-section">
+            <div class="section-heading"><div><span class="section-kicker">ARCHIVE</span><h2>全部作业</h2></div><span class="section-note">按学期整理</span></div>
+            <div class="cards-grid" id="cards-grid"></div>
+            <div class="no-results" id="no-results" style="display:none;"><div class="empty-icon">⌕</div><p>没有找到匹配的作业</p><span>试试调整筛选条件或搜索关键词。</span></div>
+        </section>
 
-    <div class="result-info" id="resultInfo"></div>
-
-    <div class="cards-grid" id="cards-grid"></div>
-
-    <div class="no-results" id="no-results" style="display:none;">
-        <p>😕 没有找到匹配的作业</p>
-    </div>
-
-    <footer>
-        <p>作业清单管理系统 &copy; 2025-2026</p>
-        <a href="feedback.html" style="color:#667eea; text-decoration:none; font-size:0.9rem;">反馈问题</a>
-    </footer>
+        <footer><p>作业清单管理系统 © 2025-2026</p><a href="feedback.html">反馈问题</a></footer>
+    </main>
 
     <script>
-        // 周数 → 中文
-        var cn = ['', '一','二','三','四','五','六','七','八','九','十',
-            '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','二十一'];
-
+        var cn = ['', '一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','二十一'];
         function range(start, end) {
             var arr = [];
             for (var i = start; i <= end; i++) arr.push(i);
             return arr;
         }
-
-        // 学期数据
         var semesters = [
             { folder: '九下', grade: '九年级', term: '下学期', weeks: [1,2,3,4,5,6,7,9,10,11,12,13,14,15,16], hasPng: true },
             { folder: '九上', grade: '九年级', term: '上学期', weeks: range(1,21), hasPng: true },
             { folder: '八下', grade: '八年级', term: '下学期', weeks: range(1,20), hasPng: true },
             { folder: '八上', grade: '八年级', term: '上学期', weeks: [1,2,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19], hasPng: true },
             { folder: '七下', grade: '七年级', term: '下学期', weeks: range(1,20), hasPng: false },
-            { folder: '七上', grade: '七年级', term: '上学期', weeks: range(2,19), hasPng: false },
+            { folder: '七上', grade: '七年级', term: '上学期', weeks: range(2,19), hasPng: false }
         ];
-
-        // 拼音映射表（仅覆盖本页用字：数字、七八九、上下学期册、第周）
         var PINYIN_MAP = {
-            // 数字
-            '一': 'yi', '二': 'er', '三': 'san', '四': 'si', '五': 'wu',
-            '六': 'liu', '七': 'qi', '八': 'ba', '九': 'jiu', '十': 'shi',
-            // 年级
-            '年': 'nian', '级': 'ji',
-            // 学期册
-            '上': 'shang', '下': 'xia', '学': 'xue', '期': 'qi', '册': 'ce',
-            // 其他
-            '第': 'di', '周': 'zhou'
+            '一':'yi','二':'er','三':'san','四':'si','五':'wu','六':'liu','七':'qi','八':'ba','九':'jiu','十':'shi',
+            '年':'nian','级':'ji','上':'shang','下':'xia','学':'xue','期':'qi','册':'ce','第':'di','周':'zhou'
         };
-
         function toPinyin(str) {
             var out = '';
-            for (var i = 0; i < str.length; i++) {
-                var c = str.charAt(i);
-                out += PINYIN_MAP[c] || c;
-            }
+            for (var i = 0; i < str.length; i++) out += PINYIN_MAP[str.charAt(i)] || str.charAt(i);
             return out;
         }
-
         function toPinyinInitials(str) {
             var out = '';
             for (var i = 0; i < str.length; i++) {
-                var c = str.charAt(i);
-                var py = PINYIN_MAP[c];
-                out += py ? py.charAt(0) : c;
+                var py = PINYIN_MAP[str.charAt(i)];
+                out += py ? py.charAt(0) : str.charAt(i);
             }
             return out;
         }
-
-        // 动态生成卡片
         (function generateCards() {
             var grid = document.getElementById('cards-grid');
             var html = '';
             var orderIndex = 0;
             semesters.forEach(function(sem) {
-                var gradeKey = sem.grade.charAt(0); // 七/八/九
+                var gradeKey = sem.grade.charAt(0);
                 sem.weeks.forEach(function(week) {
                     var weekName = '第' + cn[week] + '周';
                     var base = 'history/' + sem.folder + '/' + weekName;
                     var dlName = sem.folder + weekName + '作业';
-                    var links = '<a href="' + base + '/homework.pdf" class="download-link pdf" download="' + dlName + '.pdf">下载PDF</a>';
-                    if (sem.hasPng) {
-                        links += '<a href="' + base + '/homework.png" class="download-link" download="' + dlName + '.png">下载图片</a>';
-                    }
+                    var links = '<a href="' + base + '/homework.pdf" class="download-link pdf" download="' + dlName + '.pdf"><span>PDF</span><b>下载</b></a>';
+                    if (sem.hasPng) links += '<a href="' + base + '/homework.png" class="download-link image" download="' + dlName + '.png"><span>PNG</span><b>图片</b></a>';
                     var searchText = sem.folder + ' ' + sem.grade + ' ' + sem.term + ' ' + weekName + ' ' + week;
-                    // 拼音：去掉空格
                     var pyAll = toPinyin(searchText.replace(/\s/g, ''));
                     var pyInit = toPinyinInitials(searchText.replace(/\s/g, ''));
-                    html += '<div class="week-card" data-grade="' + sem.grade + '" data-term="' + sem.term + '" data-week="' + week + '" data-order="' + orderIndex + '" data-search="' + searchText + '" data-pinyin="' + pyAll + '" data-pinyin-initials="' + pyInit + '">'
-                        + '<span class="card-tag tag-' + gradeKey + '">' + sem.folder + '</span>'
-                        + '<h3 class="week-title">' + weekName + '</h3>'
-                        + '<div class="download-links">' + links + '</div>'
-                        + '</div>';
+                    html += '<article class="week-card" data-grade="' + sem.grade + '" data-term="' + sem.term + '" data-week="' + week + '" data-order="' + orderIndex + '" data-search="' + searchText + '" data-pinyin="' + pyAll + '" data-pinyin-initials="' + pyInit + '">' +
+                        '<div class="card-top"><span class="card-tag tag-' + gradeKey + '">' + sem.folder + '</span><span class="week-number">W' + String(week).padStart(2, '0') + '</span></div>' +
+                        '<h3 class="week-title">' + weekName + '</h3><div class="card-meta">' + sem.grade + ' · ' + sem.term + '</div>' +
+                        '<div class="download-links">' + links + '</div></article>';
                     orderIndex++;
                 });
             });
             grid.innerHTML = html;
         })();
     </script>
-
     <script type="text/javascript" src="javascript/homework/history.js"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e"}' crossorigin="anonymous"></script>
 </body>
 </html>
