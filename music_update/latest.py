@@ -3,7 +3,7 @@
 
 """
 音乐下载工具
-仅供华附北滘学校内部使用，严禁对外传播
+仅供顺德一中内部使用，严禁对外传播
 保留所有权利 (C) 2026 aiLinMc，侵权必究
 
 歌曲数据来源：Hi歌曲网 - https://higequ.com/
@@ -35,8 +35,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==================== 版本配置 ====================
-CURRENT_INTERNAL_VERSION = "6"  # 内部版本号（纯数字，用于比较）
-CURRENT_DISPLAY_VERSION = "v1.3.0"  # 显示版本号（展示给用户）
+CURRENT_INTERNAL_VERSION = "7"  # 内部版本号（纯数字，用于比较）
+CURRENT_DISPLAY_VERSION = "v1.3.1"  # 显示版本号（展示给用户）
 UPDATE_DOWNLOAD_URL = "https://yyxc.fun/music_update/"  # 更新下载地址
 VERSION_URL = UPDATE_DOWNLOAD_URL + "music_version.txt"  # 版本文件URL
 
@@ -774,7 +774,7 @@ class MusicDownloaderGUI:
         notice_frame = tk.Frame(parent, bg="#fff3cd", relief=tk.SUNKEN, bd=1)
         notice_frame.pack(fill=tk.X, pady=(0, 15))
         notice_label = tk.Label(notice_frame,
-            text="⚠️ 内部使用声明：本工具仅限顺德一中内部使用\n严禁对外传播、转载或用于商业用途 | 因擅自传播导致的一切法律责任由传播者承担",
+            text="⚠️ 内部使用声明：本工具仅限顺德一中内部使用 | 歌曲数据来源：Hi歌曲网 - https://higequ.com/\n严禁对外传播、转载或用于商业用途 | 因擅自传播导致的一切法律责任由传播者承担",
             bg="#fff3cd", fg="#856404", font=("微软雅黑", 9), pady=8)
         notice_label.pack()
     
@@ -1176,10 +1176,14 @@ class MusicDownloaderGUI:
             match = re.search(r'<h2[^>]*id="music-title"[^>]*>([^<]+)</h2>', html)
             if match:
                 title = match.group(1).strip()
+                if ' - ' in title:
+                    title = title.split(' - ', 1)[0].strip()
             else:
                 match = re.search(r'<title>([^<]+)</title>', html)
                 if match:
                     title = match.group(1).replace('MP3下载', '').replace('在线试听', '').strip()
+                    if ' - ' in title:
+                        title = title.split(' - ', 1)[0].strip()
             
             # 歌手
             artist = "未知歌手"
@@ -1305,11 +1309,12 @@ class MusicDownloaderGUI:
             format_info += "\nℹ️ 点击「直接下载」可选择转换为MP3或下载原始文件。"
         
         self._show_info_message(
+            f"【数据来源】Hi歌曲网 - https://higequ.com/\n"
             f"【歌曲名称】{info['title']}\n"
             f"【演唱歌手】{info['artist']}\n"
             f"【歌曲ID】{info['song_id']}\n"
-            f"{format_info}\n\n"
-            f"【音频链接】\n{info['audio_url']}"
+            f"{format_info}\n"
+            f"【音频链接】{info['audio_url']}"
         )
         
         self.lyrics_text.config(state=tk.NORMAL)
