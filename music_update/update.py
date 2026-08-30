@@ -97,22 +97,7 @@ def main():
         if target_dir and not os.path.exists(target_dir):
             os.makedirs(target_dir)
         
-        # ========== 步骤1：备份原程序 ==========
-        backup_exe = None
-        if os.path.exists(target_exe):
-            # 创建备份文件名（带时间戳）
-            timestamp = time.strftime("%Y%m%d_%H%M%S")
-            backup_exe = target_exe.replace(".exe", f"_backup_{timestamp}.exe")
-            if not backup_exe.endswith('.exe'):
-                backup_exe = target_exe + f"_backup_{timestamp}"
-            
-            try:
-                shutil.copy2(target_exe, backup_exe)
-                print(f"已备份原程序: {backup_exe}")
-            except Exception as e:
-                print(f"备份失败（继续更新）: {e}")
-        
-        # ========== 步骤2：删除原程序 ==========
+        # ========== 步骤1：删除原程序 ==========
         if os.path.exists(target_exe):
             try:
                 os.remove(target_exe)
@@ -130,7 +115,7 @@ def main():
                 except:
                     print("保留重命名的文件，稍后删除")
         
-        # ========== 步骤3：复制新程序（保持原文件名） ==========
+        # ========== 步骤2：复制新程序（保持原文件名） ==========
         print(f"正在复制新程序到: {target_exe}")
         shutil.copy2(latest_exe, target_exe)
         
@@ -140,7 +125,7 @@ def main():
         else:
             raise Exception("复制后文件不存在")
         
-        # ========== 步骤4：清理临时文件 ==========
+        # ========== 步骤3：清理临时文件 ==========
         try:
             if os.path.exists(latest_exe):
                 os.remove(latest_exe)
@@ -148,7 +133,7 @@ def main():
         except Exception as e:
             print(f"清理临时文件失败: {e}")
         
-        # ========== 步骤5：启动新程序 ==========
+        # ========== 步骤4：启动新程序 ==========
         time.sleep(1)
         print("正在启动新版本程序...")
         
@@ -164,20 +149,7 @@ def main():
         else:
             print("错误：新程序文件不存在")
         
-        # ========== 步骤6：延迟删除备份文件 ==========
-        if backup_exe and os.path.exists(backup_exe):
-            # 创建一个批处理文件来延迟删除备份
-            batch_file = os.path.join(tempfile.gettempdir(), "cleanup_backup.bat")
-            with open(batch_file, 'w', encoding='utf-8') as f:
-                f.write(f'@echo off\n')
-                f.write(f'timeout /t 10 /nobreak > nul\n')
-                f.write(f'if exist "{backup_exe}" del "{backup_exe}"\n')
-                f.write(f'del "%~f0"\n')
-            creationflags = subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
-            subprocess.Popen(batch_file, creationflags=creationflags)
-            print("将在10秒后自动删除备份文件")
-        
-        # ========== 步骤7：删除更新程序自身 ==========
+        # ========== 步骤5：删除更新程序自身 ==========
         current_file = sys.argv[0]
         if os.path.exists(current_file):
             # 创建批处理文件删除自身
@@ -206,15 +178,6 @@ def main():
         
         print(f"\n❌ 更新失败：{e}")
         print(f"错误日志已保存到: {error_log}")
-        
-        # 尝试恢复备份
-        if backup_exe and os.path.exists(backup_exe):
-            print("尝试恢复原程序...")
-            try:
-                shutil.copy2(backup_exe, target_exe)
-                print("已恢复原程序")
-            except:
-                print("恢复失败，请手动恢复")
         
         input("\n按任意键退出...")
 

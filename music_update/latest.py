@@ -35,10 +35,14 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==================== 版本配置 ====================
-CURRENT_INTERNAL_VERSION = "7"  # 内部版本号（纯数字，用于比较）
-CURRENT_DISPLAY_VERSION = "v1.3.1"  # 显示版本号（展示给用户）
-UPDATE_DOWNLOAD_URL = "https://yyxc.fun/music_update/"  # 更新下载地址
-VERSION_URL = UPDATE_DOWNLOAD_URL + "music_version.txt"  # 版本文件URL
+CURRENT_INTERNAL_VERSION = "8"  # 内部版本号（纯数字，用于比较）
+CURRENT_DISPLAY_VERSION = "v1.4.0"  # 显示版本号（展示给用户）
+# 更新下载地址（按优先级排列，主域名在前，自动切换备用域名）
+UPDATE_DOWNLOAD_URLS = [
+    "https://www.ailinmc.top/music_update/",   # 主域名
+    "https://lzcnb.netlify.app/music_update/", # 备用域名1
+    "https://ailinmc.github.io/music_update/", # 备用域名2
+]
 
 
 def get_current_program_path():
@@ -428,42 +432,47 @@ class UpdateChecker:
     
     @staticmethod
     def check_for_updates():
-        try:
-            session = UpdateChecker.get_session_with_retry()
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            response = session.get(VERSION_URL, headers=headers, timeout=20)
-            
-            if response.status_code != 200:
-                return False, None, None, None, None
-            
-            content = response.content
-            if content.startswith(b'\xef\xbb\xbf'):
-                content = content[3:]
-            
-            text = content.decode('utf-8')
-            lines = text.strip().split('\n')
-            
-            # 第一行：内部版本号（可能带#号）
-            version_line = lines[0].strip()
-            internal_version = version_line.lstrip('#').strip()
-            
-            # 第二行：显示版本号和日期
-            display_line = lines[1].strip() if len(lines) > 1 else ""
-            display_version = display_line.split('-')[0].strip() if display_line else ""
-            
-            # 解析更新日志（按---分割）
-            full_content = '\n'.join(lines)
-            parts = re.split(r'\n---\n|\n-{3,}\n', full_content)
-            
-            latest_changelog = parts[0].split('\n', 1)[1] if len(parts) > 0 else "暂无更新日志"
-            historical_changelog = '\n---\n'.join(parts[1:]) if len(parts) > 1 else ""
-            
-            has_update = internal_version > CURRENT_INTERNAL_VERSION
-            
-            return has_update, internal_version, display_version, latest_changelog.strip(), historical_changelog.strip()
-        except Exception as e:
-            print(f"检查更新失败: {e}")
-            return False, None, None, None, None
+        session = UpdateChecker.get_session_with_retry()
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        last_error = None
+        # 按优先级依次尝试各更新域名，第一个可用的即返回结果
+        for base_url in UPDATE_DOWNLOAD_URLS:
+            try:
+                response = session.get(base_url + "music_version.txt", headers=headers, timeout=20)
+                
+                if response.status_code != 200:
+                    continue
+                
+                content = response.content
+                if content.startswith(b'\xef\xbb\xbf'):
+                    content = content[3:]
+                
+                text = content.decode('utf-8')
+                lines = text.strip().split('\n')
+                
+                # 第一行：内部版本号（可能带#号）
+                version_line = lines[0].strip()
+                internal_version = version_line.lstrip('#').strip()
+                
+                # 第二行：显示版本号和日期
+                display_line = lines[1].strip() if len(lines) > 1 else ""
+                display_version = display_line.split('-')[0].strip() if display_line else ""
+                
+                # 解析更新日志（按---分割）
+                full_content = '\n'.join(lines)
+                parts = re.split(r'\n---\n|\n-{3,}\n', full_content)
+                
+                latest_changelog = parts[0].split('\n', 1)[1] if len(parts) > 0 else "暂无更新日志"
+                historical_changelog = '\n---\n'.join(parts[1:]) if len(parts) > 1 else ""
+                
+                has_update = internal_version > CURRENT_INTERNAL_VERSION
+                
+                return has_update, internal_version, display_version, latest_changelog.strip(), historical_changelog.strip()
+            except Exception as e:
+                last_error = e
+                print(f"检查更新失败({base_url}): {e}")
+        print(f"检查更新失败: {last_error}")
+        return False, None, None, None, None
     
     @staticmethod
     def download_update_files(progress_callback=None, cancel_callback=None):
@@ -475,10 +484,26 @@ class UpdateChecker:
             session = UpdateChecker.get_session_with_retry()
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
             
+            # 按优先级依次尝试各更新域名，探测到可用的域名后用于下载
+            working_url = None
+            for candidate_url in UPDATE_DOWNLOAD_URLS:
+                try:
+                    probe = session.get(candidate_url + "latest.exe", headers=headers, stream=True, timeout=15)
+                    if probe.status_code == 200:
+                        working_url = candidate_url
+                        probe.close()
+                        break
+                    probe.close()
+                except Exception as e:
+                    print(f"域名不可用({candidate_url}): {e}")
+            
+            if working_url is None:
+                raise Exception("所有更新域名均不可用")
+            
             if progress_callback:
                 progress_callback(10, "正在下载最新程序...")
             
-            resp1 = session.get(UPDATE_DOWNLOAD_URL + "latest.exe", headers=headers, stream=True, timeout=30)
+            resp1 = session.get(working_url + "latest.exe", headers=headers, stream=True, timeout=30)
             resp1.raise_for_status()
             total_size = int(resp1.headers.get('content-length', 0))
             downloaded = 0
@@ -501,7 +526,7 @@ class UpdateChecker:
             if progress_callback:
                 progress_callback(60, "正在下载更新程序...")
             
-            resp2 = session.get(UPDATE_DOWNLOAD_URL + "update.exe", headers=headers, stream=True, timeout=30)
+            resp2 = session.get(working_url + "update.exe", headers=headers, stream=True, timeout=30)
             resp2.raise_for_status()
             total_size2 = int(resp2.headers.get('content-length', 0))
             downloaded2 = 0
@@ -709,26 +734,7 @@ class MusicDownloaderGUI:
         self.create_widgets()
         self.center_window()
         
-        self.check_pending_update()
         self.root.after(2000, self.check_update_on_startup)
-    
-    def check_pending_update(self):
-        try:
-            current_dir = os.path.dirname(get_current_program_path())
-            pending_latest = os.path.join(current_dir, "latest.exe")
-            pending_update = os.path.join(current_dir, "update.exe")
-            if os.path.exists(pending_latest) and os.path.exists(pending_update):
-                result = messagebox.askyesno("发现待更新文件", "检测到上次下载的更新文件尚未应用。\n\n是否立即应用更新并重启软件？")
-                if result:
-                    UpdateChecker.perform_update(pending_latest, pending_update)
-                else:
-                    try:
-                        os.remove(pending_latest)
-                        os.remove(pending_update)
-                    except:
-                        pass
-        except Exception as e:
-            print(f"检查待更新文件失败: {e}")
     
     def setup_styles(self):
         style = ttk.Style()
@@ -774,7 +780,7 @@ class MusicDownloaderGUI:
         notice_frame = tk.Frame(parent, bg="#fff3cd", relief=tk.SUNKEN, bd=1)
         notice_frame.pack(fill=tk.X, pady=(0, 15))
         notice_label = tk.Label(notice_frame,
-            text="⚠️ 内部使用声明：本工具仅限顺德一中内部使用 | 歌曲数据来源：Hi歌曲网 - https://higequ.com/\n严禁对外传播、转载或用于商业用途 | 因擅自传播导致的一切法律责任由传播者承担",
+            text="⚠️ 内部使用声明：本工具仅限aiLinMc及其相关人员内部使用 | 歌曲数据来源：Hi歌曲网 - https://higequ.com/\n严禁对外传播、转载或用于商业用途 | 因擅自传播导致的一切法律责任由传播者承担",
             bg="#fff3cd", fg="#856404", font=("微软雅黑", 9), pady=8)
         notice_label.pack()
     
@@ -792,18 +798,8 @@ class MusicDownloaderGUI:
         self.search_btn = ttk.Button(row1, text="搜索", command=self.search, width=8)
         self.search_btn.pack(side=tk.LEFT)
         
-        row2 = ttk.Frame(search_frame)
-        row2.pack(fill=tk.X)
-        ttk.Label(row2, text="ID：", width=5).pack(side=tk.LEFT)
-        self.id_var = tk.StringVar()
-        self.id_entry = ttk.Entry(row2, textvariable=self.id_var, font=("微软雅黑", 10))
-        self.id_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
-        self.id_entry.bind('<Return>', lambda e: self.extract())
-        self.extract_btn = ttk.Button(row2, text="提取", command=self.extract, width=8)
-        self.extract_btn.pack(side=tk.LEFT)
-        
         hint_label = ttk.Label(search_frame,
-            text="💡 输入歌名搜索，双击结果选择歌曲；或直接输入数字ID（如 228908）后点击提取",
+            text="💡 输入歌名搜索，双击结果选择歌曲",
             foreground="gray", font=("微软雅黑", 8))
         hint_label.pack(pady=(8, 0))
     
@@ -933,9 +929,11 @@ class MusicDownloaderGUI:
         if not keyword:
             messagebox.showwarning("提示", "请输入歌曲名称")
             return
-        self.current_keyword = keyword
+        if keyword != self.current_keyword:
+            # 歌名变化才清空缓存；歌名未变时保留已加载的各页结果
+            self.current_keyword = keyword
+            self._search_cache = {}
         self.current_page = 1
-        self._search_cache = {}  # 新搜索清空缓存
         self._do_search()
     
     def _do_search(self):
@@ -1018,12 +1016,10 @@ class MusicDownloaderGUI:
         table_frame = ttk.Frame(main_frame)
         table_frame.pack(fill=tk.BOTH, expand=True)
         
-        columns = ("ID", "歌名", "歌手")
+        columns = ("歌名", "歌手")
         self.result_tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=10)
-        self.result_tree.heading("ID", text="歌曲ID")
         self.result_tree.heading("歌名", text="歌名")
         self.result_tree.heading("歌手", text="歌手")
-        self.result_tree.column("ID", width=80)
         self.result_tree.column("歌名", width=320)
         self.result_tree.column("歌手", width=160)
         
@@ -1071,7 +1067,7 @@ class MusicDownloaderGUI:
         for item in self.result_tree.get_children():
             self.result_tree.delete(item)
         for r in results:
-            self.result_tree.insert("", tk.END, values=(r['id'], r['title'], r['artist']))
+            self.result_tree.insert("", tk.END, iid=r['id'], values=(r['title'], r['artist']))
         self.page_info_label.config(text=f"第 {self.current_page} / {self.total_pages} 页")
         self.prev_result_btn.config(state=tk.NORMAL if self.current_page > 1 else tk.DISABLED)
         self.next_result_btn.config(state=tk.NORMAL if self.current_page < self.total_pages else tk.DISABLED)
@@ -1129,28 +1125,26 @@ class MusicDownloaderGUI:
         selection = self.result_tree.selection()
         if not selection:
             return
-        item = self.result_tree.item(selection[0])
-        song_id = item['values'][0]
-        self.id_var.set(song_id)
+        song_id = selection[0]  # 歌曲ID作为树节点标识
         if hasattr(self, 'result_window'):
             self.result_window.destroy()
-        self.extract()
+        self.extract(song_id)
     
     # ==================== 提取功能 ====================
     
-    def extract(self):
-        song_id = self.id_var.get().strip()
-        if not song_id:
-            messagebox.showwarning("提示", "请输入歌曲ID")
+    def extract(self, song_id=None):
+        if song_id is None:
+            messagebox.showwarning("提示", "请先在搜索结果中双击选择歌曲")
             return
+        song_id = song_id.strip()
         match = re.search(r'(\d+)', song_id)
         if match:
             song_id = match.group(1)
         else:
-            messagebox.showerror("错误", "请输入有效的数字ID")
+            messagebox.showerror("错误", "无效的歌曲ID")
             return
         
-        self._set_buttons_state(False, include_extract=True)
+        self._set_buttons_state(False)
         self._update_status(f"正在提取 ID: {song_id}...")
         self._update_progress(0, "提取中...")
         self._clear_info_display()
@@ -1289,7 +1283,7 @@ class MusicDownloaderGUI:
         
         if error:
             self._show_info_message(f"提取失败：{error}\n\n可能原因：\n1. 歌曲ID不存在\n2. 网络连接问题", is_error=True)
-            self._set_buttons_state(True, include_extract=True)
+            self._set_buttons_state(True)
             self._update_status(f"提取失败：{error}")
             return
         
@@ -1327,7 +1321,7 @@ class MusicDownloaderGUI:
         self.download_mp3_btn.config(state=tk.NORMAL)
         self.download_lrc_btn.config(state=tk.NORMAL)
         
-        self._set_buttons_state(True, include_extract=True)
+        self._set_buttons_state(True)
         self._update_status(f"✓ {info['title']} - {info['artist']} ({audio_format.upper()})")
     
     def _load_cover_image(self, url):
@@ -1618,14 +1612,9 @@ class MusicDownloaderGUI:
     
     # ==================== 辅助函数 ====================
     
-    def _set_buttons_state(self, enabled, include_extract=False, include_download=False):
+    def _set_buttons_state(self, enabled, include_download=False):
         state = tk.NORMAL if enabled else tk.DISABLED
-        if include_extract:
-            self.extract_btn.config(state=state)
-            self.search_btn.config(state=state)
-        else:
-            self.extract_btn.config(state=state)
-            self.search_btn.config(state=state)
+        self.search_btn.config(state=state)
         if include_download:
             self.download_mp3_btn.config(state=state)
             self.download_lrc_btn.config(state=state)

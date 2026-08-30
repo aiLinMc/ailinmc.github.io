@@ -1936,7 +1936,7 @@ async function exportResultImage() {
 
     const footer = document.createElement('div');
     footer.style.cssText = 'text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid ' + (isDark ? '#555' : '#eee') + ';color:' + subTextColor + ';font-size:0.85rem;';
-    footer.innerHTML = '牛逼的代数计算器 · www.yyxc.fun/maths.html';
+    footer.innerHTML = '牛逼的代数计算器 · www.ailinmc.top/maths.html';
 
     innerCard.appendChild(resultSection);
     innerCard.appendChild(footer);
@@ -3056,7 +3056,7 @@ function generateImageDataUrl() {
 
         const footer = document.createElement('div');
         footer.style.cssText = 'text-align:center;margin-top:20px;padding-top:15px;border-top:1px solid ' + (isDark ? '#555' : '#eee') + ';color:' + subTextColor + ';font-size:0.85rem;';
-        footer.innerHTML = '牛逼的代数计算器 · www.yyxc.fun/maths.html';
+        footer.innerHTML = '牛逼的代数计算器 · www.ailinmc.top/maths.html';
 
         innerCard.appendChild(resultSection);
         innerCard.appendChild(footer);
