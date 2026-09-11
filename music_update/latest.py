@@ -24,6 +24,7 @@ import ssl
 import subprocess
 import platform
 import time
+import ctypes
 from urllib.parse import quote
 from PIL import Image, ImageTk
 import io
@@ -475,6 +476,45 @@ class UpdateChecker:
         return False, None, None, None, None
     
     @staticmethod
+    def _download_file_with_stall_check(session, url, headers, target_path,
+                                        progress_start, progress_span, label,
+                                        progress_callback, cancel_callback,
+                                        stall_timeout=20):
+        """下载单个文件，仅当下载进度停滞不动时才判定超时。
+
+        这里的“进度”指下载进度百分比（如“下载最新程序 37%”中的37），
+        而不是更新总进度条（10-50/60-90）。只有下载百分比停留在一个整数上、
+        且超过stall_timeout秒没有变化时才判定卡死并超时；
+        下载进度在涨时绝不触发“下载失败、检查网络”的提示。
+        """
+        resp = session.get(url, headers=headers, stream=True, timeout=(10, 60))
+        resp.raise_for_status()
+        total_size = int(resp.headers.get('content-length', 0))
+        downloaded = 0
+        last_pct = None              # 上次的下载进度百分比（整数）
+        last_pct_time = time.time()  # 下载进度百分比最后变化的时间
+        with open(target_path, 'wb') as f:
+            for chunk in resp.iter_content(chunk_size=8192):
+                if cancel_callback and cancel_callback():
+                    print("下载已取消")
+                    return False
+                if chunk:
+                    f.write(chunk)
+                    downloaded += len(chunk)
+                    if total_size > 0:
+                        pct = int(downloaded / total_size * 100)
+                        if pct != last_pct:
+                            last_pct = pct
+                            last_pct_time = time.time()  # 下载进度在涨，刷新计时
+                        if progress_callback:
+                            progress = progress_start + int((downloaded / total_size) * progress_span)
+                            progress_callback(progress, f"{label} {pct}%")
+                        # 停滞检测：下载进度卡在某个整数百分比不动才判超时
+                        if time.time() - last_pct_time > stall_timeout:
+                            raise TimeoutError(f"下载停滞：下载进度停留在 {pct}% 长时间未变化")
+        return True
+    
+    @staticmethod
     def download_update_files(progress_callback=None, cancel_callback=None):
         temp_dir = tempfile.gettempdir()
         latest_exe_path = os.path.join(temp_dir, "latest.exe")
@@ -503,21 +543,10 @@ class UpdateChecker:
             if progress_callback:
                 progress_callback(10, "正在下载最新程序...")
             
-            resp1 = session.get(working_url + "latest.exe", headers=headers, stream=True, timeout=30)
-            resp1.raise_for_status()
-            total_size = int(resp1.headers.get('content-length', 0))
-            downloaded = 0
-            with open(latest_exe_path, 'wb') as f:
-                for chunk in resp1.iter_content(chunk_size=8192):
-                    if cancel_callback and cancel_callback():
-                        print("下载已取消")
-                        return None, None
-                    if chunk:
-                        f.write(chunk)
-                        downloaded += len(chunk)
-                        if total_size > 0 and progress_callback:
-                            progress = 10 + int((downloaded / total_size) * 40)
-                            progress_callback(progress, f"下载最新程序 {int(downloaded/total_size*100)}%")
+            if not UpdateChecker._download_file_with_stall_check(
+                    session, working_url + "latest.exe", headers, latest_exe_path,
+                    10, 40, "下载最新程序", progress_callback, cancel_callback):
+                return None, None
             
             if cancel_callback and cancel_callback():
                 print("下载已取消")
@@ -526,21 +555,10 @@ class UpdateChecker:
             if progress_callback:
                 progress_callback(60, "正在下载更新程序...")
             
-            resp2 = session.get(working_url + "update.exe", headers=headers, stream=True, timeout=30)
-            resp2.raise_for_status()
-            total_size2 = int(resp2.headers.get('content-length', 0))
-            downloaded2 = 0
-            with open(update_exe_path, 'wb') as f:
-                for chunk in resp2.iter_content(chunk_size=8192):
-                    if cancel_callback and cancel_callback():
-                        print("下载已取消")
-                        return None, None
-                    if chunk:
-                        f.write(chunk)
-                        downloaded2 += len(chunk)
-                        if total_size2 > 0 and progress_callback:
-                            progress = 60 + int((downloaded2 / total_size2) * 30)
-                            progress_callback(progress, f"下载更新程序 {int(downloaded2/total_size2*100)}%")
+            if not UpdateChecker._download_file_with_stall_check(
+                    session, working_url + "update.exe", headers, update_exe_path,
+                    60, 30, "下载更新程序", progress_callback, cancel_callback):
+                return None, None
             
             if progress_callback:
                 progress_callback(95, "下载完成，准备更新...")
@@ -729,6 +747,11 @@ class MusicDownloaderGUI:
         self._search_cache = {}  # 搜索结果缓存: {page_number: results_list}
         self.album_image = None
         self.album_photo = None
+        self.preview_playing = False       # 是否正在播放（不含暂停）
+        self._preview_paused = False       # 是否处于暂停状态
+        self._preview_downloading = False  # 试听音频是否正在下载
+        self._preview_cancel = False       # 试听下载取消标记
+        self._preview_path = None          # 试听临时文件路径（切歌时才删除）
         
         self.setup_styles()
         self.create_widgets()
@@ -845,7 +868,13 @@ class MusicDownloaderGUI:
         btn_frame = ttk.Frame(info_frame)
         btn_frame.pack(fill=tk.X, pady=(10, 0))
         
-        # 只保留两个按钮：直接下载 + 下载歌词
+        # 试听：播放/暂停 + 停止
+        self.preview_btn = ttk.Button(btn_frame, text="▶ 播放", command=self.toggle_preview, state=tk.DISABLED, width=12)
+        self.preview_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.stop_preview_btn = ttk.Button(btn_frame, text="⏹ 停止", command=self.stop_preview, state=tk.DISABLED, width=12)
+        self.stop_preview_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
         self.download_mp3_btn = ttk.Button(btn_frame, text="⬇️ 直接下载", command=self.download_audio, state=tk.DISABLED, width=12)
         self.download_mp3_btn.pack(side=tk.LEFT, padx=(0, 10))
         
@@ -1320,9 +1349,189 @@ class MusicDownloaderGUI:
         # 启用下载按钮
         self.download_mp3_btn.config(state=tk.NORMAL)
         self.download_lrc_btn.config(state=tk.NORMAL)
+        # 有音频链接才允许试听
+        self.preview_btn.config(text="▶ 播放", state=tk.NORMAL if info.get('audio_url') else tk.DISABLED)
+        self.stop_preview_btn.config(state=tk.DISABLED)
         
         self._set_buttons_state(True)
         self._update_status(f"✓ {info['title']} - {info['artist']} ({audio_format.upper()})")
+    
+    # ==================== 在线试听 ====================
+    
+    def toggle_preview(self):
+        """播放/暂停切换"""
+        if self._preview_downloading:
+            return
+        if self.preview_playing:
+            # 正在播放 → 暂停
+            if self._mci_pause():
+                self.preview_playing = False
+                self._preview_paused = True
+                self.preview_btn.config(text="▶ 播放")
+                self._update_status("已暂停")
+        elif self._preview_paused:
+            # 已暂停 → 继续播放
+            if self._mci_resume():
+                self.preview_playing = True
+                self._preview_paused = False
+                self.preview_btn.config(text="⏸ 暂停")
+                self._update_status("继续播放")
+        elif self._preview_path:
+            # 之前停止过，重新从头播放
+            self._start_play_file()
+        else:
+            # 无文件，开始下载试听
+            self._start_preview()
+    
+    def _start_preview(self):
+        if not self.current_song_info or not self.current_song_info.get('audio_url'):
+            messagebox.showwarning("提示", "未找到可试听的音频链接")
+            return
+        self._preview_downloading = True
+        self._preview_cancel = False
+        self.preview_btn.config(state=tk.DISABLED)
+        self.stop_preview_btn.config(state=tk.NORMAL)
+        self._update_status("正在下载试听音频...")
+        thread = threading.Thread(target=self._preview_download_thread)
+        thread.daemon = True
+        thread.start()
+    
+    def _preview_download_thread(self):
+        """下载试听音频到临时目录"""
+        try:
+            url = self.current_song_info['audio_url']
+            audio_format = self.current_song_info.get('audio_format', '.mp3') or '.mp3'
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            path = os.path.join(tempfile.gettempdir(), f"preview_{int(time.time() * 1000)}{audio_format}")
+            response = requests.get(url, headers=headers, stream=True, timeout=30)
+            response.raise_for_status()
+            with open(path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if self._preview_cancel:
+                        f.close()
+                        try:
+                            os.remove(path)
+                        except Exception:
+                            pass
+                        self.root.after(0, self._preview_cancelled)
+                        return
+                    if chunk:
+                        f.write(chunk)
+            self._preview_path = path
+            self.root.after(0, self._start_play_file)
+        except Exception as e:
+            self.root.after(0, lambda: self._preview_failed(str(e)))
+    
+    def _preview_cancelled(self):
+        self._preview_downloading = False
+        self._preview_cancel = False
+        self.preview_btn.config(text="▶ 播放", state=tk.NORMAL)
+        self.stop_preview_btn.config(state=tk.NORMAL if self._preview_path else tk.DISABLED)
+        self._update_status("试听已取消")
+    
+    def _start_play_file(self):
+        """从临时文件开始播放（下载完成或停止后重新播放）"""
+        self._preview_downloading = False
+        if self._mci_play(self._preview_path):
+            self.preview_playing = True
+            self._preview_paused = False
+            self.preview_btn.config(text="⏸ 暂停", state=tk.NORMAL)
+            self.stop_preview_btn.config(state=tk.NORMAL)
+            self._update_status("正在试听...")
+        else:
+            self._preview_failed("当前格式可能无法播放，请尝试直接下载")
+    
+    def _preview_failed(self, error):
+        self._preview_downloading = False
+        self.preview_btn.config(text="▶ 播放", state=tk.NORMAL)
+        self.stop_preview_btn.config(state=tk.NORMAL if self._preview_path else tk.DISABLED)
+        self._update_status(f"试听失败：{error}")
+        messagebox.showerror("试听失败", f"无法播放音频：{error}")
+        # 播放失败时清理本次下载的临时文件
+        if self._preview_path and os.path.exists(self._preview_path):
+            try:
+                os.remove(self._preview_path)
+            except Exception:
+                pass
+            self._preview_path = None
+    
+    def stop_preview(self):
+        """停止播放（保留临时文件，切歌时才删除）"""
+        if self._preview_downloading:
+            self._preview_cancel = True
+            self.stop_preview_btn.config(state=tk.DISABLED)
+            self._update_status("正在取消下载...")
+            return
+        self._mci_close()
+        self.preview_playing = False
+        self._preview_paused = False
+        self.preview_btn.config(text="▶ 播放", state=tk.NORMAL)
+        self.stop_preview_btn.config(state=tk.DISABLED)
+        self._update_status("试听已停止")
+    
+    def _mci_play(self, path):
+        """通过Windows MCI打开并从头播放音频，成功返回True"""
+        try:
+            self._mci_close()
+            alias = "mci_preview"
+            # 先自动识别格式打开，失败再尝试指定mpegvideo
+            if ctypes.windll.winmm.mciSendStringW(f'open "{path}" alias {alias}', None, 0, None) != 0:
+                if ctypes.windll.winmm.mciSendStringW(f'open "{path}" type mpegvideo alias {alias}', None, 0, None) != 0:
+                    return False
+            if ctypes.windll.winmm.mciSendStringW(f'play {alias}', None, 0, None) != 0:
+                ctypes.windll.winmm.mciSendStringW(f'close {alias}', None, 0, None)
+                return False
+            return True
+        except Exception as e:
+            print(f"MCI播放失败: {e}")
+            return False
+    
+    def _mci_pause(self):
+        """暂停播放，成功返回True"""
+        try:
+            return ctypes.windll.winmm.mciSendStringW('pause mci_preview', None, 0, None) == 0
+        except Exception:
+            return False
+    
+    def _mci_resume(self):
+        """继续播放，成功返回True"""
+        try:
+            alias = "mci_preview"
+            # 优先用resume命令，不支持时从上次位置重新播放
+            if ctypes.windll.winmm.mciSendStringW(f'resume {alias}', None, 0, None) == 0:
+                return True
+            buf = ctypes.create_unicode_buffer(128)
+            ctypes.windll.winmm.mciSendStringW(f'status {alias} position', buf, 128, None)
+            pos = buf.value.strip() or "0"
+            return ctypes.windll.winmm.mciSendStringW(f'play {alias} from {pos}', None, 0, None) == 0
+        except Exception:
+            return False
+    
+    def _mci_close(self):
+        """关闭MCI设备（释放文件占用）"""
+        try:
+            ctypes.windll.winmm.mciSendStringW('close mci_preview', None, 0, None)
+        except Exception:
+            pass
+    
+    def cleanup_preview(self):
+        """切歌/退出时释放设备并删除临时文件"""
+        self._mci_close()
+        self.preview_playing = False
+        self._preview_paused = False
+        self._preview_downloading = False
+        self._preview_cancel = False
+        if self._preview_path and os.path.exists(self._preview_path):
+            try:
+                os.remove(self._preview_path)
+            except Exception:
+                pass
+            self._preview_path = None
+    
+    def on_close(self):
+        """窗口关闭时清理试听资源"""
+        self.cleanup_preview()
+        self.root.destroy()
     
     def _load_cover_image(self, url):
         def load():
@@ -1636,6 +1845,10 @@ class MusicDownloaderGUI:
         self.lyrics_text.config(state=tk.DISABLED)
         self.download_mp3_btn.config(state=tk.DISABLED)
         self.download_lrc_btn.config(state=tk.DISABLED)
+        # 切歌时释放设备并删除试听临时文件
+        self.cleanup_preview()
+        self.preview_btn.config(text="▶ 播放", state=tk.DISABLED)
+        self.stop_preview_btn.config(state=tk.DISABLED)
         # 不再有 convert_to_mp3_btn 和 format_warning_label
         self.cover_label.config(text="暂无封面", image="")
         self.album_photo = None
@@ -1651,6 +1864,7 @@ class MusicDownloaderGUI:
 def main():
     root = tk.Tk()
     app = MusicDownloaderGUI(root)
+    root.protocol("WM_DELETE_WINDOW", app.on_close)
     root.mainloop()
 
 
