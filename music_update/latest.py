@@ -36,8 +36,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==================== 版本配置 ====================
-CURRENT_INTERNAL_VERSION = "8"  # 内部版本号（纯数字，用于比较）
-CURRENT_DISPLAY_VERSION = "v1.4.0"  # 显示版本号（展示给用户）
+CURRENT_INTERNAL_VERSION = "9"  # 内部版本号（纯数字，用于比较）
+CURRENT_DISPLAY_VERSION = "v1.5.0"  # 显示版本号（展示给用户）
 # 更新下载地址（按优先级排列，主域名在前，自动切换备用域名）
 UPDATE_DOWNLOAD_URLS = [
     "https://www.ailinmc.top/music_update/",   # 主域名
