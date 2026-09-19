@@ -3,69 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>907作业清单</title>
-    <link rel="stylesheet" href="css/homework/index.css">
+    <title>皑菱 aiLinMc · Minecraft Mod 开发者</title>
+    <meta name="description" content="皑菱（aiLinMc）的个人主页 —— Minecraft Mod 开发者，在 GitHub、Modrinth、MCMod、Bilibili、抖音、快手等平台发布模组与视频。">
+    <style>
+        :root {
+            --bg: #0b0f14;
+            --surface: #141c26;
+            --surface-hover: #1a2430;
+            --border: #223040;
+            --text: #e6edf3;
+            --muted: #8b98a5;
+            --accent: #3fb950;
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* 方块网格背景，呼应 Minecraft 世界 */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(63, 185, 80, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(63, 185, 80, 0.06) 1px, transparent 1px);
+            background-size: 44px 44px;
+            -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 75%);
+            mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 75%);
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -220px;
+            left: 50%;
+            width: 720px;
+            height: 520px;
+            transform: translateX(-50%);
+            z-index: -1;
+            background: radial-gradient(circle, rgba(63, 185, 80, 0.16), transparent 65%);
+            filter: blur(30px);
+            pointer-events: none;
+        }
+
+        .wrap {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 0 24px 64px;
+        }
+
+        /* ============ Hero ============ */
+        .hero {
+            padding: 88px 0 56px;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 104px;
+            height: 104px;
+            margin: 0 auto 24px;
+            object-fit: cover;
+            border-radius: 26px;
+            background: var(--surface);
+            box-shadow: 0 0 0 6px rgba(63, 185, 80, 0.1), 0 14px 34px rgba(47, 158, 68, 0.32);
+            user-select: none;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 6vw, 2.9rem);
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .hero h1 .alias {
+            display: inline-block;
+            margin-left: 10px;
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+            font-size: 0.5em;
+            font-weight: 500;
+            color: var(--accent);
+            vertical-align: middle;
+            letter-spacing: 0;
+        }
+
+        .role {
+            margin-top: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .role::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 9px;
+            background: var(--accent);
+            border-radius: 2px;
+            transform: translateY(-1px) rotate(45deg);
+        }
+
+        .bio {
+            max-width: 520px;
+            margin: 16px auto 0;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        /* ============ 平台链接 ============ */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 24px 0 22px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+
+        .links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(252px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            --brand: var(--accent);
+            --brand-soft: rgba(63, 185, 80, 0.13);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.22s ease, background-color 0.22s ease,
+                        border-color 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .card:hover,
+        .card:focus-visible {
+            transform: translateY(-4px);
+            background: var(--surface-hover);
+            border-color: var(--brand);
+            box-shadow: 0 12px 28px -12px var(--brand);
+            outline: none;
+        }
+
+        .badge {
+            flex: 0 0 46px;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            color: var(--brand);
+            background: var(--brand-soft);
+            border: 1px solid var(--brand-soft);
+            border-radius: 12px;
+        }
+
+        .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .info .name {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .info .desc {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .arrow {
+            flex: 0 0 auto;
+            color: var(--muted);
+            font-size: 1.05rem;
+            transition: transform 0.22s ease, color 0.22s ease;
+        }
+
+        .card:hover .arrow,
+        .card:focus-visible .arrow {
+            color: var(--brand);
+            transform: translate(3px, -3px);
+        }
+
+        /* 各平台品牌色 */
+        .p-github   { --brand: #c9d1d9; --brand-soft: rgba(201, 209, 217, 0.12); }
+        .p-modrinth { --brand: #1bd96a; --brand-soft: rgba(27, 217, 106, 0.13); }
+        .p-mcmod    { --brand: #6aa84f; --brand-soft: rgba(106, 168, 79, 0.15); }
+        .p-bilibili { --brand: #00a1d6; --brand-soft: rgba(0, 161, 214, 0.14); }
+        .p-douyin   { --brand: #fe2c55; --brand-soft: rgba(254, 44, 85, 0.14); }
+        .p-kuaishou { --brand: #ff5000; --brand-soft: rgba(255, 80, 0, 0.14); }
+
+        /* ============ 入场动画 ============ */
+        /* 使用 backwards 填充：动画结束后不再占用 transform，避免压住悬停上浮效果 */
+        .reveal {
+            animation: reveal 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+        }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(16px); }
+        }
+
+        /* ============ Footer ============ */
+        footer {
+            margin-top: 56px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        footer .mono {
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        }
+
+        @media (max-width: 480px) {
+            .hero { padding: 64px 0 44px; }
+            .avatar { width: 88px; height: 88px; border-radius: 22px; }
+            .links { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; animation: none; }
+            .card, .arrow { transition: none; }
+        }
+    </style>
 </head>
 <body>
-    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
-    <header>
-        <h1 onclick="goTo99Page()">907班作业清单</h1>
-        <div class="subtitle">最新作业内容展示</div>
-    </header>
-    
-    <div class="exam-countdown" id="examCountdown">
-        <div class="countdown-title">中考已结束</div>
-        <div class="countdown-time" id="countdownTime"></div>
-        <div class="countdown-hint">以最后一科历史7月2日16:30结束为准</div>
-    </div>
-    
-    <div class="container">
-        <div class="main-content">
-            <h2>最新作业内容（每周五23:30左右更新）</h2>
-            
-            <div class="homework-content" id="homework-content">
-                <!-- 格式化后的作业内容将在这里显示 -->
-            </div>
-            <div class="date-info" id="date-info">最后更新</div>
-        </div>
-        
-        <div class="sidebar">
-            <div class="download-section">
-                <h3>下载作业</h3>
-                <a href="latest/homework.pdf" class="btn btn-download download-pdf" data-filename="最新作业.pdf">下载PDF</a>
-                <a href="latest/homework.png" class="btn btn-download">查看图片</a>
-            </div>
-            
-            <div class="history-section">
-                <h3>查看历史</h3>
-                <a href="history.html" class="btn btn-history">查看作业历史</a>
-            </div>
-            
-            <div class="changes-section">
-                <h3>改动历史</h3>
-                <div class="changes-content" id="changes-content">
-                    <!-- 改动历史内容将通过JS动态生成 -->
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <footer>
-        <p>作业清单管理系统 &copy; 2025-2026</p>
-        <a href="feedback.html" style="color:#667eea; text-decoration:none; font-size:0.9rem;">反馈问题</a>
-    </footer>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
 
-    <div class="graduation-modal" id="graduationModal">
-        <div class="modal-content">
-            <div class="modal-icon">🎉</div>
-            <h2>恭喜毕业！</h2>
-            <p>中考已圆满结束，愿你前程似锦！</p>
-            <button class="modal-close" onclick="closeGraduationModal()">关闭</button>
-        </div>
+    <div class="wrap">
+        <header class="hero">
+            <img class="avatar reveal" src="assets/images/touxiang.webp" alt="皑菱 aiLinMc 的头像" width="104" height="104">
+            <h1 class="reveal">皑菱<span class="alias">aiLinMc</span></h1>
+            <p class="role reveal">Minecraft Mod 开发者</p>
+            <p class="bio reveal">用代码给方块世界加点新花样，琢磨有意思的模组玩法。</p>
+        </header>
+
+        <main>
+            <h2 class="section-title reveal">找到我</h2>
+
+            <div class="links">
+                <a class="card p-github reveal" href="https://github.com/aiLinMc" target="_blank" rel="noopener noreferrer">
+                    <span class="badge">GH</span>
+                    <span class="info">
+                        <span class="name">GitHub</span>
+                        <span class="desc">@aiLinMc · 开源项目</span>
+                    </span>
+                    <span class="arrow">↗</span>
+                </a>
+
+                <a class="card p-modrinth reveal" href="https://modrinth.com/user/aiLinMc" target="_blank" rel="noopener noreferrer">
+                    <span class="badge">MR</span>
+                    <span class="info">
+                        <span class="name">Modrinth</span>
+                        <span class="desc">@aiLinMc · 模组下载</span>
+                    </span>
+                    <span class="arrow">↗</span>
+                </a>
+
+                <a class="card p-mcmod reveal" href="https://center.mcmod.cn/911059/" target="_blank" rel="noopener noreferrer">
+                    <span class="badge">MC</span>
+                    <span class="info">
+                        <span class="name">MC 百科</span>
+                        <span class="desc">作者中心 · 模组词条</span>
+                    </span>
+                    <span class="arrow">↗</span>
+                </a>
+
+                <a class="card p-bilibili reveal" href="https://space.bilibili.com/3493284076849745" target="_blank" rel="noopener noreferrer">
+                    <span class="badge">B站</span>
+                    <span class="info">
+                        <span class="name">哔哩哔哩</span>
+                        <span class="desc">视频与模组展示</span>
+                    </span>
+                    <span class="arrow">↗</span>
+                </a>
+
+                <a class="card p-douyin reveal" href="https://www.douyin.com/user/MS4wLjABAAAAMTr_J_1hSK0sTBTLdWfFDxXbKIGCdWzvEicYNibn3rN1VhRHF_1WS0IqPCgC0eji" target="_blank" rel="noopener noreferrer">
+                    <span class="badge">抖音</span>
+                    <span class="info">
+                        <span class="name">抖音</span>
+                        <span class="desc">视频与模组展示</span>
+                    </span>
+                    <span class="arrow">↗</span>
+                </a>
+
+                <a class="card p-kuaishou reveal" href="https://www.kuaishou.com/profile/3xwsrz6yedc267s" target="_blank" rel="noopener noreferrer">
+                    <span class="badge">快手</span>
+                    <span class="info">
+                        <span class="name">快手</span>
+                        <span class="desc">视频与模组展示</span>
+                    </span>
+                    <span class="arrow">↗</span>
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p class="mono">&copy; <span id="year">2026</span> 皑菱 aiLinMc</p>
+        </footer>
     </div>
 
-    <script type="text/javascript" src="javascript/homework/index.js"></script>
-    <script type="text/javascript" src="javascript/homework/index_app.js"></script>
-	<script type="text/javascript" src="javascript/homework/index_pdf-download.js"></script>
+    <script>
+        (function () {
+            // 页脚年份自动更新
+            document.getElementById('year').textContent = new Date().getFullYear();
+
+            // 入场动画：逐个错开显示
+            document.querySelectorAll('.reveal').forEach(function (el, i) {
+                el.style.animationDelay = Math.min(i * 60, 600) + 'ms';
+            });
+        })();
+    </script>
 </body>
 </html>

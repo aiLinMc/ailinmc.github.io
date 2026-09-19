@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>土豆视频</title>
+    <meta name="robots" content="noindex">
+    <style>
+        :root {
+            --bg: #0c0d10;
+            --card: #16181d;
+            --border: #262a32;
+            --text: #f2f4f7;
+            --muted: #8e96a3;
+            --potato: #f0a63c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* 暗角背景，营造视频站氛围 */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(240, 166, 60, 0.14), transparent 70%),
+                        radial-gradient(ellipse 90% 70% at 50% 110%, rgba(0, 0, 0, 0.7), transparent 70%);
+        }
+
+        /* ============ 年龄确认卡片 ============ */
+        .card {
+            width: 100%;
+            max-width: 400px;
+            padding: 36px 28px 28px;
+            text-align: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+            animation: pop 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        }
+
+        @keyframes pop {
+            from { opacity: 0; transform: translateY(14px) scale(0.98); }
+        }
+
+        .logo {
+            display: block;
+            width: 112px;
+            height: 112px;
+            margin: 0 auto 20px;
+            object-fit: cover;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 12px 28px -14px rgba(240, 166, 60, 0.6);
+            user-select: none;
+        }
+
+        .card h1 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .card h1 .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-left: 6px;
+            background: var(--potato);
+            border-radius: 50%;
+            vertical-align: middle;
+            transform: translateY(-2px);
+        }
+
+        .tip {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .ask {
+            margin-top: 22px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn {
+            padding: 13px 16px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.2s ease,
+                        border-color 0.2s ease, opacity 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.985);
+        }
+
+        .btn-yes {
+            color: #1a1204;
+            background: var(--potato);
+        }
+
+        .btn-yes:hover {
+            background: #ffb955;
+        }
+
+        .btn-no {
+            color: var(--text);
+            background: transparent;
+            border-color: var(--border);
+        }
+
+        .btn-no:hover {
+            background: #1d2028;
+            border-color: #38404c;
+        }
+
+        .foot {
+            margin-top: 18px;
+            font-size: 0.76rem;
+            color: #5f6874;
+        }
+
+        /* ============ 标语屏幕 ============ */
+        .slogan-screen {
+            position: fixed;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            padding: 32px 24px;
+            text-align: center;
+            background: var(--bg);
+        }
+
+        .slogan-screen.show {
+            display: flex;
+        }
+
+        .slogan-mark {
+            padding: 7px 16px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            color: var(--potato);
+            background: rgba(240, 166, 60, 0.1);
+            border: 1px solid rgba(240, 166, 60, 0.28);
+            border-radius: 999px;
+            animation: rise 0.5s ease both;
+        }
+
+        .slogan-text {
+            max-width: 640px;
+            font-size: clamp(1.5rem, 6vw, 2.6rem);
+            font-weight: 800;
+            line-height: 1.45;
+            letter-spacing: 0.02em;
+            animation: rise 0.55s 0.08s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        }
+
+        .slogan-text::before,
+        .slogan-text::after {
+            content: "「";
+            color: var(--potato);
+        }
+
+        .slogan-text::after {
+            content: "」";
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(18px); }
+        }
+
+        .slogan-by {
+            position: absolute;
+            bottom: 26px;
+            left: 0;
+            right: 0;
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            color: #5f6874;
+            animation: rise 0.55s 0.18s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 30px 20px 24px; }
+            .logo { width: 92px; height: 92px; border-radius: 20px; }
+            .card h1 { font-size: 1.45rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card, .slogan-mark, .slogan-text, .slogan-by { animation: none; }
+            .btn { transition: none; }
+        }
+    </style>
+</head>
+<body>
+    <main class="card" id="ageCard">
+        <img class="logo" src="assets/images/potato.jpg" alt="土豆视频图标" width="112" height="112">
+        <h1>土豆视频<span class="dot"></span></h1>
+        <p class="tip">本站内容仅面向年满 18 周岁的用户<br>请先确认您的年龄后再继续访问</p>
+
+        <p class="ask">您是否已年满 18 周岁？</p>
+        <div class="actions">
+            <button class="btn btn-yes" type="button" data-answer="yes">是，我已满 18 周岁</button>
+            <button class="btn btn-no" type="button" data-answer="no">否，我未满 18 周岁</button>
+        </div>
+
+        <p class="foot">未成年人请在监护人陪同下离开本页面</p>
+    </main>
+
+    <section class="slogan-screen" id="sloganScreen" aria-live="polite">
+        <span class="slogan-mark">扫黄打非 · 清朗网络</span>
+        <p class="slogan-text" id="sloganText"></p>
+        <p class="slogan-by">By lzc</p>
+    </section>
+
+    <script>
+        // 50 条扫黄打非标语
+        var SLOGANS = [
+            "拒绝黄色，从我做起",
+            "扫黄打非，人人有责",
+            "抵制低俗，净化网络",
+            "文明上网，拒绝有色信息",
+            "远离色情内容，守护清朗网络",
+            "绿色上网，健康成长",
+            "拒绝低俗内容，共建文明网络",
+            "净化网络环境，从你我做起",
+            "不传黄、不看黄、不涉黄",
+            "抵制淫秽色情，弘扬网络正气",
+            "网络不是法外之地，传播色情必受追究",
+            "珍爱青春，远离色情",
+            "清朗网络空间，你我共同守护",
+            "拒绝色情诱惑，守住心中底线",
+            "让网络空间清朗起来",
+            "传播正能量，抵制低俗风",
+            "色情内容害人害己，坚决抵制不手软",
+            "健康上网，远离不良信息",
+            "拒绝低俗文字，崇尚文明表达",
+            "未成年人请远离成人内容",
+            "扫除文化垃圾，净化精神家园",
+            "打非治违，净化网络",
+            "色情信息是精神毒品，坚决说不",
+            "共建清朗网络，共享健康生活",
+            "拒绝黄赌毒，做守法好网民",
+            "让每一次点击都干干净净",
+            "抵制色情信息，守护家庭幸福",
+            "网络清朗，人人受益",
+            "文明上网，拒绝低俗",
+            "色情网站是陷阱，一不小心就中招",
+            "远离色情，拥抱阳光",
+            "净化网络环境，保护未成年人",
+            "拒绝色情链接，不给算法带偏",
+            "传播淫秽物品，法律绝不姑息",
+            "清朗网络，青春同行",
+            "拒绝低俗弹窗，还网络一片净土",
+            "健康的内容，才有健康的心情",
+            "色情内容伤身伤神，远离才是正道",
+            "从我做起，拒绝一切色情信息",
+            "抵制淫秽色情，共建精神文明",
+            "每一次拒绝，都是对清朗网络的守护",
+            "拒绝黄毒，让生活更美好",
+            "上网讲文明，发言守底线",
+            "不良信息一键举报，清朗网络共同维护",
+            "色情不是娱乐，是违法的开始",
+            "拒绝诱惑，守住底线",
+            "净化网络空间，从拒绝色情开始",
+            "清澈的网络，需要每个人的坚持",
+            "拒绝色情内容，为下一代留一片蓝天",
+            "扫黄打非不止步，清朗网络伴我行"
+        ];
+
+        (function () {
+            var card = document.getElementById('ageCard');
+            var screen = document.getElementById('sloganScreen');
+            var sloganText = document.getElementById('sloganText');
+
+            document.querySelectorAll('.btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    // 无论选择「是」还是「否」，都随机展示一条扫黄标语
+                    sloganText.textContent = SLOGANS[Math.floor(Math.random() * SLOGANS.length)];
+                    card.style.display = 'none';
+                    screen.classList.add('show');
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
