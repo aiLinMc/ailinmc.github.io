@@ -1,6 +1,6 @@
 const API_KEY = process.env.DEEPSEEK_API_KEY;
 const API_URL = 'https://api.deepseek.com/chat/completions';
-const MODEL_NAME = 'deepseek-v4-flash';  // 根据你的模型调整
+const MODEL_NAME = 'deepseek-v4-flash';  // 根据你的模型调整（自带思考模式）
 
 exports.handler = async (event, context) => {
     // 1. 只允许 POST 请求
@@ -21,23 +21,27 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // 3. 解析前端发来的数据
-        const { messages, temperature = 0.8, max_tokens = 4000 } = JSON.parse(event.body);
+        // 3. 解析前端发来的数据（messages 原样透传，因此支持多模态 content 数组）
+        const { messages, temperature = 0.8, max_tokens = 4000, thinking, reasoning_effort } = JSON.parse(event.body);
 
-        // 4. 转发请求给 DeepSeek
+        // 4. 组装请求：思考模式相关参数仅在传入时下发，不传则保持模型默认行为
+        const payload = {
+            model: MODEL_NAME,
+            messages: messages,
+            temperature: temperature,
+            max_tokens: max_tokens,
+            stream: false
+        };
+        if (thinking) payload.thinking = thinking;
+        if (reasoning_effort) payload.reasoning_effort = reasoning_effort;
+
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${API_KEY}`
             },
-            body: JSON.stringify({
-                model: MODEL_NAME,
-                messages: messages,
-                temperature: temperature,
-                max_tokens: max_tokens,
-                stream: false
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
