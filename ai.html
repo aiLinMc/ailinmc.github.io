@@ -1745,6 +1745,7 @@
         let content = '';
         let reasoning = '';
         let usage = null;
+        let finished = false;   // 是否收到结束标记（finish_reason 或 [DONE]）
 
         while (true) {
             const { done, value } = await reader.read();
@@ -1758,17 +1759,27 @@
                 const text = line.trim();
                 if (!text.startsWith('data:')) continue;
                 const data = text.slice(5).trim();
-                if (!data || data === '[DONE]') continue;
+                if (!data) continue;
+                if (data === '[DONE]') { finished = true; continue; }
 
                 let json;
                 try { json = JSON.parse(data); } catch (e) { continue; }
                 if (json.usage) usage = json.usage;   // 末块带 usage，先收下来
-                const delta = json.choices && json.choices[0] && json.choices[0].delta;
+                const choice = json.choices && json.choices[0];
+                if (choice && choice.finish_reason) finished = true;
+                const delta = choice && choice.delta;
                 if (!delta) continue;
                 if (delta.reasoning_content) reasoning += delta.reasoning_content;
                 if (delta.content) content += delta.content;
                 if (delta.reasoning_content || delta.content) onDelta({ content, reasoning });
             }
+        }
+        // 连接被中途掐断（例如超出平台单次请求时限）不会报错，只会提前结束；
+        // 这里显式识别，避免半截思考/回复被当成完整结果保存下来
+        if (!finished) {
+            const err = new Error('流式响应被中断，内容不完整（可能超出平台单次请求时限）');
+            err.truncated = true;
+            throw err;
         }
         return { content, reasoning, usage };
     }
@@ -2685,22 +2696,42 @@
             conv.updatedAt = Date.now();
             await persist(conv);
         } catch (streamErr) {
-            console.warn('流式输出失败，回退到非流式:', streamErr);
             if (frame !== null) { cancelAnimationFrame(frame); frame = null; }
-            try {
-                const reply = await callChat(buildApiMessages(conv), thinkingOptions(), 3);
-                conv.messages.push({
-                    id: uid(),
-                    role: 'assistant',
-                    content: reply.content || '',
-                    reasoning: reply.reasoning_content || '',
-                    usage: reply.usage || null,
-                    ts: Date.now()
-                });
-                conv.updatedAt = Date.now();
-                await persist(conv);
-            } catch (e) {
-                lastError = (e && e.message) ? e.message : '网络异常';
+            if (streamErr && streamErr.truncated) {
+                // 流被平台掐断时非流式请求同样会超时，回退没有意义；
+                // 保留已经收到的半截内容（不白等一场），同时在下方给出明确提示
+                console.warn('流式响应被中断:', streamErr);
+                if (content || reasoning) {
+                    conv.messages.push({
+                        id: uid(),
+                        role: 'assistant',
+                        content: content,
+                        reasoning: reasoning,
+                        reasonSec: thinkStart && thinkEnd ? thinkSeconds(thinkStart, thinkEnd) : 0,
+                        usage: null,
+                        ts: Date.now()
+                    });
+                    conv.updatedAt = Date.now();
+                    await persist(conv);
+                }
+                lastError = streamErr.message;
+            } else {
+                console.warn('流式输出失败，回退到非流式:', streamErr);
+                try {
+                    const reply = await callChat(buildApiMessages(conv), thinkingOptions(), 3);
+                    conv.messages.push({
+                        id: uid(),
+                        role: 'assistant',
+                        content: reply.content || '',
+                        reasoning: reply.reasoning_content || '',
+                        usage: reply.usage || null,
+                        ts: Date.now()
+                    });
+                    conv.updatedAt = Date.now();
+                    await persist(conv);
+                } catch (e) {
+                    lastError = (e && e.message) ? e.message : '网络异常';
+                }
             }
         } finally {
             bubble.remove();

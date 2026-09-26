@@ -1,8 +1,13 @@
-// 流式对话接口：把 DeepSeek 的 SSE 流原样透传给前端
-// 使用 Netlify Functions v2（返回 Response，支持流式响应）
-const API_KEY = process.env.DEEPSEEK_API_KEY;
+// 流式对话接口：把 DeepSeek 的 SSE 流原样透传给前端。
+//
+// 为什么必须放在 Edge Function 而不是 Serverless Function：
+// Serverless Function 的**流式响应有 60 秒硬执行上限，且 Netlify 不允许调整**，
+// 于是「高思考等级 + 难题」这类动辄一两分钟的思考会被拦腰掐断。
+// Edge Function 只限制 50ms CPU 时间，等待上游响应的时间不计入，
+// 因此可以长时间保持连接、持续把 SSE 分片推给浏览器。
+
 const API_URL = 'https://api.deepseek.com/chat/completions';
-const MODEL_NAME = 'deepseek-v4-flash';  // 根据你的模型调整（自带思考模式）
+const MODEL_NAME = 'deepseek-v4-flash';  // 自带思考模式
 
 const json = (status, data) =>
     new Response(JSON.stringify(data), {
@@ -17,7 +22,8 @@ export default async (request) => {
     }
 
     // 2. 检查密钥是否存在
-    if (!API_KEY) {
+    const apiKey = Netlify.env.get('DEEPSEEK_API_KEY');
+    if (!apiKey) {
         console.error('环境变量 DEEPSEEK_API_KEY 未设置');
         return json(500, { error: '服务器配置错误' });
     }
@@ -47,13 +53,13 @@ export default async (request) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
+                'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify(payload)
         });
     } catch (error) {
         console.error('请求 DeepSeek 失败:', error);
-        return json(502, { error: error.message });
+        return json(502, { error: String((error && error.message) || error) });
     }
 
     if (!upstream.ok) {
@@ -68,8 +74,10 @@ export default async (request) => {
         headers: {
             'Content-Type': 'text/event-stream; charset=utf-8',
             'Cache-Control': 'no-cache, no-transform',
-            'Connection': 'keep-alive',
             'X-Accel-Buffering': 'no'
         }
     });
 };
+
+// 只有声明了 path，Edge Function 才会被路由到；否则永远不会执行
+export const config = { path: '/api/chat-stream' };

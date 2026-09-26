@@ -1,7 +1,12 @@
 [build]
   functions = "netlify/functions"
 
+# 非流式对话走 Serverless Function
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
   status = 200
+
+# 流式对话 /api/chat-stream 由 netlify/edge-functions/chat-stream.ts 处理：
+# Serverless Function 的流式响应有 60 秒硬上限，长思考会被掐断，必须走 Edge Function。
+# 所以这里不再使用 /api/* 通配规则，避免把流式请求重写回 Serverless Function。
