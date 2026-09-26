@@ -326,9 +326,9 @@
     }
     .msg.user .msg-actions { justify-content: flex-end; }
     .msg-usage {
+        flex: 0 0 100%;   /* 独占一行，按钮被挤到下一行 */
         font-size: 12px;
         color: var(--muted);
-        margin-right: 2px;
     }
     .msg-btn {
         border: 1px solid var(--border);
@@ -658,7 +658,33 @@
         background: var(--bg);
     }
 
-    .composer-inner { max-width: 840px; margin: 0 auto; }
+    .composer-inner { position: relative; max-width: 840px; margin: 0 auto; }
+
+    /* 滑到最下：用户往上翻、不再跟随最新内容时才出现，浮在输入区正上方 */
+    .scroll-btn {
+        position: absolute;
+        right: 0;
+        bottom: calc(100% + 12px);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 13px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        font-size: 12.5px;
+        box-shadow: var(--shadow);
+        cursor: pointer;
+        z-index: 5;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(6px);
+        transition: opacity .18s ease, transform .18s ease, visibility .18s;
+    }
+    .scroll-btn.show { opacity: 1; visibility: visible; transform: none; }
+    .scroll-btn:hover { background: var(--surface-2); }
 
     .img-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
     .thumb {
@@ -1086,6 +1112,7 @@
 
         <div class="composer">
             <div class="composer-inner">
+                <button class="scroll-btn" id="scrollBtn" type="button" title="滑到最新内容">↓ 滑到最下</button>
                 <div class="img-previews" id="imgPreviews"></div>
                 <div class="input-box">
                     <textarea id="input" rows="1" placeholder="输入消息…"></textarea>
@@ -1203,6 +1230,9 @@
     ];
     const DEFAULT_EFFORT_INDEX = 3;   // 接口默认 effort = high
 
+    // 输出长度上限：接口允许的范围是 [1, 393216]，取最大值相当于不限制输出长度
+    const MAX_TOKENS = 393216;
+
     // 调试模式默认值（可在面板中修改）
     const DEBUG_DEFAULTS = {
         endpoint: 'https://api.deepseek.com/chat/completions',
@@ -1255,6 +1285,7 @@
         mobileTheme: document.getElementById('mobileTheme'),
         lightbox: document.getElementById('lightbox'),
         lightboxImg: document.getElementById('lightboxImg'),
+        scrollBtn: document.getElementById('scrollBtn'),
         toast: document.getElementById('toast'),
         dlgMask: document.getElementById('dlgMask'),
         dlgCard: document.getElementById('dlgCard'),
@@ -1647,7 +1678,7 @@
 
     // 按当前设置组装请求（含调试模式直连）
     function buildRequest(thinkingOpts, stream) {
-        const payload = { temperature: 0.8, max_tokens: 4000 };
+        const payload = { temperature: 0.8, max_tokens: MAX_TOKENS };
         Object.assign(payload, thinkingOpts);
 
         const headers = { 'Content-Type': 'application/json' };
@@ -1822,6 +1853,8 @@
 
     // 消息多的对话渲染一次要花上百毫秒，先画出「加载中」，下一帧再渲染，避免点了没反应
     function renderMessagesWithLoading() {
+        stickToBottom = true;   // 打开/切换对话时重新跟随最新内容
+        updateScrollBtn();
         const conv = currentConv();
         if (!conv || conv.messages.length < 12) {   // 消息少就直接渲染，省得闪一下
             renderMessages();
@@ -2235,9 +2268,26 @@
         return wrap;
     }
 
+    // 自动滚动只在用户本来就在底部时发生；用户自己往上翻后就不再跟随，直到他重新滚回底部
+    let stickToBottom = true;
+
+    function atBottom() {
+        const m = el.messages;
+        return m.scrollHeight - m.scrollTop - m.clientHeight <= 24;   // 留 24px 容差，避免小数像素误判
+    }
+
+    function updateScrollBtn() {
+        // 内容不足一屏时没有可滚动空间，不显示按钮
+        const m = el.messages;
+        el.scrollBtn.classList.toggle('show', !stickToBottom && m.scrollHeight - m.clientHeight > 24);
+    }
+
     // 自动滚动一律瞬时定位（容器未开启平滑滚动），保证流式刷新时始终贴在底部
-    function scrollToBottom() {
-        el.messages.scrollTop = el.messages.scrollHeight;
+    // force = true 用于用户主动发消息 / 点「滑到最下」这类明确要求回到最新位置的情况
+    function scrollToBottom(force) {
+        if (force) stickToBottom = true;
+        if (stickToBottom) el.messages.scrollTop = el.messages.scrollHeight;
+        updateScrollBtn();
     }
 
     function openLightbox(src) {
@@ -2325,6 +2375,8 @@
         lastError = null;
         editingId = null;
         pendingImages = [];
+        stickToBottom = true;   // 新对话从头开始跟随
+        updateScrollBtn();
         syncChatUrl();
         renderPreviews();
         el.input.value = '';
@@ -2575,6 +2627,9 @@
     async function requestReply(conv) {
         if (sending) return;
         lastError = null;
+        // 主动发消息/重新生成：恢复跟随，下面的重绘会把视图拉到底部
+        stickToBottom = true;
+        updateScrollBtn();
         // 先按“未发送”状态重绘历史，避免同时出现加载小圆点与流式气泡
         renderMessages();
         sending = true;
@@ -3035,6 +3090,13 @@
                 handleFiles(e.dataTransfer.files);
             }
         });
+
+        // ---- 自动滚动的跟随判定 + 滑到最下 ----
+        el.messages.addEventListener('scroll', () => {
+            stickToBottom = atBottom();
+            updateScrollBtn();
+        });
+        el.scrollBtn.addEventListener('click', () => scrollToBottom(true));
 
         // ---- 通用对话框 ----
         el.dlgCancel.addEventListener('click', () => closeDialog(false));
