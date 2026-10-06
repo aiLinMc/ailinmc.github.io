@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>newfu · 停服纪念</title>
+    <meta name="description" content="newfu Minecraft 服务器停服纪念站 —— 纪念我们的方块世界，2026.10.6 正式关停。精选截图下载，感谢每一位冒险家。">
+    <style>
+        :root {
+            --bg: #0b0f14;
+            --surface: #141c26;
+            --surface-hover: #1a2430;
+            --border: #223040;
+            --text: #e6edf3;
+            --muted: #8b98a5;
+            --accent: #3fb950;
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* 方块网格背景，呼应 Minecraft 世界 */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(63, 185, 80, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(63, 185, 80, 0.06) 1px, transparent 1px);
+            background-size: 44px 44px;
+            -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 75%);
+            mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 20%, transparent 75%);
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -220px;
+            left: 50%;
+            width: 720px;
+            height: 520px;
+            transform: translateX(-50%);
+            z-index: -1;
+            background: radial-gradient(circle, rgba(63, 185, 80, 0.16), transparent 65%);
+            filter: blur(30px);
+            pointer-events: none;
+        }
+
+        .wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 24px 64px;
+        }
+
+        /* ============ Hero ============ */
+        .hero {
+            padding: 88px 0 40px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 7vw, 3.4rem);
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .hero h1 .server {
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        }
+
+        .hero h1 .alias {
+            display: inline-block;
+            margin-left: 12px;
+            font-size: 0.5em;
+            font-weight: 600;
+            color: var(--accent);
+            vertical-align: middle;
+            letter-spacing: 0.06em;
+        }
+
+        .hero .date {
+            margin-top: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .hero .date::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 9px;
+            background: var(--accent);
+            border-radius: 2px;
+            transform: translateY(-1px) rotate(45deg);
+        }
+
+        .hero .bio {
+            max-width: 520px;
+            margin: 14px auto 0;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        /* ============ 分区标题 ============ */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 48px 0 22px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            color: var(--muted);
+        }
+
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border), transparent);
+        }
+
+        /* ============ 文章卡片（纪念文 / 公告） ============ */
+        .paper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 30px 32px;
+        }
+
+        .paper .paper-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 18px;
+            color: var(--accent);
+        }
+
+        .paper .text {
+            white-space: pre-wrap;
+            line-height: 2;
+            font-size: 0.97rem;
+            color: var(--text);
+        }
+
+        /* ============ 数据回顾 ============ */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+            gap: 14px;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+            text-align: center;
+            transition: transform 0.22s ease, border-color 0.22s ease;
+        }
+
+        .stat:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+
+        .stat b {
+            display: block;
+            font-size: clamp(1.6rem, 4vw, 2.1rem);
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1.2;
+        }
+
+        .stat span {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        /* ============ 截图画廊 ============ */
+        .gallery-desc {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #0b0f14;
+            font-weight: 700;
+            font-size: 0.88rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: filter 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn:hover {
+            filter: brightness(1.12);
+            transform: translateY(-1px);
+        }
+
+        .gallery-cat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 34px 0 14px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .gallery-cat::before {
+            content: "";
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 3px;
+            transform: rotate(45deg);
+        }
+
+        .gallery-cat .count {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        .shots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .shot {
+            margin: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: zoom-in;
+            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .shot:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 12px 28px -12px rgba(63, 185, 80, 0.35);
+        }
+
+        .shot img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+        }
+
+        .shot figcaption {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 10px;
+        }
+
+        .shot-name {
+            font-size: 0.82rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .shot-dl {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            color: var(--accent);
+            background: rgba(63, 185, 80, 0.12);
+            border: 1px solid rgba(63, 185, 80, 0.28);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .shot-dl:hover {
+            background: var(--accent);
+            color: #0b0f14;
+        }
+
+        /* ============ 下载区 ============ */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(252px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            --brand: var(--accent);
+            --brand-soft: rgba(63, 185, 80, 0.13);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.22s ease, background-color 0.22s ease,
+                        border-color 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .card:hover,
+        .card:focus-visible {
+            transform: translateY(-4px);
+            background: var(--surface-hover);
+            border-color: var(--brand);
+            box-shadow: 0 12px 28px -12px var(--brand);
+            outline: none;
+        }
+
+        .badge {
+            flex: 0 0 46px;
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            color: var(--brand);
+            background: var(--brand-soft);
+            border: 1px solid var(--brand-soft);
+            border-radius: 12px;
+        }
+
+        .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .info .name {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .info .desc {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .arrow {
+            flex: 0 0 auto;
+            color: var(--muted);
+            font-size: 1.05rem;
+            transition: transform 0.22s ease, color 0.22s ease;
+        }
+
+        .card:hover .arrow,
+        .card:focus-visible .arrow {
+            color: var(--brand);
+            transform: translate(3px, 3px);
+        }
+
+        /* ============ 玩家荣誉榜 ============ */
+        .players {
+            overflow-x: auto;
+        }
+
+        .ptable {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .ptable th,
+        .ptable td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .ptable thead th {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            background: rgba(63, 185, 80, 0.07);
+        }
+
+        .ptable tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .ptable tbody tr:hover {
+            background: var(--surface-hover);
+        }
+
+        .ptable td {
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+            font-size: 0.92rem;
+        }
+
+        .ptable td:first-child {
+            font-family: inherit;
+            font-weight: 700;
+        }
+
+        .ptable .num {
+            text-align: right;
+        }
+
+        .tag {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 1px 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            border: 1px solid rgba(63, 185, 80, 0.4);
+            border-radius: 999px;
+            vertical-align: 2px;
+        }
+
+        .sub-title {
+            margin: 30px 0 14px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sub-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ============ 灯箱 ============ */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            background: rgba(0, 0, 0, 0.88);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 24px;
+        }
+
+        .lightbox.show {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 100%;
+            max-height: 82vh;
+            border-radius: 10px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        .lb-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 100%;
+        }
+
+        .lb-name {
+            font-size: 0.85rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 46vw;
+        }
+
+        .lb-close {
+            padding: 8px 14px;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        /* ============ 入场动画 ============ */
+        .reveal {
+            animation: reveal 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+        }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(16px); }
+        }
+
+        /* ============ Footer ============ */
+        footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        footer .mono {
+            font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        }
+
+        footer .memory {
+            margin-top: 4px;
+        }
+
+        @media (max-width: 480px) {
+            .hero { padding: 64px 0 32px; }
+            .paper { padding: 22px 18px; }
+            .lightbox { padding: 14px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; animation: none; }
+            .stat, .shot, .card, .btn { transition: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="wrap">
+        <header class="hero">
+            <h1 class="reveal"><span class="server">newfu</span><span class="alias">停服纪念</span></h1>
+            <p class="date reveal">2026.10.6 22:00 正式关停</p>
+            <p class="bio reveal">感谢你陪伴的每一个方块，与每一段冒险。</p>
+        </header>
+
+        <main>
+            <!-- 纪念文 -->
+            <section id="memorial">
+                <h2 class="section-title reveal">纪念文</h2>
+                <div class="paper reveal">
+                    <div class="text">亲爱的冒险家们：
+
+　　服务器关停的那天夜里，窗外的灯光和往常一样亮着。我坐在电脑前，看着 newfu 的最后一行日志滚动完毕，忽然意识到，这个陪伴了我们一年多的方块世界，真的要说再见了。
+
+　　还记得它最开始的模样吗？两间小房子，一块农田，一个刚铺好的矿洞。后来，家越来越多，聚居地拔地而起，工厂冒起了烟，地铁穿行于地下，楼阁与浮岛悬在云间。我们经历过两次服务器端的大迁移，也扛过了无数次猝不及防的崩溃——可每一次重开，都有人准时上线，继续修完那面没砌完的墙。
+
+　　我们一起战胜过数十个 Boss，踏遍数千种结构，在许多个维度里留下足迹。聚居地的合影、永恒星光的探索、暮色森林里的惊险一瞬……这些画面早已不只是像素，而是我们共同写下的故事。
+
+　　服务器可以关停，存档可以被封存，但这段旅程不会。谢谢你，每一位冒险家，谢谢你们让 newfu 成为最好的 newfu。
+
+　　愿我们在某个方块组成的世界里，再次相遇。
+
+服主 皑菱(lzc)
+2026年10月</div>
+                </div>
+            </section>
+
+            <!-- 停服公告 -->
+            <section id="announcement">
+                <h2 class="section-title reveal">停服公告</h2>
+                <div class="paper reveal">
+                    <div class="text">停服（2026.10.5）公告
+
+亲爱的冒险家们：
+　　　感谢你们长久以来的支持！
+　　 时间真快啊，这个服务器转眼已经一岁多了，期间经历了两次服务器端大迁移，以及n次崩溃，但这阻挡不了我们冒险的征程。我们探险了许多维度，战胜了数十个boss，探索了数千种结构，这见证了服务器的辉煌！
+　　 服务器的开设需要花费大量精力和成本，并且我们的冒险征程渐入尾声，因此服务器将于2026年10月5日下午17:00关停。关停前将举办一次停服仪式，后续将会把冒险存档发给你们。
+　　 感谢你们的支持！
+
+服主 皑菱(lzc)
+2026年8月15日</div>
+                </div>
+            </section>
+
+            <!-- 数据回顾 -->
+            <section id="stats">
+                <h2 class="section-title reveal">数据回顾</h2>
+                <div class="stats">
+                    <div class="stat reveal"><b>6</b><span>位冒险家</span></div>
+                    <div class="stat reveal"><b>546h</b><span>累计在线时长</span></div>
+                    <div class="stat reveal"><b>26.3万</b><span>次怪物击杀</span></div>
+                    <div class="stat reveal"><b>8.8万</b><span>方块被挖掘</span></div>
+                    <div class="stat reveal"><b>812km</b><span>共同足迹</span></div>
+                    <div class="stat reveal"><b>1,078</b><span>项成就达成</span></div>
+                </div>
+            </section>
+
+            <!-- 玩家荣誉榜 -->
+            <section id="players">
+                <h2 class="section-title reveal">玩家荣誉榜</h2>
+                <p class="gallery-desc reveal">按累计在线时长排序 · 测试账号未列入。</p>
+                <div class="players reveal">
+                    <table class="ptable">
+                        <thead>
+                            <tr>
+                                <th>玩家</th>
+                                <th class="num">在线</th>
+                                <th class="num">怪物击杀</th>
+                                <th class="num">挖掘方块</th>
+                                <th class="num">足迹</th>
+                                <th class="num">成就</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>aiLinMc<span class="tag">服主</span></td><td class="num">264h</td><td class="num">178,724</td><td class="num">36,296</td><td class="num">345km</td><td class="num">3,207</td></tr>
+                            <tr><td>Real</td><td class="num">117h</td><td class="num">14,578</td><td class="num">9,592</td><td class="num">263km</td><td class="num">2,221</td></tr>
+                            <tr><td>zhouzihui</td><td class="num">80h</td><td class="num">11,079</td><td class="num">10,807</td><td class="num">123km</td><td class="num">1,839</td></tr>
+                            <tr><td>hello</td><td class="num">77h</td><td class="num">57,982</td><td class="num">28,318</td><td class="num">61km</td><td class="num">2,080</td></tr>
+                            <tr><td>xmlxml4304</td><td class="num">7h</td><td class="num">314</td><td class="num">3,170</td><td class="num">19km</td><td class="num">821</td></tr>
+                            <tr><td>Sanuel</td><td class="num">1h</td><td class="num">11</td><td class="num">45</td><td class="num">2km</td><td class="num">138</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 截图画廊 -->
+            <section id="gallery">
+                <h2 class="section-title reveal">截图画廊</h2>
+                <p class="gallery-desc reveal">点击缩略图查看原图，可单张下载留念。</p>
+                <div id="galleryRoot"></div>
+            </section>
+
+            <!-- 下载区 -->
+            <section id="downloads">
+                <h2 class="section-title reveal">下载</h2>
+                <div class="cards">
+                    <a class="card reveal" href="newfu/NewfuMetro.zip" download>
+                        <span class="badge">MC</span>
+                        <span class="info">
+                            <span class="name">NewfuMetro 地铁画材质包</span>
+                            <span class="desc">newfu/NewfuMetro.zip · 约 222KB · 服务器纪念品</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                </div>
+
+                <h3 class="sub-title reveal">设计蓝图 · Litematica 格式</h3>
+                <p class="gallery-desc reveal">冒险家们留下的设计，可用机械动力加载。</p>
+                <div class="cards">
+                    <a class="card reveal" href="assets/downloads/mc_schematics/Little_Train.nbt" download>
+                        <span class="badge">蓝图</span>
+                        <span class="info">
+                            <span class="name">Little Train</span>
+                            <span class="desc">aiLinMc · 5×6×21 · Create 小火车</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                    <a class="card reveal" href="assets/downloads/mc_schematics/Little_Train_II.nbt" download>
+                        <span class="badge">蓝图</span>
+                        <span class="info">
+                            <span class="name">Little Train II</span>
+                            <span class="desc">aiLinMc · 3×6×21 · Create 小火车</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                    <a class="card reveal" href="assets/downloads/mc_schematics/Long_Train.nbt" download>
+                        <span class="badge">蓝图</span>
+                        <span class="info">
+                            <span class="name">Long Train</span>
+                            <span class="desc">aiLinMc · 25×6×5 · 石英长款火车</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                    <a class="card reveal" href="assets/downloads/mc_schematics/Windmill.nbt" download>
+                        <span class="badge">蓝图</span>
+                        <span class="info">
+                            <span class="name">Windmill</span>
+                            <span class="desc">zhouzihui · 7×23×7 · 风车</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                    <a class="card reveal" href="assets/downloads/mc_schematics/114514.nbt" download>
+                        <span class="badge">蓝图</span>
+                        <span class="info">
+                            <span class="name">114514</span>
+                            <span class="desc">zhouzihui · 19×4×5 · 金块玻璃活塞机</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                    <a class="card reveal" href="assets/downloads/mc_schematics/5x5x5刷铁机-透明探索版-涵涵子.nbt" download>
+                        <span class="badge">蓝图</span>
+                        <span class="info">
+                            <span class="name">5×5×5 刷铁机</span>
+                            <span class="desc">zhouzihui · 5×5×5 · Create 刷铁机</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                    <a class="card reveal" href="assets/downloads/mc_schematics/Water_Wheel.nbt" download>
+                        <span class="badge">蓝图</span>
+                        <span class="info">
+                            <span class="name">Water Wheel</span>
+                            <span class="desc">zhouzihui · 3×3×17 · 水车</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                    <a class="card reveal" href="assets/downloads/mc_schematics/单区块甘蔗机葱球出品.nbt" download>
+                        <span class="badge">蓝图</span>
+                        <span class="info">
+                            <span class="name">单区块甘蔗机</span>
+                            <span class="desc">zhouzihui · 16×5×18 · 机械收割甘蔗</span>
+                        </span>
+                        <span class="arrow">⬇</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p class="mono">&copy; <span id="year">2025-2026</span> 皑菱 aiLinMc</p>
+            <p class="memory">newfu · 永存心中</p>
+        </footer>
+    </div>
+
+    <!-- 灯箱 -->
+    <div class="lightbox" id="lightbox">
+        <img id="lbImg" alt="原图预览">
+        <div class="lb-bar">
+            <span class="lb-name" id="lbName"></span>
+            <a class="btn" id="lbDl" href="#" download>下载原图</a>
+            <button class="btn lb-close" id="lbClose" type="button">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // 页脚年份
+            document.getElementById('year').textContent = '2025-' + new Date().getFullYear();
+
+            // 静态元素入场动画：逐个错开
+            document.querySelectorAll('.reveal').forEach(function (el, i) {
+                el.style.animationDelay = Math.min(i * 60, 600) + 'ms';
+            });
+
+            /* ============ 截图画廊数据 ============ */
+            var THUMB_DIR = 'assets/images/mc_screenshots_thumbs/';
+            var FULL_DIR = 'assets/images/mc_screenshots/';
+
+            var GALLERY = [
+                {
+                    title: '玩家之家',
+                    files: ['lzc的家_1', 'lzc的家_2', 'lzc的家_3', 'lyc的家_1', 'lyc的家_2',
+                            'lyc的家_3', 'lyc的家_4', 'lyc的家_5', 'tzx的家_1', 'tzx的家_2',
+                            'tzx的家_3', 'xml的家', 'zzh的家_1', 'zzh的家_2']
+                },
+                {
+                    title: '聚居地',
+                    files: ['聚居地_新', '聚居地_新.远景', '聚居地_旧']
+                },
+                {
+                    title: '工业',
+                    files: ['工业_1', '工业_2', '工业_3', '工业_4', '工业_5', '旧熔炉']
+                },
+                {
+                    title: '交通',
+                    files: ['交通_1', '交通_2']
+                },
+                {
+                    title: '建筑与风景',
+                    files: ['楼阁', '永恒星光_1', '永恒星光_2', '永恒星光_3', '永恒星光_4',
+                            '暮色森林', '浮岛']
+                },
+                {
+                    title: '活动合影',
+                    files: ['合照_1', '合照_2', '合照_2.1', '双人_1', '双人_2',
+                            '中秋', '生物捕捉', '农夫乐事']
+                }
+            ];
+
+            var lightbox = document.getElementById('lightbox');
+            var lbImg = document.getElementById('lbImg');
+            var lbName = document.getElementById('lbName');
+            var lbDl = document.getElementById('lbDl');
+
+            function openLightbox(name) {
+                lbName.textContent = name;
+                lbDl.href = FULL_DIR + name + '.png';
+                lbDl.setAttribute('download', name + '.png');
+                lbImg.src = FULL_DIR + name + '.png';
+                lightbox.classList.add('show');
+            }
+
+            function closeLightbox() {
+                lightbox.classList.remove('show');
+                lbImg.removeAttribute('src');
+            }
+
+            lightbox.addEventListener('click', function (e) {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.getElementById('lbClose').addEventListener('click', closeLightbox);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeLightbox();
+            });
+
+            // 渲染画廊
+            var root = document.getElementById('galleryRoot');
+            var delay = 0;
+            GALLERY.forEach(function (g) {
+                var h3 = document.createElement('h3');
+                h3.className = 'gallery-cat reveal';
+                h3.innerHTML = g.title + ' <span class="count">' + g.files.length + ' 张</span>';
+
+                var grid = document.createElement('div');
+                grid.className = 'shots';
+
+                g.files.forEach(function (name) {
+                    var fig = document.createElement('figure');
+                    fig.className = 'shot reveal';
+                    fig.style.animationDelay = Math.min(delay * 35, 420) + 'ms';
+                    delay += 1;
+
+                    var img = document.createElement('img');
+                    img.loading = 'lazy';
+                    img.src = THUMB_DIR + name + '.jpg';
+                    img.alt = name;
+
+                    var cap = document.createElement('figcaption');
+                    var nm = document.createElement('span');
+                    nm.className = 'shot-name';
+                    nm.textContent = name;
+
+                    var dl = document.createElement('a');
+                    dl.className = 'shot-dl';
+                    dl.href = FULL_DIR + name + '.png';
+                    dl.setAttribute('download', name + '.png');
+                    dl.title = '下载原图';
+                    dl.textContent = '⬇';
+                    dl.addEventListener('click', function (e) { e.stopPropagation(); });
+
+                    cap.appendChild(nm);
+                    cap.appendChild(dl);
+                    fig.appendChild(img);
+                    fig.appendChild(cap);
+                    fig.addEventListener('click', function () { openLightbox(name); });
+
+                    grid.appendChild(fig);
+                });
+
+                root.appendChild(h3);
+                root.appendChild(grid);
+            });
+        })();
+    </script>
+</body>
+</html>
