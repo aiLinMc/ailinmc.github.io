@@ -295,27 +295,6 @@
             text-overflow: ellipsis;
         }
 
-        .shot-dl {
-            flex: 0 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            color: var(--accent);
-            background: rgba(63, 185, 80, 0.12);
-            border: 1px solid rgba(63, 185, 80, 0.28);
-            text-decoration: none;
-            font-size: 0.95rem;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .shot-dl:hover {
-            background: var(--accent);
-            color: #0b0f14;
-        }
-
         /* ============ 下载区 ============ */
         .cards {
             display: grid;
@@ -519,6 +498,12 @@
             max-width: 46vw;
         }
 
+        .lb-hint {
+            font-size: 0.8rem;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
         .lb-close {
             padding: 8px 14px;
             background: transparent;
@@ -582,19 +567,14 @@
                 <h2 class="section-title reveal">纪念文</h2>
                 <div class="paper reveal">
                     <div class="text">亲爱的冒险家们：
-
 　　服务器关停的那天夜里，窗外的灯光和往常一样亮着。我坐在电脑前，看着 newfu 的最后一行日志滚动完毕，忽然意识到，这个陪伴了我们一年多的方块世界，真的要说再见了。
-
 　　还记得它最开始的模样吗？两间小房子，一块农田，一个刚铺好的矿洞。后来，家越来越多，聚居地拔地而起，工厂冒起了烟，地铁穿行于地下，楼阁与浮岛悬在云间。我们经历过两次服务器端的大迁移，也扛过了无数次猝不及防的崩溃——可每一次重开，都有人准时上线，继续修完那面没砌完的墙。
-
 　　我们一起战胜过数十个 Boss，踏遍数千种结构，在许多个维度里留下足迹。聚居地的合影、永恒星光的探索、暮色森林里的惊险一瞬……这些画面早已不只是像素，而是我们共同写下的故事。
-
 　　服务器可以关停，存档可以被封存，但这段旅程不会。谢谢你，每一位冒险家，谢谢你们让 newfu 成为最好的 newfu。
-
 　　愿我们在某个方块组成的世界里，再次相遇。
 
 服主 皑菱(lzc)
-2026年10月</div>
+2026年10月6日</div>
                 </div>
             </section>
 
@@ -605,7 +585,7 @@
                     <div class="text">停服（2026.10.5）公告
 
 亲爱的冒险家们：
-　　　感谢你们长久以来的支持！
+　　 感谢你们长久以来的支持！
 　　 时间真快啊，这个服务器转眼已经一岁多了，期间经历了两次服务器端大迁移，以及n次崩溃，但这阻挡不了我们冒险的征程。我们探险了许多维度，战胜了数十个boss，探索了数千种结构，这见证了服务器的辉煌！
 　　 服务器的开设需要花费大量精力和成本，并且我们的冒险征程渐入尾声，因此服务器将于2026年10月5日下午17:00关停。关停前将举办一次停服仪式，后续将会把冒险存档发给你们。
 　　 感谢你们的支持！
@@ -659,7 +639,7 @@
             <!-- 截图画廊 -->
             <section id="gallery">
                 <h2 class="section-title reveal">截图画廊</h2>
-                <p class="gallery-desc reveal">点击缩略图查看原图，可单张下载留念。</p>
+                <p class="gallery-desc reveal">点击缩略图查看原图，长按图片即可保存留念。</p>
                 <div id="galleryRoot"></div>
             </section>
 
@@ -759,7 +739,7 @@
         <img id="lbImg" alt="原图预览">
         <div class="lb-bar">
             <span class="lb-name" id="lbName"></span>
-            <a class="btn" id="lbDl" href="#" download>下载原图</a>
+            <span class="lb-hint">长按图片保存</span>
             <button class="btn lb-close" id="lbClose" type="button">关闭</button>
         </div>
     </div>
@@ -812,12 +792,9 @@
             var lightbox = document.getElementById('lightbox');
             var lbImg = document.getElementById('lbImg');
             var lbName = document.getElementById('lbName');
-            var lbDl = document.getElementById('lbDl');
 
             function openLightbox(name) {
                 lbName.textContent = name;
-                lbDl.href = FULL_DIR + name + '.png';
-                lbDl.setAttribute('download', name + '.png');
                 lbImg.src = FULL_DIR + name + '.png';
                 lightbox.classList.add('show');
             }
@@ -862,16 +839,7 @@
                     nm.className = 'shot-name';
                     nm.textContent = name;
 
-                    var dl = document.createElement('a');
-                    dl.className = 'shot-dl';
-                    dl.href = FULL_DIR + name + '.png';
-                    dl.setAttribute('download', name + '.png');
-                    dl.title = '下载原图';
-                    dl.textContent = '⬇';
-                    dl.addEventListener('click', function (e) { e.stopPropagation(); });
-
                     cap.appendChild(nm);
-                    cap.appendChild(dl);
                     fig.appendChild(img);
                     fig.appendChild(cap);
                     fig.addEventListener('click', function () { openLightbox(name); });
