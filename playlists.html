@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>歌单 · 音乐下载器 · aiLinMc</title>
+<meta name="description" content="aiLinMc 音乐下载器 —— 管理你的歌单。数据来源：Hi歌曲网。">
+<link rel="stylesheet" href="assets/css/music.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="brand">
+        <span class="logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+        <span>音乐下载器</span>
+        <small>数据来源：Hi歌曲网</small>
+    </div>
+    <nav class="page-nav">
+        <a class="nav-link" href="music.html">主页</a>
+        <a class="nav-link" href="search.html">搜索</a>
+        <a class="nav-link active" href="playlists.html">歌单</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg><span>深色模式</span></button>
+</header>
+
+<main class="wrap">
+    <section class="panel playlist-layout">
+        <aside class="pl-side">
+            <button class="btn primary block" id="newPlBtn" type="button"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>新建歌单</button>
+            <div class="result-list" id="plList"></div>
+        </aside>
+        <section class="pl-main">
+            <div class="panel-head">
+                <h2 id="plTitle">我喜欢</h2>
+                <div class="panel-tools">
+                    <span class="count" id="plCount"></span>
+                </div>
+            </div>
+            <div class="result-list" id="songList"></div>
+        </section>
+    </section>
+</main>
+
+<footer class="foot">⚠️ 本工具仅供内部使用，严禁对外传播、转载或用于商业用途 | 歌曲数据来源：Hi歌曲网 · https://higequ.com/</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/music-common.js"></script>
+<script>
+(function () {
+    'use strict';
+    var MC = window.MusicCommon;
+    MC.initTheme();
+
+    var plList = MC.$('plList');
+    var songList = MC.$('songList');
+    var plTitle = MC.$('plTitle');
+    var plCount = MC.$('plCount');
+    var currentId = 'default';
+
+    function currentPlaylist() {
+        var all = MC.Playlists.getAll();
+        for (var i = 0; i < all.length; i++) {
+            if (all[i].id === currentId) return all[i];
+        }
+        return all[0] || null;
+    }
+
+    function renderList() {
+        var all = MC.Playlists.getAll();
+        if (!currentPlaylist() && all.length) currentId = all[0].id;
+        plList.innerHTML = '';
+        all.forEach(function (p) {
+            var item = document.createElement('div');
+            item.className = 'pl-item' + (p.id === currentId ? ' active' : '');
+            var name = document.createElement('span');
+            name.className = 'pl-name';
+            name.innerHTML = (p.fixed ? MC.icons.heartFill + ' ' : '') + MC.escapeHtml(p.name);
+            var count = document.createElement('span');
+            count.className = 'pl-count';
+            count.textContent = p.songs.length + ' 首';
+            item.appendChild(name);
+            item.appendChild(count);
+            if (!p.fixed) {
+                var renameBtn = document.createElement('button');
+                renameBtn.type = 'button';
+                renameBtn.className = 'icon-btn';
+                renameBtn.innerHTML = MC.icons.pencil;
+                renameBtn.title = '重命名';
+                renameBtn.setAttribute('aria-label', '重命名 ' + p.name);
+                renameBtn.addEventListener('click', function (ev) {
+                    ev.stopPropagation();
+                    promptRename(p);
+                });
+                var delBtn = document.createElement('button');
+                delBtn.type = 'button';
+                delBtn.className = 'icon-btn danger';
+                delBtn.innerHTML = MC.icons.x;
+                delBtn.title = '删除';
+                delBtn.setAttribute('aria-label', '删除 ' + p.name);
+                delBtn.addEventListener('click', function (ev) {
+                    ev.stopPropagation();
+                    confirmRemove(p);
+                });
+                item.appendChild(renameBtn);
+                item.appendChild(delBtn);
+            }
+            item.addEventListener('click', function () {
+                currentId = p.id;
+                renderList();
+                renderSongs();
+            });
+            plList.appendChild(item);
+        });
+    }
+
+    function renderSongs() {
+        var pl = currentPlaylist();
+        if (!pl) return;
+        plTitle.innerHTML = (pl.fixed ? MC.icons.heartFill + ' ' : '') + MC.escapeHtml(pl.name);
+        plCount.textContent = pl.songs.length ? '共 ' + pl.songs.length + ' 首' : '';
+        songList.innerHTML = '';
+        if (!pl.songs.length) {
+            songList.innerHTML = '<div class="empty-box">歌单暂无歌曲，去「主页」或「搜索」挑选喜欢的歌吧</div>';
+            return;
+        }
+        pl.songs.forEach(function (s) {
+            var row = document.createElement('div');
+            row.className = 'pl-song';
+            var meta = document.createElement('div');
+            meta.className = 'meta';
+            var t = document.createElement('div');
+            t.className = 'title';
+            t.textContent = s.title;
+            var a = document.createElement('div');
+            a.className = 'artist';
+            a.textContent = s.artist || '未知歌手';
+            meta.appendChild(t);
+            meta.appendChild(a);
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = '移除';
+            removeBtn.addEventListener('click', function (ev) {
+                ev.stopPropagation();
+                MC.Playlists.removeSong(pl.id, s.id);
+                MC.toast('已从歌单移除：' + s.title);
+                renderList();
+                renderSongs();
+            });
+            var go = document.createElement('span');
+            go.className = 'go';
+            go.innerHTML = MC.icons.chevron;
+            row.appendChild(meta);
+            row.appendChild(removeBtn);
+            row.appendChild(go);
+            row.addEventListener('click', function () {
+                location.href = 'player.html?id=' + encodeURIComponent(s.id);
+            });
+            songList.appendChild(row);
+        });
+    }
+
+    // 输入弹窗（新建 / 重命名共用）
+    function promptName(title, placeholder, okText, cb) {
+        var input = document.createElement('input');
+        input.className = 'modal-input';
+        input.placeholder = placeholder || '歌单名称';
+        input.maxLength = 20;
+        var actions = document.createElement('div');
+        actions.className = 'modal-actions';
+        var cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'btn';
+        cancel.textContent = '取消';
+        var ok = document.createElement('button');
+        ok.type = 'button';
+        ok.className = 'btn primary';
+        ok.textContent = okText || '确定';
+        actions.appendChild(cancel);
+        actions.appendChild(ok);
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-direction:column;gap:14px;';
+        wrap.appendChild(input);
+        wrap.appendChild(actions);
+        var modal = MC.openModal({ title: title, body: wrap });
+        function confirm() {
+            var name = input.value.trim();
+            if (!name) { MC.toast('名称不能为空', true); input.focus(); return; }
+            cb(name);
+        }
+        ok.addEventListener('click', confirm);
+        cancel.addEventListener('click', modal.close);
+        input.addEventListener('keydown', function (e) { if (e.key === 'Enter') confirm(); });
+    }
+
+    function promptRename(p) {
+        promptName('重命名歌单', p.name, '保存', function (name) {
+            MC.Playlists.rename(p.id, name);
+            MC.toast('已重命名为：' + name);
+            renderList();
+            renderSongs();
+        });
+    }
+
+    function confirmRemove(p) {
+        var tip = document.createElement('p');
+        tip.textContent = '确定删除歌单「' + p.name + '」吗？其中 ' + p.songs.length + ' 首歌曲将被移除（不影响音乐站数据）。';
+        var actions = document.createElement('div');
+        actions.className = 'modal-actions';
+        var cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'btn';
+        cancel.textContent = '取消';
+        var ok = document.createElement('button');
+        ok.type = 'button';
+        ok.className = 'btn danger';
+        ok.textContent = '删除';
+        actions.appendChild(cancel);
+        actions.appendChild(ok);
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-direction:column;gap:14px;';
+        wrap.appendChild(tip);
+        wrap.appendChild(actions);
+        var modal = MC.openModal({ title: '删除歌单', body: wrap });
+        ok.addEventListener('click', function () {
+            modal.close();
+            MC.Playlists.remove(p.id);
+            if (currentId === p.id) currentId = 'default';
+            MC.toast('歌单已删除');
+            renderList();
+            renderSongs();
+        });
+        cancel.addEventListener('click', modal.close);
+    }
+
+    MC.$('newPlBtn').addEventListener('click', function () {
+        promptName('新建歌单', '输入歌单名称', '创建', function (name) {
+            var pl = MC.Playlists.create(name);
+            if (pl) {
+                currentId = pl.id;
+                MC.toast('歌单已创建：' + name);
+                renderList();
+                renderSongs();
+            }
+        });
+    });
+
+    renderList();
+    renderSongs();
+})();
+</script>
+</body>
+</html>

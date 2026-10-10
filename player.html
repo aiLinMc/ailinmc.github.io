@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>播放 · 音乐下载器 · aiLinMc</title>
+<meta name="description" content="aiLinMc 音乐下载器 —— 试听并下载歌曲与歌词。数据来源：Hi歌曲网。">
+<link rel="stylesheet" href="assets/css/music.css">
+</head>
+<body>
+<header class="topbar">
+    <div class="brand">
+        <span class="logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+        <span>音乐下载器</span>
+        <small>数据来源：Hi歌曲网</small>
+    </div>
+    <nav class="page-nav">
+        <a class="nav-link" href="music.html">主页</a>
+        <a class="nav-link" href="search.html">搜索</a>
+        <a class="nav-link" href="playlists.html">歌单</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg><span>深色模式</span></button>
+</header>
+
+<main class="wrap">
+    <section class="panel detail-panel">
+        <div class="detail-empty" id="detailEmpty">正在加载歌曲详情…</div>
+        <div class="detail-body hidden" id="detailBody">
+            <div class="cover-wrap">
+                <img id="coverImg" alt="专辑封面" class="hidden">
+                <div class="cover-fallback" id="coverFallback">暂无封面</div>
+            </div>
+            <h2 class="song-title" id="songTitle"></h2>
+            <p class="song-artist" id="songArtist"></p>
+            <div class="badge-row"><span class="format-badge" id="formatBadge"></span></div>
+            <audio id="audioPlayer" controls preload="metadata" class="audio-player"></audio>
+            <div class="dl-btns">
+                <a class="dl-btn" id="dlAudio" href="#" download><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载音频</a>
+                <a class="dl-btn ghost" id="dlLrc" href="#" download><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载歌词</a>
+                <button class="dl-btn ghost" id="addToPlaylist" type="button"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>加入歌单</button>
+            </div>
+            <div class="lyrics-wrap">
+                <h3>歌词</h3>
+                <div class="lyrics" id="lyricsBox"></div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="foot">⚠️ 本工具仅供内部使用，严禁对外传播、转载或用于商业用途 | 歌曲数据来源：Hi歌曲网 · https://higequ.com/</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/js/music-common.js"></script>
+<script>
+(function () {
+    'use strict';
+    var MC = window.MusicCommon;
+    MC.initTheme();
+
+    var detailEmpty = MC.$('detailEmpty');
+    var detailBody = MC.$('detailBody');
+    var coverImg = MC.$('coverImg');
+    var coverFallback = MC.$('coverFallback');
+    var songTitle = MC.$('songTitle');
+    var songArtist = MC.$('songArtist');
+    var formatBadge = MC.$('formatBadge');
+    var audioPlayer = MC.$('audioPlayer');
+    var dlAudio = MC.$('dlAudio');
+    var dlLrc = MC.$('dlLrc');
+    var addToPlaylist = MC.$('addToPlaylist');
+    var lyricsBox = MC.$('lyricsBox');
+
+    var currentSong = null;
+
+    function renderDetail(s) {
+        detailEmpty.classList.add('hidden');
+        detailBody.classList.remove('hidden');
+
+        currentSong = {
+            id: String(s.song_id || ''),
+            title: s.title || '未知歌名',
+            artist: s.artist || '未知歌手',
+        };
+
+        songTitle.textContent = s.title || '未知歌名';
+        songArtist.textContent = s.artist || '未知歌手';
+        formatBadge.textContent = (s.audio_format || '.mp3').toUpperCase();
+
+        if (s.cover_url) {
+            coverImg.classList.remove('hidden');
+            coverImg.src = s.cover_url;
+            coverImg.onerror = function () { coverImg.classList.add('hidden'); };
+            coverFallback.style.display = 'none';
+        } else {
+            coverImg.classList.add('hidden');
+            coverImg.removeAttribute('src');
+            coverFallback.style.display = '';
+        }
+
+        // 试听（走代理，支持 Range 拖动）
+        if (s.audio_url) {
+            audioPlayer.src = '/api/music/dl?inline=1&url=' + encodeURIComponent(s.audio_url);
+            audioPlayer.load();
+        } else {
+            audioPlayer.removeAttribute('src');
+            audioPlayer.load();
+        }
+        audioPlayer.onerror = function () {
+            MC.toast('试听失败：音频可能已下架或无法播放', true);
+        };
+
+        // 下载
+        var baseName = (s.title || 'download') + ' - ' + (s.artist || 'unknown');
+        if (s.audio_url) {
+            dlAudio.href = '/api/music/dl?url=' + encodeURIComponent(s.audio_url) +
+                '&name=' + encodeURIComponent(baseName + (s.audio_format || '.mp3'));
+            dlAudio.classList.remove('disabled');
+            dlAudio.removeAttribute('aria-disabled');
+        } else {
+            dlAudio.removeAttribute('href');
+            dlAudio.classList.add('disabled');
+            dlAudio.setAttribute('aria-disabled', 'true');
+        }
+
+        // 歌词
+        var lrc = s.lrc || [];
+        var lyrics = s.lyrics || [];
+        if (lyrics.length) {
+            lyricsBox.innerHTML = '';
+            lyrics.forEach(function (text) {
+                var line = document.createElement('div');
+                line.className = 'lyric-line';
+                line.textContent = text;
+                lyricsBox.appendChild(line);
+            });
+        } else {
+            lyricsBox.innerHTML = '<div class="lyric-line">暂无歌词</div>';
+        }
+
+        // LRC 下载 + 播放高亮当前行
+        if (lrc.length) {
+            var lrcText = lrc.map(function (l) { return '[' + MC.fmtTime(l.t) + '] ' + l.text; }).join('\n');
+            dlLrc.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lrcText);
+            dlLrc.download = baseName + '.lrc';
+            dlLrc.classList.remove('disabled');
+            dlLrc.removeAttribute('aria-disabled');
+            var lines = lyricsBox.querySelectorAll('.lyric-line');
+            if (lines.length === lrc.length) {
+                audioPlayer.ontimeupdate = function () {
+                    var t = audioPlayer.currentTime;
+                    var idx = 0;
+                    for (var i = 0; i < lrc.length; i++) { if (lrc[i].t <= t) idx = i; else break; }
+                    lines.forEach(function (ln, i) { ln.classList.toggle('cur', i === idx); });
+                };
+            } else {
+                audioPlayer.ontimeupdate = null;
+            }
+        } else {
+            dlLrc.removeAttribute('href');
+            dlLrc.classList.add('disabled');
+            dlLrc.setAttribute('aria-disabled', 'true');
+            audioPlayer.ontimeupdate = null;
+        }
+    }
+
+    async function openSong(id) {
+        audioPlayer.pause();
+        detailBody.classList.add('hidden');
+        detailEmpty.classList.remove('hidden');
+        detailEmpty.textContent = '正在加载歌曲详情…';
+        try {
+            var res = await fetch('/api/music/song?id=' + encodeURIComponent(id));
+            var data = await res.json();
+            if (!res.ok) throw MC.respError(data, res);
+            renderDetail(data);
+        } catch (e) {
+            detailBody.classList.add('hidden');
+            detailEmpty.classList.remove('hidden');
+            detailEmpty.textContent = '加载失败：' + (e.message || '网络错误');
+            MC.toast('加载详情失败', true);
+        }
+    }
+
+    function openPlaylistPicker() {
+        if (!currentSong || !currentSong.id) { MC.toast('当前没有可加入的歌曲', true); return; }
+        var inPl = MC.Playlists.songIn(currentSong.id);
+        var all = MC.Playlists.getAll();
+
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-direction:column;gap:10px;';
+
+        all.forEach(function (p) {
+            var row = document.createElement('label');
+            row.className = 'pl-pick';
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = inPl.indexOf(p.id) !== -1;
+            var name = document.createElement('span');
+            name.className = 'pl-name';
+            name.innerHTML = (p.fixed ? MC.icons.heartFill + ' ' : '') + MC.escapeHtml(p.name);
+            var count = document.createElement('span');
+            count.className = 'pl-count';
+            count.textContent = p.songs.length + ' 首';
+            row.appendChild(cb);
+            row.appendChild(name);
+            row.appendChild(count);
+            cb.addEventListener('change', function () {
+                if (cb.checked) {
+                    if (MC.Playlists.addSong(p.id, currentSong)) {
+                        MC.toast('已加入「' + p.name + '」');
+                    } else {
+                        cb.checked = false;
+                        MC.toast('该歌曲已在「' + p.name + '」中', true);
+                    }
+                } else {
+                    MC.Playlists.removeSong(p.id, currentSong.id);
+                    MC.toast('已从「' + p.name + '」移除');
+                }
+            });
+            wrap.appendChild(row);
+        });
+
+        // 新建歌单并加入
+        var newRow = document.createElement('div');
+        newRow.className = 'pl-pick';
+        newRow.style.cursor = 'default';
+        var newInput = document.createElement('input');
+        newInput.className = 'modal-input';
+        newInput.placeholder = '输入新歌单名称';
+        newInput.maxLength = 20;
+        var newBtn = document.createElement('button');
+        newBtn.type = 'button';
+        newBtn.className = 'btn primary';
+        newBtn.textContent = '创建并加入';
+        newRow.appendChild(newInput);
+        newRow.appendChild(newBtn);
+        newBtn.addEventListener('click', function () {
+            var pl = MC.Playlists.create(newInput.value);
+            if (!pl) return; // 校验失败时 create 已 toast 提示
+            MC.Playlists.addSong(pl.id, currentSong);
+            MC.toast('已创建并加入「' + pl.name + '」');
+            modal.close();
+        });
+        wrap.appendChild(newRow);
+
+        var modal = MC.openModal({ title: '加入歌单：' + currentSong.title, body: wrap });
+    }
+
+    addToPlaylist.addEventListener('click', openPlaylistPicker);
+
+    var qs = new URLSearchParams(location.search);
+    var id = (qs.get('id') || '').trim();
+    if (/^\d+$/.test(id)) {
+        openSong(id);
+    } else {
+        detailEmpty.textContent = '缺少歌曲 ID，请从「主页」或「搜索」进入';
+    }
+})();
+</script>
+</body>
+</html>

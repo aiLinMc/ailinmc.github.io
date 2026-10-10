@@ -5,406 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>音乐下载器 · aiLinMc</title>
 <meta name="description" content="aiLinMc 音乐下载器 —— 在线搜索、试听并下载歌曲与歌词。数据来源：Hi歌曲网。">
-<style>
-    :root {
-        --bg: #f5f6f8;
-        --surface: #ffffff;
-        --surface-2: #eceff3;
-        --border: #e2e5ea;
-        --text: #1b1f24;
-        --muted: #6b7684;
-        --accent: #2ea043;
-        --accent-hover: #3fb950;
-        --accent-soft: rgba(46, 160, 67, .12);
-        --danger: #d1242f;
-        --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 8px 28px rgba(16, 24, 40, .06);
-        --radius: 14px;
-    }
-
-    body.dark-mode {
-        --bg: #0b0f14;
-        --surface: #141c26;
-        --surface-2: #1a2430;
-        --border: #223040;
-        --text: #e6edf3;
-        --muted: #8b98a5;
-        --accent: #3fb950;
-        --accent-hover: #56d364;
-        --accent-soft: rgba(63, 185, 80, .16);
-        --danger: #f85149;
-        --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px rgba(0, 0, 0, .35);
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-        min-height: 100vh;
-        background: var(--bg);
-        color: var(--text);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-                     "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-        font-size: 15px;
-        line-height: 1.65;
-        -webkit-font-smoothing: antialiased;
-    }
-
-    button { font-family: inherit; cursor: pointer; }
-    input { font-family: inherit; }
-
-    /* ==================== 顶栏 ==================== */
-    .topbar {
-        position: sticky; top: 0; z-index: 20;
-        display: flex; align-items: center; gap: 12px;
-        padding: 12px 24px;
-        background: var(--surface);
-        border-bottom: 1px solid var(--border);
-        backdrop-filter: blur(8px);
-    }
-    .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
-    .brand .logo { font-size: 20px; }
-    .brand small { color: var(--muted); font-weight: 500; font-size: 12px; margin-left: 4px; }
-
-    .theme-btn {
-        margin-left: auto;
-        padding: 8px 14px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: var(--surface-2);
-        color: var(--text);
-        font-size: 13px;
-        font-weight: 600;
-        transition: background .15s, border-color .15s;
-    }
-    .theme-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-    /* ==================== 主体 ==================== */
-    .wrap { max-width: 1080px; margin: 0 auto; padding: 20px 24px 40px; }
-
-    /* ---------- 搜索区 ---------- */
-    .search-area { margin-bottom: 20px; }
-    .search-box { display: flex; gap: 10px; }
-    .search-box input {
-        flex: 1;
-        padding: 13px 18px;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        background: var(--surface);
-        color: var(--text);
-        font-size: 15px;
-        outline: none;
-        transition: border-color .15s, box-shadow .15s;
-    }
-    .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-    .search-box input::placeholder { color: var(--muted); }
-
-    .search-btn {
-        padding: 13px 28px;
-        border: none;
-        border-radius: 12px;
-        background: var(--accent);
-        color: #fff;
-        font-size: 15px;
-        font-weight: 700;
-        transition: background .15s, transform .1s;
-    }
-    .search-btn:hover { background: var(--accent-hover); }
-    .search-btn:active { transform: scale(.97); }
-    .search-btn:disabled { opacity: .55; cursor: not-allowed; }
-
-    .hint { margin-top: 8px; font-size: 13px; color: var(--muted); min-height: 20px; }
-
-    /* ---------- Tab 栏 ---------- */
-    .tabs {
-        display: flex; gap: 8px; flex-wrap: wrap;
-        margin-bottom: 16px;
-    }
-    .tab-btn {
-        padding: 8px 16px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: var(--surface);
-        color: var(--muted);
-        font-size: 14px; font-weight: 600;
-        transition: background .15s, color .15s, border-color .15s;
-    }
-    .tab-btn:hover { color: var(--text); }
-    .tab-btn.active {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: #fff;
-    }
-
-    /* ---------- 搜索历史 ---------- */
-    .history-wrap { margin: 12px 0 18px; }
-    .history-head {
-        display: flex; align-items: center; justify-content: space-between;
-        margin-bottom: 8px;
-    }
-    .history-head span { font-size: 13px; color: var(--muted); font-weight: 600; }
-    .history-clear {
-        border: none; background: none;
-        color: var(--muted); font-size: 12px;
-        text-decoration: underline;
-        padding: 0;
-    }
-    .history-clear:hover { color: var(--danger); }
-    .history-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip {
-        display: inline-flex; align-items: center; gap: 6px;
-        max-width: 100%;
-        padding: 5px 12px;
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        background: var(--surface);
-        color: var(--text);
-        font-size: 13px;
-        cursor: pointer;
-        transition: background .15s, border-color .15s;
-    }
-    .chip:hover { border-color: var(--accent); background: var(--accent-soft); }
-    .chip .chip-txt {
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        max-width: 180px;
-    }
-    .chip .chip-del {
-        flex: none;
-        border: none; background: none;
-        color: var(--muted);
-        font-size: 12px; line-height: 1;
-        padding: 2px;
-        border-radius: 50%;
-    }
-    .chip .chip-del:hover { color: var(--danger); }
-
-    /* ---------- AI 推荐未找到 ---------- */
-    .missing-line {
-        margin: 6px 4px 2px;
-        padding: 10px 14px;
-        border-top: 1px dashed var(--border);
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.8;
-        word-break: break-all;
-    }
-
-    /* ---------- 双栏布局 ---------- */
-    .layout {
-        display: grid;
-        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-        gap: 20px;
-        align-items: start;
-    }
-    @media (max-width: 840px) {
-        .layout { grid-template-columns: 1fr; }
-        .wrap { padding: 16px 16px 32px; }
-        .topbar { padding: 10px 16px; }
-    }
-
-    .panel {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-    }
-    .panel-head {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 14px 18px 0;
-    }
-    .panel-head h2 { font-size: 15px; font-weight: 700; }
-    .count { font-size: 12px; color: var(--muted); }
-    .panel-tools { display: flex; align-items: center; gap: 10px; }
-    .refresh-btn {
-        display: inline-flex; align-items: center; gap: 5px;
-        padding: 5px 12px;
-        border: 1px solid var(--border);
-        border-radius: 9px;
-        background: var(--surface-2);
-        color: var(--text);
-        font-size: 12px; font-weight: 600;
-        transition: background .15s, border-color .15s, color .15s, opacity .15s;
-    }
-    .refresh-btn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .refresh-btn:disabled { opacity: .5; cursor: not-allowed; }
-    .refresh-btn .ico { display: inline-block; }
-    .refresh-btn.loading .ico { animation: rot .8s linear infinite; }
-
-    /* ---------- 搜索结果 ---------- */
-    .result-list { max-height: 560px; overflow-y: auto; padding: 10px; }
-    .result-item {
-        display: flex; align-items: center; gap: 12px;
-        padding: 12px 14px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: background .15s;
-    }
-    .result-item:hover { background: var(--surface-2); }
-    .result-item .num {
-        flex: none; width: 26px; height: 26px;
-        display: grid; place-items: center;
-        border-radius: 8px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 12px; font-weight: 700;
-    }
-    .result-item .meta { min-width: 0; flex: 1; }
-    .result-item .title {
-        font-weight: 600; font-size: 14px;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .result-item .artist { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .result-item .go { flex: none; color: var(--muted); font-size: 14px; }
-
-    .empty-box {
-        padding: 40px 20px; text-align: center;
-        color: var(--muted); font-size: 14px;
-    }
-    .loading-box { padding: 30px 20px; text-align: center; color: var(--muted); font-size: 13px; }
-    .spin {
-        display: inline-block; width: 18px; height: 18px;
-        margin-right: 8px; vertical-align: -3px;
-        border: 2px solid var(--border); border-top-color: var(--accent);
-        border-radius: 50%; animation: rot .8s linear infinite;
-    }
-    @keyframes rot { to { transform: rotate(360deg); } }
-
-    /* ---------- 分页 ---------- */
-    .pagination {
-        display: flex; align-items: center; justify-content: center; gap: 14px;
-        padding: 12px 16px;
-        border-top: 1px solid var(--border);
-    }
-    .page-btn {
-        padding: 7px 14px;
-        border: 1px solid var(--border);
-        border-radius: 9px;
-        background: var(--surface-2);
-        color: var(--text);
-        font-size: 13px;
-        transition: background .15s, opacity .15s;
-    }
-    .page-btn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .page-info { font-size: 13px; color: var(--muted); }
-
-    /* ---------- 详情 ---------- */
-    .detail-panel { position: sticky; top: 72px; }
-    @media (max-width: 840px) { .detail-panel { position: static; } }
-
-    .detail-empty { padding: 60px 20px; text-align: center; color: var(--muted); font-size: 14px; }
-    .hidden { display: none; }
-
-    .detail-body { padding: 20px; }
-    .cover-wrap {
-        width: 200px; height: 200px; margin: 0 auto 16px;
-        border-radius: 16px;
-        overflow: hidden;
-        position: relative;
-        background: var(--surface-2);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
-    }
-    .cover-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .cover-fallback {
-        position: absolute; inset: 0;
-        display: grid; place-items: center;
-        color: var(--muted); font-size: 13px;
-    }
-
-    .song-title {
-        text-align: center; font-size: 19px; font-weight: 800;
-        word-break: break-all;
-    }
-    .song-artist { text-align: center; color: var(--muted); font-size: 14px; margin-top: 4px; }
-    .format-badge {
-        display: inline-block;
-        margin: 12px auto 0;
-        padding: 3px 10px;
-        border-radius: 20px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 12px; font-weight: 700;
-        text-transform: uppercase;
-    }
-    .badge-row { text-align: center; }
-
-    .audio-player { width: 100%; margin-top: 16px; }
-
-    .dl-btns { display: flex; gap: 10px; margin-top: 14px; }
-    .dl-btn {
-        flex: 1;
-        display: inline-flex; align-items: center; justify-content: center;
-        padding: 11px 12px;
-        border-radius: 11px;
-        border: none;
-        background: var(--accent);
-        color: #fff;
-        font-size: 14px; font-weight: 700;
-        text-decoration: none;
-        transition: background .15s, transform .1s;
-    }
-    .dl-btn:hover { background: var(--accent-hover); }
-    .dl-btn:active { transform: scale(.97); }
-    .dl-btn.ghost { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
-    .dl-btn.ghost:hover { background: var(--border); }
-    .dl-btn:disabled, .dl-btn.disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
-
-    /* ---------- 歌词 ---------- */
-    .lyrics-wrap { margin-top: 18px; }
-    .lyrics-wrap h3 { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
-    .lyrics {
-        max-height: 240px;
-        overflow-y: auto;
-        padding: 12px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: var(--surface-2);
-        font-size: 13px;
-        line-height: 1.9;
-    }
-    .lyric-line { padding: 2px 6px; border-radius: 6px; transition: background .2s, color .2s; }
-    .lyric-line.cur { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-
-    /* ---------- 页脚 ---------- */
-    .foot {
-        max-width: 1080px; margin: 0 auto; padding: 16px 24px 32px;
-        font-size: 12px; color: var(--muted); text-align: center;
-        border-top: 1px solid var(--border);
-    }
-
-    /* ---------- Toast ---------- */
-    .toast {
-        position: fixed; left: 50%; bottom: 28px; z-index: 50;
-        transform: translate(-50%, 20px);
-        max-width: 86vw;
-        padding: 11px 18px;
-        border-radius: 10px;
-        background: var(--text); color: var(--bg);
-        font-size: 13px;
-        box-shadow: var(--shadow);
-        opacity: 0; pointer-events: none;
-        transition: opacity .2s, transform .2s;
-    }
-    .toast.show { opacity: 1; transform: translate(-50%, 0); }
-    .toast.err { background: var(--danger); color: #fff; }
-</style>
+<link rel="stylesheet" href="assets/css/music.css">
 </head>
 <body>
 <header class="topbar">
     <div class="brand">
-        <span class="logo">🎵</span>
+        <span class="logo"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
         <span>音乐下载器</span>
         <small>数据来源：Hi歌曲网</small>
     </div>
-    <button class="theme-btn" id="themeBtn">🌙 深色模式</button>
+    <nav class="page-nav">
+        <a class="nav-link active" href="music.html">主页</a>
+        <a class="nav-link" href="search.html">搜索</a>
+        <a class="nav-link" href="playlists.html">歌单</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg><span>深色模式</span></button>
 </header>
 
 <main class="wrap">
-    <nav class="tabs" id="tabs">
-        <button class="tab-btn active" data-tab="search">🔍 搜索</button>
-        <button class="tab-btn" data-tab="hot">🔥 热门歌曲</button>
-        <button class="tab-btn" data-tab="ai">✨ AI推荐</button>
-    </nav>
-
     <section class="search-area">
         <div class="search-box">
             <input id="searchInput" placeholder="输入歌曲名称，如：月亮" autocomplete="off" maxlength="60">
@@ -420,640 +38,112 @@
         <p class="hint" id="searchHint"></p>
     </section>
 
-    <div class="layout">
-        <section class="panel">
-            <div class="panel-head">
-                <h2 id="panelTitle">搜索结果</h2>
-                <div class="panel-tools">
-                    <span class="count" id="resultCount"></span>
-                    <button class="refresh-btn hidden" id="refreshBtn" type="button" title="重新获取最新内容">
-                        <span class="ico">🔄</span>刷新
-                    </button>
-                </div>
+    <section class="panel">
+        <div class="panel-head">
+            <h2>热门歌曲</h2>
+            <div class="panel-tools">
+                <span class="count" id="resultCount"></span>
+                <button class="refresh-btn" id="refreshBtn" type="button" title="重新获取最新内容">
+                    <span class="ico"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg></span>刷新
+                </button>
             </div>
-            <div class="result-list" id="resultList">
-                <div class="empty-box">输入歌名并搜索，找到你想下载的歌曲</div>
-            </div>
-            <div class="pagination" id="pagination">
-                <button class="page-btn" id="prevBtn">◀ 上一页</button>
-                <span class="page-info" id="pageInfo"></span>
-                <button class="page-btn" id="nextBtn">下一页 ▶</button>
-            </div>
-        </section>
-
-        <section class="panel detail-panel">
-            <div class="detail-empty" id="detailEmpty">点击左侧歌曲，查看详情、试听并下载</div>
-            <div class="detail-body hidden" id="detailBody">
-                <div class="cover-wrap">
-                    <img id="coverImg" alt="专辑封面" class="hidden">
-                    <div class="cover-fallback" id="coverFallback">暂无封面</div>
-                </div>
-                <h2 class="song-title" id="songTitle"></h2>
-                <p class="song-artist" id="songArtist"></p>
-                <div class="badge-row"><span class="format-badge" id="formatBadge"></span></div>
-                <audio id="audioPlayer" controls preload="metadata" class="audio-player"></audio>
-                <div class="dl-btns">
-                    <a class="dl-btn" id="dlAudio" href="#" download>⬇ 下载音频</a>
-                    <a class="dl-btn ghost" id="dlLrc" href="#" download>⬇ 下载歌词</a>
-                </div>
-                <div class="lyrics-wrap">
-                    <h3>歌词</h3>
-                    <div class="lyrics" id="lyricsBox"></div>
-                </div>
-            </div>
-        </section>
-    </div>
+        </div>
+        <div class="result-list" id="hotList">
+            <div class="loading-box"><span class="spin"></span>正在获取热门歌曲…</div>
+        </div>
+    </section>
 </main>
 
 <footer class="foot">⚠️ 本工具仅供内部使用，严禁对外传播、转载或用于商业用途 | 歌曲数据来源：Hi歌曲网 · https://higequ.com/</footer>
 
 <div class="toast" id="toast"></div>
 
+<script src="assets/js/music-common.js"></script>
 <script>
 (function () {
     'use strict';
-
-    // ================================================================
-    //  主题（与全站其他页面同步：共享 localStorage 'darkMode'）
-    // ================================================================
-    const themeBtn = document.getElementById('themeBtn');
-    function applyTheme(dark) {
-        document.body.classList.toggle('dark-mode', dark);
-        themeBtn.textContent = dark ? '☀️ 浅色模式' : '🌙 深色模式';
-    }
-    function initTheme() {
-        applyTheme(localStorage.getItem('darkMode') === 'true');
-        themeBtn.addEventListener('click', function () {
-            const dark = !document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', dark);
-            applyTheme(dark);
-        });
-    }
-    initTheme();
-
-    // ================================================================
-    //  DOM
-    // ================================================================
-    const $ = function (id) { return document.getElementById(id); };
-    const searchInput = $('searchInput');
-    const searchBtn = $('searchBtn');
-    const searchHint = $('searchHint');
-    const resultList = $('resultList');
-    const resultCount = $('resultCount');
-    const prevBtn = $('prevBtn');
-    const nextBtn = $('nextBtn');
-    const pageInfo = $('pageInfo');
-    const detailEmpty = $('detailEmpty');
-    const detailBody = $('detailBody');
-    const coverImg = $('coverImg');
-    const coverFallback = $('coverFallback');
-    const songTitle = $('songTitle');
-    const songArtist = $('songArtist');
-    const formatBadge = $('formatBadge');
-    const audioPlayer = $('audioPlayer');
-    const dlAudio = $('dlAudio');
-    const dlLrc = $('dlLrc');
-    const lyricsBox = $('lyricsBox');
-    const panelTitle = $('panelTitle');
-    const pagination = $('pagination');
-    const refreshBtn = $('refreshBtn');
-    const tabs = document.querySelectorAll('.tab-btn');
-    const historyWrap = $('historyWrap');
-    const historyChips = $('historyChips');
-    const historyClear = $('historyClear');
-
-    // ================================================================
-    //  状态
-    // ================================================================
-    const state = {
-        keyword: '', page: 1, totalPages: 1, currentSong: null,
-        tab: 'search', searchResults: null, searchTotalPages: 1, aiMissing: [],
-        hotData: null, aiData: null,          // 热门 / AI 推荐的内存缓存
-    };
-    const cache = new Map();          // `${keyword}|${page}` -> {results, total_pages}
-    const MAX_CACHE = 30;
-
-    // ================================================================
-    //  各 Tab 的状态提示（各自独立保存，切换 Tab 时立即恢复自己的文案）
-    // ================================================================
-    const hintText = { search: '', hot: '', ai: '' };
-    function setHint(tab, text) {
-        hintText[tab] = text;
-        if (state.tab === tab) searchHint.textContent = text;
-    }
-    function fmtClock(ts) {
-        const d = new Date(ts);
-        const p = function (n) { return String(n).padStart(2, '0'); };
-        return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
-    }
-    let hotLoading = false, aiLoading = false;   // 请求进行中标记，避免重复请求
-    const busySet = new Set();
-    function setBusy(key, active) {
-        if (active) busySet.add(key); else busySet.delete(key);
-        const loading = busySet.size > 0;
-        refreshBtn.disabled = loading;
-        refreshBtn.classList.toggle('loading', loading);
-    }
-
-    // ================================================================
-    //  Toast
-    // ================================================================
-    const toastEl = $('toast');
-    let toastTimer = null;
-    function toast(msg, isErr) {
-        toastEl.textContent = msg;
-        toastEl.classList.toggle('err', !!isErr);
-        toastEl.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 3000);
-    }
-
-    function fmtTime(sec) {
-        sec = Math.max(0, sec || 0);
-        const m = Math.floor(sec / 60);
-        const s = Math.floor(sec % 60);
-        return m + ':' + String(s).padStart(2, '0');
-    }
-
-    // ================================================================
-    //  搜索历史（localStorage：去重 / 最近在前 / 上限20）
-    // ================================================================
-    const HISTORY_KEY = 'musicSearchHistory';
-    const HISTORY_MAX = 20;
-    function getHistory() {
-        try {
-            const raw = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-            return Array.isArray(raw)
-                ? raw.filter(function (h) { return typeof h === 'string' && h.trim(); })
-                : [];
-        } catch (e) {
-            return [];
-        }
-    }
-    function saveHistory(list) {
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
-        // 搜索历史变了，AI 推荐缓存随之失效；若此刻正停留在 AI 推荐页则跟着更新
-        state.aiData = null;
-        if (state.tab === 'ai') loadAi(false);
-    }
-    function renderHistory() {
-        const list = getHistory();
-        historyWrap.classList.toggle('hidden', list.length === 0);
-        historyChips.innerHTML = '';
-        list.forEach(function (k) {
-            const chip = document.createElement('span');
-            chip.className = 'chip';
-            chip.title = k;
-            const txt = document.createElement('span');
-            txt.className = 'chip-txt';
-            txt.textContent = k;
-            const del = document.createElement('button');
-            del.className = 'chip-del';
-            del.type = 'button';
-            del.textContent = '✕';
-            del.setAttribute('aria-label', '删除 ' + k);
-            del.addEventListener('click', function (ev) {
-                ev.stopPropagation();
-                saveHistory(getHistory().filter(function (h) { return h !== k; }));
-                renderHistory();
-            });
-            chip.appendChild(txt);
-            chip.appendChild(del);
-            chip.addEventListener('click', function () {
-                searchInput.value = k;
-                doSearch();
-            });
-            historyChips.appendChild(chip);
-        });
-    }
-    function addHistory(keyword) {
-        const k = keyword.trim();
-        if (!k) return;
-        const list = [k].concat(getHistory().filter(function (h) { return h !== k; }));
-        saveHistory(list.slice(0, HISTORY_MAX));
-        renderHistory();
-    }
-    historyClear.addEventListener('click', function () {
-        saveHistory([]);
-        renderHistory();
-        toast('搜索历史已清空');
+    var MC = window.MusicCommon;
+    MC.initTheme();
+    MC.bindHistoryClear();
+    // 点击历史词 → 记入历史并跳转搜索页
+    MC.renderHistory(function (k) {
+        MC.addHistory(k);
+        location.href = 'search.html?keyword=' + encodeURIComponent(k);
     });
-    renderHistory();
 
-    // ================================================================
-    //  搜索
-    // ================================================================
-    function setLoading(on, tab, msg) {
-        if (tab === 'search') searchBtn.disabled = on;
-        if (on && state.tab === tab) {
-            resultList.innerHTML = '<div class="loading-box"><span class="spin"></span>' + msg + '</div>';
-        }
+    var searchInput = MC.$('searchInput');
+    var searchBtn = MC.$('searchBtn');
+    var searchHint = MC.$('searchHint');
+    var hotList = MC.$('hotList');
+    var resultCount = MC.$('resultCount');
+    var refreshBtn = MC.$('refreshBtn');
+
+    function goSearch() {
+        var k = searchInput.value.trim();
+        if (!k) { MC.toast('请输入歌曲名称', true); return; }
+        MC.addHistory(k);
+        location.href = 'search.html?keyword=' + encodeURIComponent(k);
     }
+    searchBtn.addEventListener('click', goSearch);
+    searchInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') goSearch(); });
 
-    function renderResults() {
-        const results = state.results;
-        if (!results || !results.length) {
-            resultList.innerHTML = '<div class="empty-box">未找到相关歌曲，换个关键词试试</div>';
-            resultCount.textContent = '';
+    function renderHot(results) {
+        resultCount.textContent = results.length ? '共 ' + results.length + ' 首' : '';
+        if (!results.length) {
+            hotList.innerHTML = '<div class="empty-box">暂无热门歌曲</div>';
             return;
         }
-        resultCount.textContent = '共 ' + results.length + ' 条';
-        const frag = document.createDocumentFragment();
+        var frag = document.createDocumentFragment();
         results.forEach(function (r, i) {
-            const item = document.createElement('div');
+            var item = document.createElement('div');
             item.className = 'result-item';
             item.innerHTML =
                 '<span class="num">' + (i + 1) + '</span>' +
                 '<div class="meta"><div class="title"></div><div class="artist"></div></div>' +
-                '<span class="go">›</span>';
+                '<span class="go">' + MC.icons.chevron + '</span>';
             item.querySelector('.title').textContent = r.title;
             item.querySelector('.artist').textContent = r.artist;
-            item.addEventListener('click', function () { openSong(r.id); });
+            item.addEventListener('click', function () {
+                location.href = 'player.html?id=' + encodeURIComponent(r.id);
+            });
             frag.appendChild(item);
         });
-        resultList.innerHTML = '';
-        resultList.appendChild(frag);
-        if (state.aiMissing && state.aiMissing.length) {
-            const miss = document.createElement('div');
-            miss.className = 'missing-line';
-            miss.textContent = '以下推荐未找到（歌名可能过小众，可手动搜索）：';
-            const b = document.createElement('b');
-            b.textContent = state.aiMissing.join('、');
-            miss.appendChild(b);
-            resultList.appendChild(miss);
-        }
+        hotList.innerHTML = '';
+        hotList.appendChild(frag);
     }
 
-    function renderPagination() {
-        pageInfo.textContent = '第 ' + state.page + ' / ' + state.totalPages + ' 页';
-        prevBtn.disabled = state.page <= 1;
-        nextBtn.disabled = state.page >= state.totalPages;
-    }
-
-    function doSearch() {
-        const keyword = searchInput.value.trim();
-        if (!keyword) { toast('请输入歌曲名称', true); return; }
-        if (state.tab !== 'search') setTab('search');
-        if (keyword !== state.keyword) {
-            state.keyword = keyword;
-            state.page = 1;
-            clearCache();
-        }
-        fetchPage(state.page);
-    }
-
-    function clearCache() {
-        cache.clear();
-    }
-
-    async function fetchPage(page) {
-        const key = state.keyword + '|' + page;
-        const active = function () { return state.tab === 'search'; };
-        const keep = function () {
-            state.searchResults = state.results;
-            state.searchTotalPages = state.totalPages;
-            state.aiMissing = [];
-        };
-        if (cache.has(key)) {
-            const c = cache.get(key);
-            state.page = page;
-            state.results = c.results;
-            state.totalPages = c.total_pages;
-            keep();
-            if (active()) { renderResults(); renderPagination(); }
-            setHint('search', '第 ' + page + ' 页（缓存）');
-            return;
-        }
-        setLoading(true, 'search', '搜索中…');
-        setHint('search', '正在搜索：' + state.keyword + '（第 ' + page + ' 页）…');
-        try {
-            const res = await fetch('/api/music/search?keyword=' + encodeURIComponent(state.keyword) + '&page=' + page);
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || ('请求失败（' + res.status + '）'));
-            state.page = page;
-            state.results = data.results;
-            state.totalPages = data.total_pages || 1;
-            keep();
-            if (cache.size >= MAX_CACHE) cache.clear();
-            cache.set(key, { results: data.results, total_pages: state.totalPages });
-            if (active()) { renderResults(); renderPagination(); }
-            addHistory(state.keyword);
-            setHint('search', data.results.length
-                ? '找到 ' + data.results.length + ' 首歌曲'
-                : '未找到"' + state.keyword + '"的相关歌曲');
-        } catch (e) {
-            setHint('search', '搜索失败');
-            if (active()) {
-                resultList.innerHTML = '<div class="empty-box">' + escapeHtml(e.message || '网络错误') + '</div>';
-            }
-            toast('搜索失败：' + (e.message || '网络错误'), true);
-        } finally {
-            setLoading(false, 'search');
-        }
-    }
-
-    function escapeHtml(s) {
-        return String(s).replace(/[&<>"']/g, function (c) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-        });
-    }
-
-    // ================================================================
-    //  热门歌曲 / AI 推荐
-    //  · 结果缓存在内存中：切换 Tab 直接复用，不再每次都重新搜索
-    //  · 需要最新数据时点「刷新」按钮（force = true）
-    // ================================================================
-    function hotHint(d) {
-        return d.results.length
-            ? '热门歌曲 ' + d.results.length + ' 首（来源：Hi歌曲网 首页 + 热歌榜）· 更新于 ' + fmtClock(d.time)
-            : '暂无热门歌曲';
-    }
-
-    function aiHint(d) {
-        const miss = d.missing || [];
-        const base = miss.length
-            ? 'AI 推荐 ' + d.results.length + ' 首，' + miss.length + ' 首未找到'
-            : 'AI 根据你的搜索历史推荐了 ' + d.results.length + ' 首歌曲';
-        return base + ' · 更新于 ' + fmtClock(d.time);
-    }
-
-    // 只在对应 Tab 处于激活状态时才改动列表，避免请求返回时覆盖别的 Tab
-    function renderHotData(d) {
-        state.results = d.results;
-        state.aiMissing = [];
-        if (state.tab !== 'hot') return;
-        renderResults();
-        setHint('hot', hotHint(d));
-    }
-
-    function renderAiData(d) {
-        state.results = d.results;
-        state.aiMissing = d.missing || [];
-        if (state.tab !== 'ai') return;
-        renderResults();
-        setHint('ai', aiHint(d));
-    }
-
-    function showAiEmpty() {
-        state.results = null;
-        state.aiMissing = [];
-        resultCount.textContent = '';
-        resultList.innerHTML =
-            '<div class="empty-box">还没有搜索历史，AI 无法了解你的偏好。<br>' +
-            '先去「搜索」几首歌，再回来试试 AI 推荐</div>';
-        setHint('ai', '');
-    }
-
-    async function loadHot(force) {
-        if (!force && state.hotData) { renderHotData(state.hotData); return; }
+    var hotLoading = false;
+    function loadHot(force) {
         if (hotLoading) return;
         hotLoading = true;
-        setBusy('hot', true);
-        setLoading(true, 'hot', '正在获取热门歌曲…');
-        setHint('hot', '正在获取热门歌曲…');
-        try {
-            const res = await fetch('/api/music/hot');
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || ('请求失败（' + res.status + '）'));
-            state.hotData = { results: data.results, time: Date.now() };
-            renderHotData(state.hotData);
-            if (force) toast('热门歌曲已刷新');
-        } catch (e) {
-            const msg = e.message || '网络错误';
-            setHint('hot', state.hotData ? hotHint(state.hotData) : '获取热门歌曲失败');
-            if (state.tab === 'hot') {
-                if (state.hotData) {
-                    renderHotData(state.hotData);      // 刷新失败时保留上次结果
-                    toast('刷新失败，仍显示上次结果：' + msg, true);
-                } else {
-                    resultList.innerHTML = '<div class="empty-box">' + escapeHtml(msg) + '</div>';
-                    toast('获取热门歌曲失败：' + msg, true);
-                }
-            } else {
-                toast('获取热门歌曲失败：' + msg, true);
-            }
-        } finally {
-            hotLoading = false;
-            setBusy('hot', false);
-            setLoading(false, 'hot');
-        }
-    }
-
-    async function loadAi(force) {
-        const history = getHistory();
-        if (!history.length) {
-            state.aiData = null;
-            if (state.tab === 'ai') showAiEmpty();
-            else setHint('ai', '');
-            if (force) toast('还没有搜索历史，先去搜索几首歌吧', true);
-            return;
-        }
-        if (!force && state.aiData) { renderAiData(state.aiData); return; }
-        if (aiLoading) return;
-        aiLoading = true;
-        setBusy('ai', true);
-        setLoading(true, 'ai', 'AI 正在分析你的搜索偏好…');
-        setHint('ai', 'AI 正在分析你的搜索偏好…');
-        try {
-            const res = await fetch('/api/music/recommend', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ history: history }),
+        refreshBtn.disabled = true;
+        refreshBtn.classList.add('loading');
+        searchHint.textContent = '正在获取热门歌曲…';
+        fetch('/api/music/hot')
+            .then(function (res) {
+                return res.json().then(function (d) { return { d: d, res: res }; });
+            })
+            .then(function (o) {
+                if (!o.res.ok) throw MC.respError(o.d, o.res);
+                renderHot(o.d.results);
+                searchHint.textContent = o.d.results.length
+                    ? '热门歌曲 ' + o.d.results.length + ' 首（来源：Hi歌曲网 首页 + 热歌榜）'
+                    : '暂无热门歌曲';
+                if (force) MC.toast('热门歌曲已刷新');
+            })
+            .catch(function (e) {
+                hotList.innerHTML = '<div class="empty-box">' + MC.escapeHtml(e.message || '网络错误') + '</div>';
+                searchHint.textContent = '获取热门歌曲失败';
+                MC.toast('获取热门歌曲失败：' + (e.message || '网络错误'), true);
+            })
+            .finally(function () {
+                hotLoading = false;
+                refreshBtn.disabled = false;
+                refreshBtn.classList.remove('loading');
             });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || ('请求失败（' + res.status + '）'));
-            state.aiData = { results: data.results, missing: data.missing || [], time: Date.now() };
-            renderAiData(state.aiData);
-            if (force) toast('AI 推荐已刷新');
-        } catch (e) {
-            const msg = e.message || '网络错误';
-            setHint('ai', state.aiData ? aiHint(state.aiData) : 'AI 推荐失败');
-            if (state.tab === 'ai') {
-                if (state.aiData) {
-                    renderAiData(state.aiData);        // 刷新失败时保留上次结果
-                    toast('刷新失败，仍显示上次推荐：' + msg, true);
-                } else {
-                    resultList.innerHTML = '<div class="empty-box">' + escapeHtml(msg) + '</div>';
-                    toast('AI 推荐失败：' + msg, true);
-                }
-            } else {
-                toast('AI 推荐失败：' + msg, true);
-            }
-        } finally {
-            aiLoading = false;
-            setBusy('ai', false);
-            setLoading(false, 'ai');
-        }
     }
-
-    // ================================================================
-    //  Tab 切换
-    // ================================================================
-    function setTab(tab) {
-        state.tab = tab;
-        tabs.forEach(function (b) { b.classList.toggle('active', b.dataset.tab === tab); });
-        refreshBtn.classList.toggle('hidden', tab === 'search');
-
-        if (tab === 'search') {
-            pagination.classList.remove('hidden');
-            panelTitle.textContent = '搜索结果';
-            if (state.searchResults) {
-                state.results = state.searchResults;
-                state.totalPages = state.searchTotalPages;
-                state.aiMissing = [];
-                renderResults(); renderPagination();
-            } else {
-                state.results = null;
-                resultCount.textContent = '';
-                resultList.innerHTML = '<div class="empty-box">输入歌名并搜索，找到你想下载的歌曲</div>';
-            }
-        } else if (tab === 'hot') {
-            pagination.classList.add('hidden');
-            panelTitle.textContent = '热门歌曲';
-            if (state.hotData) renderHotData(state.hotData);
-            else loadHot(false);
-        } else if (tab === 'ai') {
-            pagination.classList.add('hidden');
-            panelTitle.textContent = 'AI推荐';
-            if (state.aiData) renderAiData(state.aiData);
-            else loadAi(false);
-        }
-
-        // 恢复当前 Tab 自己的状态文案
-        //（修复：原先共用一句提示，切回「搜索」后仍显示「热门歌曲 35 首（来源：…）」）
-        searchHint.textContent = hintText[tab];
-    }
-
-    refreshBtn.addEventListener('click', function () {
-        if (state.tab === 'hot') loadHot(true);
-        else if (state.tab === 'ai') loadAi(true);
-    });
-    tabs.forEach(function (b) {
-        b.addEventListener('click', function () { setTab(b.dataset.tab); });
-    });
-
-    searchBtn.addEventListener('click', doSearch);
-    searchInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') doSearch();
-    });
-    prevBtn.addEventListener('click', function () {
-        if (state.page > 1) fetchPage(state.page - 1);
-    });
-    nextBtn.addEventListener('click', function () {
-        if (state.page < state.totalPages) fetchPage(state.page + 1);
-    });
-
-    // ================================================================
-    //  歌曲详情
-    // ================================================================
-    async function openSong(id) {
-        audioPlayer.pause();
-        setDetailLoading();
-        try {
-            const res = await fetch('/api/music/song?id=' + encodeURIComponent(id));
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || ('请求失败（' + res.status + '）'));
-            state.currentSong = data;
-            renderDetail(data);
-        } catch (e) {
-            detailBody.classList.add('hidden');
-            detailEmpty.classList.remove('hidden');
-            detailEmpty.textContent = '加载失败：' + (e.message || '网络错误');
-            toast('加载详情失败', true);
-        }
-    }
-
-    function setDetailLoading() {
-        detailBody.classList.add('hidden');
-        detailEmpty.classList.remove('hidden');
-        detailEmpty.textContent = '正在加载歌曲详情…';
-    }
-
-    function renderDetail(s) {
-        detailEmpty.classList.add('hidden');
-        detailBody.classList.remove('hidden');
-
-        songTitle.textContent = s.title || '未知歌名';
-        songArtist.textContent = s.artist || '未知歌手';
-        formatBadge.textContent = (s.audio_format || '.mp3').toUpperCase();
-
-        if (s.cover_url) {
-            coverImg.classList.remove('hidden');
-            coverImg.src = s.cover_url;
-            coverImg.onerror = function () { coverImg.classList.add('hidden'); };
-            coverFallback.style.display = 'none';
-        } else {
-            coverImg.classList.add('hidden');
-            coverImg.removeAttribute('src');
-            coverFallback.style.display = '';
-        }
-
-        // 试听（走代理，支持 Range 拖动）
-        if (s.audio_url) {
-            audioPlayer.src = '/api/music/dl?inline=1&url=' + encodeURIComponent(s.audio_url);
-            audioPlayer.load();
-        } else {
-            audioPlayer.removeAttribute('src');
-            audioPlayer.load();
-        }
-        audioPlayer.onerror = function () {
-            toast('试听失败：音频可能已下架或无法播放', true);
-        };
-
-        // 下载
-        const baseName = (s.title || 'download') + ' - ' + (s.artist || 'unknown');
-        if (s.audio_url) {
-            dlAudio.href = '/api/music/dl?url=' + encodeURIComponent(s.audio_url) +
-                '&name=' + encodeURIComponent(baseName + (s.audio_format || '.mp3'));
-            dlAudio.classList.remove('disabled');
-            dlAudio.removeAttribute('aria-disabled');
-        } else {
-            dlAudio.removeAttribute('href');
-            dlAudio.classList.add('disabled');
-            dlAudio.setAttribute('aria-disabled', 'true');
-        }
-
-        // 歌词
-        const lrc = s.lrc || [];
-        const lyrics = s.lyrics || [];
-        if (lyrics.length) {
-            lyricsBox.innerHTML = '';
-            lyrics.forEach(function (text) {
-                const line = document.createElement('div');
-                line.className = 'lyric-line';
-                line.textContent = text;
-                lyricsBox.appendChild(line);
-            });
-        } else {
-            lyricsBox.innerHTML = '<div class="lyric-line">暂无歌词</div>';
-        }
-
-        // LRC 下载
-        if (lrc.length) {
-            let lrcText = lrc.map(function (l) { return '[' + fmtTime(l.t) + '] ' + l.text; }).join('\n');
-            dlLrc.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lrcText);
-            dlLrc.download = baseName + '.lrc';
-            dlLrc.classList.remove('disabled');
-            dlLrc.removeAttribute('aria-disabled');
-            // 播放时高亮当前行
-            const lines = lyricsBox.querySelectorAll('.lyric-line');
-            if (lines.length === lrc.length) {
-                audioPlayer.ontimeupdate = function () {
-                    const t = audioPlayer.currentTime;
-                    let idx = 0;
-                    for (let i = 0; i < lrc.length; i++) { if (lrc[i].t <= t) idx = i; else break; }
-                    lines.forEach(function (ln, i) { ln.classList.toggle('cur', i === idx); });
-                };
-            } else {
-                audioPlayer.ontimeupdate = null;
-            }
-        } else {
-            dlLrc.removeAttribute('href');
-            dlLrc.classList.add('disabled');
-            dlLrc.setAttribute('aria-disabled', 'true');
-            audioPlayer.ontimeupdate = null;
-        }
-    }
+    refreshBtn.addEventListener('click', function () { loadHot(true); });
+    loadHot(false);
 })();
 </script>
 </body>

@@ -75,144 +75,6 @@ async function handleHot(): Promise<Response> {
     return json(200, { results, source: 'higequ-hot' });
 }
 
-// ==================== AI 推荐 ====================
-
-const DEEPSEEK_API = 'https://api.deepseek.com/chat/completions';
-const AI_MODEL = 'deepseek-v4-flash';
-
-class RecommendError extends Error {
-    status: number;
-    constructor(message: string, status: number) {
-        super(message);
-        this.status = status;
-    }
-}
-
-// 调用 DeepSeek 生成风格相近的歌曲建议（JSON 输出）。
-// 注意：deepseek-v4-flash 是推理模型，reasoning_content 可能吃掉全部 max_tokens，
-// 导致 content 在半截处被截断（finish_reason: length）。因此 max_tokens 给足 4096，
-// 且内容为空 / 解析失败时重试最多 3 次兜底。
-async function aiSuggest(history: string[]): Promise<Array<{ title: string; artist?: string }>> {
-    const apiKey = Netlify.env.get('DEEPSEEK_API_KEY');
-    if (!apiKey) throw new RecommendError('AI 推荐暂未配置', 500);
-
-    const system =
-        '你是音乐推荐助手。根据用户的搜索历史，推荐 8 首风格相近、在华语音乐中广为人知的歌曲。\n' +
-        '要求：\n' +
-        '1. 歌名必须是常见、在音乐网站上能找到的歌曲\n' +
-        '2. 不要推荐与搜索词完全相同的歌曲\n' +
-        '3. 只输出严格 JSON：{"songs":[{"title":"歌名","artist":"歌手"}]}，不要输出其他内容';
-
-    for (let attempt = 0; attempt < 3; attempt++) {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 45000);
-        let resp: Response;
-        try {
-            resp = await fetch(DEEPSEEK_API, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${apiKey}`,
-                },
-                body: JSON.stringify({
-                    model: AI_MODEL,
-                    messages: [
-                        { role: 'system', content: system },
-                        { role: 'user', content: `用户搜索历史：${history.join('、')}` },
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 4096,
-                    response_format: { type: 'json_object' },
-                }),
-                signal: controller.signal,
-            });
-        } catch {
-            clearTimeout(timer);
-            throw new RecommendError('AI 服务请求失败，请稍后重试', 502);
-        }
-        clearTimeout(timer);
-        if (!resp.ok) throw new RecommendError(`AI 服务错误（${resp.status}）`, 502);
-
-        const data = (await resp.json()) as {
-            choices?: Array<{ message?: { content?: string } }>;
-        };
-        const content =
-            (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
-        const cleaned = content.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-        if (!cleaned) continue;
-        let parsed: { songs?: Array<{ title?: string; artist?: string }> };
-        try {
-            parsed = JSON.parse(cleaned);
-        } catch {
-            continue;
-        }
-        const songs = (parsed.songs || [])
-            .slice(0, 8)
-            .map((s) => ({
-                title: (s.title || '').trim().slice(0, 60),
-                artist: (s.artist || '').trim().slice(0, 60),
-            }))
-            .filter((s) => s.title);
-        if (songs.length) return songs;
-    }
-    throw new RecommendError('AI 返回内容解析失败', 502);
-}
-
-// 在 higequ 搜索建议歌名，返回第一条匹配；带歌手时优先歌手匹配项
-async function searchFirst(title: string, artist?: string) {
-    try {
-        const resp = await fetch(`${HIGEQ}/s/${encodeURIComponent(title)}/1/`, {
-            headers: { 'User-Agent': UA },
-        });
-        if (!resp.ok) return null;
-        const html = await resp.text();
-        const pageResults = parseSearchPage(html);
-        if (!pageResults.length) return null;
-        if (artist) {
-            const hit = pageResults.find((r) => r.artist === artist);
-            if (hit) return hit;
-        }
-        return pageResults[0];
-    } catch {
-        return null;
-    }
-}
-
-async function handleRecommend(request: Request): Promise<Response> {
-    if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' });
-    let body: { history?: unknown };
-    try {
-        body = await request.json();
-    } catch {
-        return json(400, { error: '请求体格式错误' });
-    }
-    const history = (Array.isArray(body.history) ? body.history : [])
-        .filter((h): h is string => typeof h === 'string')
-        .map((h) => h.trim().slice(0, 30))
-        .filter(Boolean)
-        .slice(0, 20);
-    if (!history.length) return json(400, { error: '缺少搜索历史，先搜索几首歌再试' });
-
-    let songs: Array<{ title: string; artist?: string }>;
-    try {
-        songs = await aiSuggest(history);
-    } catch (e) {
-        if (e instanceof RecommendError) return json(e.status, { error: e.message });
-        return json(502, { error: String((e as Error).message || e) });
-    }
-    if (!songs.length) return json(502, { error: 'AI 未返回有效推荐' });
-
-    const results: Array<{ id: string; title: string; artist: string }> = [];
-    const missing: string[] = [];
-    for (const s of songs) {
-        const hit = await searchFirst(s.title, s.artist);
-        if (hit) results.push(hit);
-        else missing.push(s.title);
-        if (results.length >= 8) break;
-    }
-    return json(200, { results, missing });
-}
-
 async function handleSearch(url: URL): Promise<Response> {
     const keyword = (url.searchParams.get('keyword') || '').trim();
     if (!keyword) return json(400, { error: '缺少 keyword 参数' });
@@ -261,10 +123,12 @@ async function handleSong(url: URL): Promise<Response> {
         }
     }
 
-    // 歌手
+    // 歌手（可能被 <a> 链接包裹，如 <span id="music-artist"><a href="/so/周杰伦">周杰伦</a></span>）
     let artist = '未知歌手';
-    m = html.match(/<span[^>]*id="music-artist"[^>]*>([^<]+)<\/span>/);
-    if (m) artist = m[1].trim();
+    m = html.match(/<span[^>]*id="music-artist"[^>]*>([\s\S]*?)<\/span>/);
+    if (m) {
+        artist = m[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() || '未知歌手';
+    }
 
     // 封面
     let coverUrl: string | null = null;
@@ -377,7 +241,6 @@ export default async (request: Request): Promise<Response> => {
         if (pathname === '/api/music/song') return await handleSong(url);
         if (pathname === '/api/music/dl') return await handleDl(request, url);
         if (pathname === '/api/music/hot') return await handleHot();
-        if (pathname === '/api/music/recommend') return await handleRecommend(request);
         return json(404, { error: 'Not Found' });
     } catch (e) {
         return json(500, { error: String((e && (e as Error).message) || e) });
@@ -385,5 +248,5 @@ export default async (request: Request): Promise<Response> => {
 };
 
 export const config = {
-    path: ['/api/music/search', '/api/music/song', '/api/music/dl', '/api/music/hot', '/api/music/recommend'],
+    path: ['/api/music/search', '/api/music/song', '/api/music/dl', '/api/music/hot'],
 };
