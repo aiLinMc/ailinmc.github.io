@@ -55,7 +55,7 @@
         <section class="sort-bar">
             <span class="section-kicker">排序</span>
             <div class="sort-control"><label for="gradeSort">年级</label><select class="filter-select" id="gradeSort"><option value="asc">七上至九下</option><option value="desc" selected>九下至七上</option></select></div>
-            <div class="sort-control"><label for="weekSort">周数</label><select class="filter-select" id="weekSort"><option value="asc" selected>正序</option><option value="desc">倒序</option></select></div>
+            <div class="sort-control"><label for="weekSort">周数</label><select class="filter-select" id="weekSort"><option value="asc">正序</option><option value="desc" selected>倒序</option></select></div>
         </section>
 
         <section class="archive-section">
@@ -108,15 +108,14 @@
                 sem.weeks.forEach(function(week) {
                     var weekName = '第' + cn[week] + '周';
                     var base = 'history/' + sem.folder + '/' + weekName;
-                    var dlName = sem.folder + weekName + '作业';
-                    var links = '<a href="' + base + '/homework.png" class="download-link image" download="' + dlName + '.png"><span>PNG</span><b>图片</b></a>';
+                    var imgName = sem.folder + weekName + '作业';
                     var searchText = sem.folder + ' ' + sem.grade + ' ' + sem.term + ' ' + weekName + ' ' + week;
                     var pyAll = toPinyin(searchText.replace(/\s/g, ''));
                     var pyInit = toPinyinInitials(searchText.replace(/\s/g, ''));
-                    html += '<article class="week-card" data-grade="' + sem.grade + '" data-term="' + sem.term + '" data-week="' + week + '" data-order="' + orderIndex + '" data-search="' + searchText + '" data-pinyin="' + pyAll + '" data-pinyin-initials="' + pyInit + '">' +
+                    html += '<article class="week-card" role="button" tabindex="0" aria-label="查看' + sem.folder + weekName + '作业图片" data-img="' + base + '/homework.png" data-img-name="' + imgName + '" data-grade="' + sem.grade + '" data-term="' + sem.term + '" data-week="' + week + '" data-order="' + orderIndex + '" data-search="' + searchText + '" data-pinyin="' + pyAll + '" data-pinyin-initials="' + pyInit + '">' +
                         '<div class="card-top"><span class="card-tag tag-' + gradeKey + '">' + sem.folder + '</span><span class="week-number">W' + String(week).padStart(2, '0') + '</span></div>' +
                         '<h3 class="week-title">' + weekName + '</h3><div class="card-meta">' + sem.grade + ' · ' + sem.term + '</div>' +
-                        '<div class="download-links">' + links + '</div></article>';
+                        '</article>';
                     orderIndex++;
                 });
             });

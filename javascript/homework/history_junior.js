@@ -2,7 +2,7 @@ var selectedGrades=new Set();
 var selectedTerms=new Set();
 var searchText="";
 var gradeSort="desc";
-var weekSort="asc";
+var weekSort="desc";
 
 var GRADE_ALL=["七年级","八年级","九年级"];
 var TERM_ALL=["上学期","下学期"];
