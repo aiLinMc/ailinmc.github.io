@@ -1,0 +1,10 @@
+# 作业整理产生的东西：仅保留在本机，不纳入版本库
+# .audit/backup/ 是本次清理时移出的原文件备份（可用于回滚）
+.audit/backup/
+.audit/fix.log
+
+# 说明：.audit/README.txt 保留跟踪，作为整理记录
+
+# 编辑器 / 工具目录
+.trae/
+.vscode/

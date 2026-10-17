@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>作业历史</title>
     <link rel="stylesheet" href="css/homework/history_junior.css">
-    <script type="text/javascript" src="javascript/homework/history_junior_pdf-download.js"></script>
+    <link rel="stylesheet" href="css/homework/image-viewer.css">
 </head>
 <body>
     <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="切换深色模式">🌙</button>
@@ -75,12 +75,12 @@
             return arr;
         }
         var semesters = [
-            { folder: '九下', grade: '九年级', term: '下学期', weeks: [1,2,3,4,5,6,7,9,10,11,12,13,14,15,16], hasPng: true },
-            { folder: '九上', grade: '九年级', term: '上学期', weeks: range(1,21), hasPng: true },
-            { folder: '八下', grade: '八年级', term: '下学期', weeks: range(1,20), hasPng: true },
-            { folder: '八上', grade: '八年级', term: '上学期', weeks: [1,2,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19], hasPng: true },
-            { folder: '七下', grade: '七年级', term: '下学期', weeks: range(1,20), hasPng: false },
-            { folder: '七上', grade: '七年级', term: '上学期', weeks: range(2,19), hasPng: false }
+            { folder: '九下', grade: '九年级', term: '下学期', weeks: [1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18] },
+            { folder: '九上', grade: '九年级', term: '上学期', weeks: range(1,20) },
+            { folder: '八下', grade: '八年级', term: '下学期', weeks: range(1,20) },
+            { folder: '八上', grade: '八年级', term: '上学期', weeks: [1,2,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19] },
+            { folder: '七下', grade: '七年级', term: '下学期', weeks: range(1,20) },
+            { folder: '七上', grade: '七年级', term: '上学期', weeks: range(2,20) }
         ];
         var PINYIN_MAP = {
             '一':'yi','二':'er','三':'san','四':'si','五':'wu','六':'liu','七':'qi','八':'ba','九':'jiu','十':'shi',
@@ -109,8 +109,7 @@
                     var weekName = '第' + cn[week] + '周';
                     var base = 'history/' + sem.folder + '/' + weekName;
                     var dlName = sem.folder + weekName + '作业';
-                    var links = '<a href="' + base + '/homework.pdf" class="download-link pdf" download="' + dlName + '.pdf"><span>PDF</span><b>下载</b></a>';
-                    if (sem.hasPng) links += '<a href="' + base + '/homework.png" class="download-link image" download="' + dlName + '.png"><span>PNG</span><b>图片</b></a>';
+                    var links = '<a href="' + base + '/homework.png" class="download-link image" download="' + dlName + '.png"><span>PNG</span><b>图片</b></a>';
                     var searchText = sem.folder + ' ' + sem.grade + ' ' + sem.term + ' ' + weekName + ' ' + week;
                     var pyAll = toPinyin(searchText.replace(/\s/g, ''));
                     var pyInit = toPinyinInitials(searchText.replace(/\s/g, ''));
@@ -125,6 +124,7 @@
         })();
     </script>
     <script type="text/javascript" src="javascript/homework/history_junior.js"></script>
+    <script type="text/javascript" src="javascript/homework/image-viewer.js"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e"}' crossorigin="anonymous"></script>
 </body>
 </html>

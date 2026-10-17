@@ -154,6 +154,7 @@
             row.appendChild(removeBtn);
             row.appendChild(go);
             row.addEventListener('click', function () {
+                MC.PlayQueue.save({ source: 'playlist', label: '歌单：' + pl.name, songs: pl.songs });
                 location.href = 'player.html?id=' + encodeURIComponent(s.id);
             });
             songList.appendChild(row);

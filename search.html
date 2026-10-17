@@ -103,6 +103,7 @@
             item.querySelector('.title').textContent = r.title;
             item.querySelector('.artist').textContent = r.artist;
             item.addEventListener('click', function () {
+                MC.PlayQueue.save({ source: 'search', label: '搜索结果：' + state.keyword, songs: state.results });
                 location.href = 'player.html?id=' + encodeURIComponent(r.id);
             });
             frag.appendChild(item);

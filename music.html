@@ -104,6 +104,7 @@
             item.querySelector('.title').textContent = r.title;
             item.querySelector('.artist').textContent = r.artist;
             item.addEventListener('click', function () {
+                MC.PlayQueue.save({ source: 'hot', label: '热门歌曲', songs: results });
                 location.href = 'player.html?id=' + encodeURIComponent(r.id);
             });
             frag.appendChild(item);

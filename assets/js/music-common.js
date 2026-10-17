@@ -24,6 +24,11 @@
         pencil: svgIcon('<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>'),
         x: svgIcon('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'),
         chevron: svgIcon('<path d="m9 18 6-6-6-6"/>'),
+        prev: svgIcon('<polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>'),
+        next: svgIcon('<polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>'),
+        repeat: svgIcon('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
+        repeat1: svgIcon('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/>'),
+        shuffle: svgIcon('<path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.8-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/>'),
     };
 
     /* ---------- 主题（与全站其他页面同步 localStorage 'darkMode'） ---------- */
@@ -234,6 +239,32 @@
         return out;
     }
 
+    /* ---------- 播放队列（localStorage 'musicPlayQueue' / 'musicPlayMode'） ---------- */
+    var PLAY_QUEUE_KEY = 'musicPlayQueue';
+    var PLAY_MODE_KEY = 'musicPlayMode';
+    function savePlayQueue(queue) {
+        try { localStorage.setItem(PLAY_QUEUE_KEY, JSON.stringify(queue || null)); } catch (e) {}
+    }
+    function loadPlayQueue() {
+        try {
+            var q = JSON.parse(localStorage.getItem(PLAY_QUEUE_KEY) || 'null');
+            if (q && Array.isArray(q.songs)) return q;
+        } catch (e) {}
+        return null;
+    }
+    function clearPlayQueue() {
+        try { localStorage.removeItem(PLAY_QUEUE_KEY); } catch (e) {}
+    }
+    function getPlayMode() {
+        var m = '';
+        try { m = localStorage.getItem(PLAY_MODE_KEY); } catch (e) {}
+        return m === 'single' || m === 'shuffle' ? m : 'list';
+    }
+    function setPlayMode(m) {
+        if (m !== 'single' && m !== 'shuffle') m = 'list';
+        try { localStorage.setItem(PLAY_MODE_KEY, m); } catch (e) {}
+    }
+
     /* ---------- 弹窗（遮罩 + 面板，不用原生 alert/confirm/prompt） ---------- */
     var modalCurrent = null;
     function openModal(opts) {
@@ -335,6 +366,10 @@
         },
         openModal: openModal, closeModal: closeModal,
         icons: icons,
+        PlayQueue: {
+            save: savePlayQueue, load: loadPlayQueue, clear: clearPlayQueue,
+            getMode: getPlayMode, setMode: setPlayMode,
+        },
         toast: toast, fmtTime: fmtTime, escapeHtml: escapeHtml, respError: respError,
     };
 })();

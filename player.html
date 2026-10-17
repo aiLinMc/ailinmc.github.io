@@ -34,6 +34,12 @@
             <p class="song-artist" id="songArtist"></p>
             <div class="badge-row"><span class="format-badge" id="formatBadge"></span></div>
             <audio id="audioPlayer" controls preload="metadata" class="audio-player"></audio>
+            <div class="play-controls">
+                <button class="pc-btn" id="btnPrev" type="button" title="上一首" aria-label="上一首"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>上一首</button>
+                <button class="pc-btn" id="btnMode" type="button" title="播放顺序" aria-label="播放顺序"></button>
+                <button class="pc-btn" id="btnNext" type="button" title="下一首" aria-label="下一首"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>下一首</button>
+            </div>
+            <p class="queue-hint hidden" id="queueHint"></p>
             <div class="dl-btns">
                 <a class="dl-btn" id="dlAudio" href="#" download><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载音频</a>
                 <a class="dl-btn ghost" id="dlLrc" href="#" download><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载歌词</a>
@@ -70,8 +76,86 @@
     var dlLrc = MC.$('dlLrc');
     var addToPlaylist = MC.$('addToPlaylist');
     var lyricsBox = MC.$('lyricsBox');
+    var btnPrev = MC.$('btnPrev');
+    var btnNext = MC.$('btnNext');
+    var btnMode = MC.$('btnMode');
+    var queueHint = MC.$('queueHint');
 
     var currentSong = null;
+
+    /* ---------- 播放队列 / 播放顺序 ---------- */
+    var playQueue = null;
+    var queueIndex = -1;
+    var playMode = MC.PlayQueue.getMode();
+    var MODE_ORDER = ['list', 'single', 'shuffle'];
+    var MODE_INFO = {
+        list: { icon: 'repeat', label: '列表循环' },
+        single: { icon: 'repeat1', label: '单曲循环' },
+        shuffle: { icon: 'shuffle', label: '随机播放' }
+    };
+
+    function renderModeBtn() {
+        var info = MODE_INFO[playMode] || MODE_INFO.list;
+        btnMode.innerHTML = MC.icons[info.icon] + '<span>' + info.label + '</span>';
+        btnMode.classList.toggle('active', playMode !== 'list');
+    }
+
+    function setupQueue() {
+        var q = MC.PlayQueue.load();
+        var hasQueue = !!(q && Array.isArray(q.songs) && q.songs.length);
+        playQueue = hasQueue ? q : null;
+        var n = playQueue ? playQueue.songs.length : 0;
+        var canPrevNext = n > 1;
+        btnPrev.disabled = !canPrevNext;
+        btnNext.disabled = !canPrevNext;
+        if (canPrevNext) {
+            var qid = ((new URLSearchParams(location.search)).get('id') || '').trim();
+            queueIndex = -1;
+            for (var i = 0; i < n; i++) {
+                if (String(playQueue.songs[i].id) === String(qid)) { queueIndex = i; break; }
+            }
+            queueHint.textContent = '播放队列：' + (playQueue.label || '当前列表') + '（' + n + ' 首）';
+            queueHint.classList.remove('hidden');
+        } else {
+            queueIndex = -1;
+            queueHint.classList.add('hidden');
+            queueHint.textContent = '';
+        }
+    }
+
+    function randomIndex(exclude) {
+        var n = playQueue ? playQueue.songs.length : 0;
+        if (n < 2) return -1;
+        var r = Math.floor(Math.random() * n);
+        if (r === exclude) r = (r + 1) % n;
+        return r;
+    }
+
+    function playAt(index) {
+        if (!playQueue || index < 0 || index >= playQueue.songs.length) return;
+        queueIndex = index;
+        openSong(String(playQueue.songs[index].id), true);
+    }
+
+    function playNext() {
+        var n = playQueue ? playQueue.songs.length : 0;
+        if (n < 2) return;
+        if (playMode === 'shuffle') {
+            playAt(randomIndex(queueIndex));
+        } else {
+            playAt((queueIndex + 1 + n) % n);
+        }
+    }
+
+    function playPrev() {
+        var n = playQueue ? playQueue.songs.length : 0;
+        if (n < 2) return;
+        if (playMode === 'shuffle') {
+            playAt(randomIndex(queueIndex));
+        } else {
+            playAt((queueIndex - 1 + n) % n);
+        }
+    }
 
     function renderDetail(s) {
         detailEmpty.classList.add('hidden');
@@ -164,7 +248,7 @@
         }
     }
 
-    async function openSong(id) {
+    async function openSong(id, autoplay) {
         audioPlayer.pause();
         detailBody.classList.add('hidden');
         detailEmpty.classList.remove('hidden');
@@ -174,6 +258,9 @@
             var data = await res.json();
             if (!res.ok) throw MC.respError(data, res);
             renderDetail(data);
+            if (autoplay) {
+                audioPlayer.play().catch(function () { /* 自动播放可能被浏览器拦截，忽略 */ });
+            }
         } catch (e) {
             detailBody.classList.add('hidden');
             detailEmpty.classList.remove('hidden');
@@ -248,6 +335,28 @@
     }
 
     addToPlaylist.addEventListener('click', openPlaylistPicker);
+
+    /* ---------- 上一首 / 下一首 / 播放顺序 ---------- */
+    btnPrev.addEventListener('click', playPrev);
+    btnNext.addEventListener('click', playNext);
+    btnMode.addEventListener('click', function () {
+        var idx = MODE_ORDER.indexOf(playMode);
+        playMode = MODE_ORDER[(idx + 1) % MODE_ORDER.length];
+        MC.PlayQueue.setMode(playMode);
+        renderModeBtn();
+        MC.toast('播放顺序：' + MODE_INFO[playMode].label);
+    });
+    audioPlayer.addEventListener('ended', function () {
+        if (playMode === 'single') {
+            audioPlayer.currentTime = 0;
+            audioPlayer.play().catch(function () {});
+        } else {
+            playNext();
+        }
+    });
+
+    renderModeBtn();
+    setupQueue();
 
     var qs = new URLSearchParams(location.search);
     var id = (qs.get('id') || '').trim();
