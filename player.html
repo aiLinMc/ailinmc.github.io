@@ -254,7 +254,19 @@
         detailEmpty.classList.remove('hidden');
         detailEmpty.textContent = '正在加载歌曲详情…';
         try {
-            var res = await fetch('/api/music/song?id=' + encodeURIComponent(id));
+            // 歌手优先取播放队列中该歌曲的信息（搜索结果/热门/歌单列表），未匹配时由后端详情页兜底
+            var listArtist = '';
+            if (playQueue && playQueue.songs) {
+                for (var i = 0; i < playQueue.songs.length; i++) {
+                    if (String(playQueue.songs[i].id) === String(id)) {
+                        listArtist = playQueue.songs[i].artist || '';
+                        break;
+                    }
+                }
+            }
+            var apiUrl = '/api/music/song?id=' + encodeURIComponent(id);
+            if (listArtist) apiUrl += '&artist=' + encodeURIComponent(listArtist);
+            var res = await fetch(apiUrl);
             var data = await res.json();
             if (!res.ok) throw MC.respError(data, res);
             renderDetail(data);

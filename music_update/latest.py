@@ -36,8 +36,8 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ==================== 版本配置 ====================
-CURRENT_INTERNAL_VERSION = "9"  # 内部版本号（纯数字，用于比较）
-CURRENT_DISPLAY_VERSION = "v1.5.0"  # 显示版本号（展示给用户）
+CURRENT_INTERNAL_VERSION = "10"  # 内部版本号（纯数字，用于比较）
+CURRENT_DISPLAY_VERSION = "v1.5.1"  # 显示版本号（展示给用户）
 # 更新下载地址（按优先级排列，主域名在前，自动切换备用域名）
 UPDATE_DOWNLOAD_URLS = [
     "https://www.ailinmc.top/music_update/",   # 主域名
@@ -466,7 +466,16 @@ class UpdateChecker:
                 latest_changelog = parts[0].split('\n', 1)[1] if len(parts) > 0 else "暂无更新日志"
                 historical_changelog = '\n---\n'.join(parts[1:]) if len(parts) > 1 else ""
                 
-                has_update = internal_version > CURRENT_INTERNAL_VERSION
+                # 重要更新标记：第一行版本号为 #imp 时必定提示更新
+                # （防止旧程序版本号比较异常/无法识别数字导致漏更新；字母开头对旧版字符串比较同样 > "9"）
+                if internal_version.lower() == 'imp':
+                    has_update = True
+                else:
+                    # 内部版本号按整数比较（字符串比较会有 "9" > "10" 的字典序 bug）
+                    try:
+                        has_update = int(internal_version) > int(CURRENT_INTERNAL_VERSION)
+                    except ValueError:
+                        has_update = False
                 
                 return has_update, internal_version, display_version, latest_changelog.strip(), historical_changelog.strip()
             except Exception as e:
@@ -1155,13 +1164,21 @@ class MusicDownloaderGUI:
         if not selection:
             return
         song_id = selection[0]  # 歌曲ID作为树节点标识
+        # 歌手从搜索结果列表获取（列表行的第2列为歌手），传参给提取流程
+        artist = ""
+        try:
+            values = self.result_tree.item(selection[0], "values")
+            if values and len(values) > 1:
+                artist = values[1]
+        except Exception:
+            artist = ""
         if hasattr(self, 'result_window'):
             self.result_window.destroy()
-        self.extract(song_id)
+        self.extract(song_id, artist)
     
     # ==================== 提取功能 ====================
     
-    def extract(self, song_id=None):
+    def extract(self, song_id=None, artist=None):
         if song_id is None:
             messagebox.showwarning("提示", "请先在搜索结果中双击选择歌曲")
             return
@@ -1177,15 +1194,15 @@ class MusicDownloaderGUI:
         self._update_status(f"正在提取 ID: {song_id}...")
         self._update_progress(0, "提取中...")
         self._clear_info_display()
-        thread = threading.Thread(target=self._extract_thread, args=(song_id,))
+        thread = threading.Thread(target=self._extract_thread, args=(song_id, artist))
         thread.daemon = True
         thread.start()
     
-    def _extract_thread(self, song_id):
-        info, error = self._extract_song_info(song_id)
+    def _extract_thread(self, song_id, artist=None):
+        info, error = self._extract_song_info(song_id, artist)
         self.root.after(0, self._on_extract_complete, info, error)
     
-    def _extract_song_info(self, song_id):
+    def _extract_song_info(self, song_id, artist=None):
         url = f"https://higequ.com/player/{song_id}/"
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         
@@ -1208,11 +1225,15 @@ class MusicDownloaderGUI:
                     if ' - ' in title:
                         title = title.split(' - ', 1)[0].strip()
             
-            # 歌手
-            artist = "未知歌手"
-            match = re.search(r'<span[^>]*id="music-artist"[^>]*>([^<]+)</span>', html)
-            if match:
-                artist = match.group(1).strip()
+            # 歌手：优先使用搜索结果列表中的歌手；未传才从详情页解析
+            # （详情页歌手可能被 <a> 链接包裹，如 <span id="music-artist"><a href="/so/周杰伦">周杰伦</a></span>）
+            if artist:
+                artist = artist.strip() or "未知歌手"
+            else:
+                artist = "未知歌手"
+                match = re.search(r'<span[^>]*id="music-artist"[^>]*>([\s\S]*?)</span>', html)
+                if match:
+                    artist = re.sub(r'<[^>]+>', '', match.group(1)).replace('&nbsp;', ' ').strip() or "未知歌手"
             
             # 专辑封面
             cover_url = None

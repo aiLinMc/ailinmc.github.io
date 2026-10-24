@@ -105,6 +105,8 @@ async function handleSearch(url: URL): Promise<Response> {
 async function handleSong(url: URL): Promise<Response> {
     const id = (url.searchParams.get('id') || '').trim();
     if (!/^\d+$/.test(id)) return json(400, { error: '无效的歌曲 ID' });
+    // 列表歌手：来自搜索结果/热门/歌单列表，优先使用（用户要求歌手取自列表而非详情页）
+    const listArtist = (url.searchParams.get('artist') || '').trim();
     const resp = await fetch(`${HIGEQ}/player/${id}/`, { headers: { 'User-Agent': UA } });
     if (!resp.ok) return json(resp.status, { error: `页面请求失败：${resp.status}` });
     const html = await resp.text();
@@ -123,11 +125,13 @@ async function handleSong(url: URL): Promise<Response> {
         }
     }
 
-    // 歌手（可能被 <a> 链接包裹，如 <span id="music-artist"><a href="/so/周杰伦">周杰伦</a></span>）
-    let artist = '未知歌手';
-    m = html.match(/<span[^>]*id="music-artist"[^>]*>([\s\S]*?)<\/span>/);
-    if (m) {
-        artist = m[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() || '未知歌手';
+    // 歌手：优先使用列表歌手；未传才从详情页解析（可能被 <a> 链接包裹，如 <span id="music-artist"><a href="/so/周杰伦">周杰伦</a></span>）
+    let artist = listArtist || '未知歌手';
+    if (!listArtist) {
+        m = html.match(/<span[^>]*id="music-artist"[^>]*>([\s\S]*?)<\/span>/);
+        if (m) {
+            artist = m[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() || '未知歌手';
+        }
     }
 
     // 封面
