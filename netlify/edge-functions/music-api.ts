@@ -37,7 +37,7 @@ function parseSearchPage(html: string): Array<{ id: string; title: string; artis
         /<div class="result-item" data-rid="(\d+)">[\s\S]*?<div class="result-title">([^<]+)<\/div>[\s\S]*?<div class="result-artist">([^<]+)<\/div>/g;
     let m: RegExpExecArray | null;
     while ((m = pattern.exec(html)) !== null) {
-        results.push({ id: m[1], title: m[2].trim(), artist: m[3].trim() });
+        results.push({ id: m[1], title: m[2].trim(), artist: m[3].trim().replace(/&amp;/g, '&') });
     }
     return results;
 }
@@ -49,7 +49,7 @@ function parseTrending(html: string): Array<{ id: string; title: string; artist:
         /<div class="trending-item" onclick="goPlayer\('(\d+)'\)">[\s\S]*?<div class="trending-title">([^<]+)<\/div>[\s\S]*?<div class="trending-artist">([^<]+)<\/div>/g;
     let m: RegExpExecArray | null;
     while ((m = pattern.exec(html)) !== null) {
-        results.push({ id: m[1], title: m[2].trim(), artist: m[3].trim() });
+        results.push({ id: m[1], title: m[2].trim(), artist: m[3].trim().replace(/&amp;/g, '&') });
     }
     return results;
 }
@@ -130,7 +130,7 @@ async function handleSong(url: URL): Promise<Response> {
     if (!listArtist) {
         m = html.match(/<span[^>]*id="music-artist"[^>]*>([\s\S]*?)<\/span>/);
         if (m) {
-            artist = m[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() || '未知歌手';
+            artist = m[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').trim() || '未知歌手';
         }
     }
 
